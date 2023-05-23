@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router"
 import { storeToRefs } from "pinia"
+import { Empty } from "ant-design-vue"
 import Layout from "@/layout/index.vue"
 import { getToken } from "@/utils/auth"
 import menuTreeStores from "@/stores/menuTree"
@@ -26,6 +27,10 @@ const routeList = [
     path: "/404",
     name: "404",
     component: () => import("@/views/error/404.vue")
+  },
+  {
+    path: "/static/:pathMatch(.*)",
+    component: Empty
   },
   {
     path: "/redirect",

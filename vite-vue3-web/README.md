@@ -16,23 +16,25 @@ npm run build:ts
 3、settings.json配置
 ```
    {
-      "editor.formatOnSave": true,
-      "editor.defaultFormatter": "esbenp.prettier-vscode",
-      "editor.codeActionsOnSave": {
-         "source.fixAll.eslint": true,
-      },
-      "[vue]": {
-         "editor.defaultFormatter": "esbenp.prettier-vscode"
-      },
-      "[javascript]": {
-         "editor.defaultFormatter": "esbenp.prettier-vscode"
-      },
-      "[jsonc]": {
-         "editor.defaultFormatter": "vscode.json-language-features"
-      },
-      "[typescript]": {
-         "editor.defaultFormatter": "esbenp.prettier-vscode"
-      },
-      "editor.tabSize": 2
+      "prettier.requireConfig": true,
+    "editor.formatOnSave": false,
+    "eslint.enable": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true,
+    },
+    "[vue]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "editor.tabSize": 2
    }
 ```

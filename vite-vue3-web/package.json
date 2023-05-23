@@ -39,5 +39,19 @@
   "dependencies": {
     "pinia": "^2.0.33",
     "pinia-plugin-persistedstate": "^3.1.0"
+  },
+  "optimizeDeps": {
+    "include": [
+      "vue",
+      "vue-router",
+      "axios",
+      "pinia",
+      "echarts",
+      "ant-design-vue/es/",
+      "ant-design-vue/es/locale/zh_CN",
+      "dayjs/locale/zh-cn",
+      "@ant-design",
+      "@ant-design/icons-vue/es/icons"
+    ]
   }
 }

@@ -7,9 +7,7 @@
     :keyboard="false"
     :centered="true"
   >
-    <div style="max-height: 400px">
-      {{ noticeData.content }}
-    </div>
+    <div style="max-height: 400px">{{ noticeData.content }}</div>
   </a-modal>
 </template>
 

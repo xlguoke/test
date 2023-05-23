@@ -1,4 +1,4 @@
-import request from "@/utils/request.js"
+import request from "@/utils/request"
 
 export function getStatistic(data: any) {
   return request({

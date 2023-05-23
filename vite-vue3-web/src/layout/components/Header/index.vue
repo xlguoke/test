@@ -82,7 +82,7 @@ import { ExclamationCircleOutlined, UserOutlined } from "@ant-design/icons-vue"
 import { storeToRefs } from "pinia"
 import userInfoStore from "@/stores/userInfo"
 import { clearAllCookie, userLocalStorage } from "@/utils/index"
-import { getMinioFileUrl } from "@/utils/minio.config.js"
+import { getMinioFileUrl } from "@/utils/minio.config"
 
 const { userInfo } = storeToRefs(userInfoStore())
 

@@ -1,5 +1,5 @@
 import { ObjectAny } from "@/type/common"
-import request from "@/utils/request.js"
+import request from "@/utils/request"
 
 // 状态
 interface enumPar {

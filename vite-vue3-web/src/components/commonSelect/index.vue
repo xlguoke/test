@@ -24,7 +24,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref, watch } from "vue"
 import { debounce } from "@/utils"
-import request from "@/utils/request.js"
+import request from "@/utils/request"
 import { OptType } from "@/type/common"
 
 interface configType {

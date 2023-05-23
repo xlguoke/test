@@ -11,7 +11,7 @@
 
 <script lang="ts" setup>
 import { onBeforeUnmount, ref, shallowRef, onMounted, watch } from "vue"
-import minioPutObject, { getMinioFuleUrlPub } from "@/utils/minio.config.js"
+import minioPutObject, { getMinioFuleUrlPub } from "@/utils/minio.config"
 const props = defineProps({
   value: {
     type: String,

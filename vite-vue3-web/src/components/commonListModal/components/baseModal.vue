@@ -4,65 +4,73 @@
     :title="title"
     :mask-closable="false"
     :keyboard="false"
-    :width="`${width ? width : '900px'}`"
+    :width="width"
     @ok="saveModal"
     @cancel="cancelModal"
   >
-    <div style="min-height: 350px">
-      <a-space style="margin-bottom: 10px">
-        <template v-for="f in formList" :key="f.value">
-          <a-select
-            v-if="f.type == 'select'"
-            v-model:value="form[f.value]"
-            :placeholder="`请选择${f.label}`"
-          >
-            <a-select-option v-for="opt in f.options" :key="opt.value" :value="opt.value">
-              {{ opt.label }}
-            </a-select-option>
-          </a-select>
-          <a-input
-            v-else
-            v-model:value="form[f.value]"
-            :placeholder="`请输入${f.label || '关键字'}查询`"
-            @keypress.enter="queryDataList"
+    <a-spin :spinning="loading">
+      <div style="min-height: 350px">
+        <slot name="queryForm" :form="form" :search="queryDataList" :reset="resetFrom">
+          <a-space>
+            <template v-for="f in formList" :key="f.value">
+              <a-select
+                v-if="f.type == 'select'"
+                v-model:value="form[f.value]"
+                allow-clear
+                :placeholder="`请选择${f.label}`"
+              >
+                <a-select-option v-for="opt in f.options" :key="opt.value" :value="opt.value">
+                  {{ opt.label }}
+                </a-select-option>
+              </a-select>
+              <a-input
+                v-else
+                v-model:value="form[f.value]"
+                allow-clear
+                :placeholder="`请输入${f.label || '关键字'}查询`"
+                @keypress.enter="queryDataList"
+              />
+            </template>
+            <a-button type="primary" @click="queryDataList">查询</a-button>
+            <a-button @click="resetFrom">重置</a-button>
+          </a-space>
+        </slot>
+        <div style="padding-top: 5px">
+          <a-table
+            :data-source="dataSource"
+            :columns="columns"
+            :row-selection="rowSelection"
+            :custom-row="customRow"
+            :pagination="isPagination ? pagination : false"
+            size="small"
+            bordered
+            :row-key="rowKey"
+            :scroll="{ y: tableH }"
           />
-        </template>
-        <a-button type="primary" @click="queryDataList">查询</a-button>
-      </a-space>
-      <a-table
-        :data-source="dataSource"
-        :loading="loading"
-        :columns="columns"
-        :row-selection="rowSelection"
-        :custom-row="customRow"
-        :pagination="false"
-        size="small"
-        bordered
-        :row-key="rowKey"
-        :scroll="{ y: tableH }"
-      />
-    </div>
+        </div>
+      </div>
+    </a-spin>
   </a-modal>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, shallowRef, watch } from "vue"
+import { onMounted, ref, shallowRef, watch, PropType, reactive, inject } from "vue"
 import { message } from "ant-design-vue"
-import type { queryType, DataType, objType } from "./baseModal"
-import type { TableColumnType } from "ant-design-vue"
+import type { queryType, DataType } from "./baseModal"
+import type { TableColumnType, PaginationProps } from "ant-design-vue"
+import http from "@/utils/request"
+
 const props = defineProps({
   visible: Boolean,
   // 弹窗标题
   title: {
     type: String,
-    default: ""
+    default: "数据列表"
   },
   // 已选列表，用于回显；数据必须包含 【props.rowKey】绑定属性 -> [{id:'',...},{id:'',...}...]
   selected: {
-    type: Array,
-    default: function (d: any) {
-      return d || []
-    }
+    type: Array as PropType<any[]>,
+    default: () => []
   },
   rowKey: {
     type: String,
@@ -70,30 +78,23 @@ const props = defineProps({
   },
   // 禁用项
   disabledRows: {
-    type: Array,
-    default: function (d: any) {
-      return d || []
-    }
+    type: Array as PropType<DataType[]>,
+    default: () => []
   },
   // 查询表单
   queryForm: {
-    type: Array,
-    required: true,
-    default: function (d: any) {
-      return d || []
-    }
+    type: Array as PropType<queryType[]>,
+    default: () => []
   },
   // 表格列
   queryColumns: {
-    type: Array,
+    type: Array as PropType<TableColumnType[]>,
     required: true,
-    default: function (d: TableColumnType) {
-      return d || []
-    }
+    default: () => []
   },
   width: {
     type: String,
-    default: ""
+    default: "1000px"
   },
   // 选择类型
   type: {
@@ -102,21 +103,26 @@ const props = defineProps({
   },
   // 表格数据
   datas: {
-    type: Array,
-    default: function (d: any) {
-      return d || []
-    }
+    type: Array as PropType<DataType[]>,
+    default: () => []
+  },
+  // 是否分页：分页获取时，搜索调用接口，不分页时本地过滤
+  isPagination: Boolean,
+  // 分页请求时，获取数据的配置
+  httpOption: {
+    type: Object,
+    default: () => ({})
   },
   autoClose: Boolean
 })
 const emit = defineEmits(["ok", "update:visible"])
 
 const mvisible = ref<boolean>(props.visible)
-const form = ref<objType>({})
+const form = ref<any>({})
 const formList = ref<queryType[]>([])
 const columns = ref<TableColumnType[]>([
   {
-    title: "",
+    title: "序号",
     dataIndex: "index",
     key: "index",
     width: 50,
@@ -132,29 +138,100 @@ const tableH = ref<number>(450)
 
 // 初始化
 onMounted(() => {
-  tableH.value = (window.innerHeight || document.body.clientHeight) * 0.8 - 230
-  formList.value = props.queryForm as queryType[]
+  if (!mvisible.value) return
+  tableH.value = (window.innerHeight || document.body.clientHeight) * 0.8 - 260
+  formList.value = props.queryForm
   columns.value = [...columns.value, ...props.queryColumns] as TableColumnType[]
-  props.datas.length > 0 && initDatas(props.datas)
+  if (props.isPagination) {
+    getPageDatas()
+  } else {
+    initDatas(props.datas)
+  }
 })
 
 watch(
+  () => props.visible,
+  (val) => {
+    mvisible.value = val
+  }
+)
+watch(
   () => [props.datas, props.selected],
-  (list) => {
-    initDatas(list[0])
+  (dataObj) => {
+    if (props.isPagination) {
+      getPageDatas()
+    } else {
+      initDatas(dataObj[0])
+    }
   }
 )
 
-watch(
-  () => props.visible,
-  (val) => (mvisible.value = val)
-)
+// 分页
+const commonPagination = reactive(inject("commonPagination") as PaginationProps)
+const pagination = reactive<PaginationProps>({
+  ...commonPagination,
+  onChange: (page: number, pageSize: number) => {
+    pagination.current = page
+    pagination.pageSize = pageSize
+    _selectedRows.value = []
+    _selectedRowKeys.value = []
+    getPageDatas()
+  }
+})
+// 分页查询数据
+const getPageDatas = (flag?: boolean, addId?: string) => {
+  const { url, method = "get", pageZero = false, pagesKey = {}, params = {} } = props.httpOption
+  const page = (pagesKey && pagesKey.page) || "currPage"
+  const pageSize = (pagesKey && pagesKey.pageSize) || "maxPage"
+  flag && (pagination.current = 1)
+  loading.value = true
+  http({
+    url,
+    method,
+    params: {
+      ...form.value,
+      [page]: pageZero ? (pagination.current as number) - 1 : pagination.current,
+      [pageSize]: pagination.pageSize,
+      ...params
+    }
+  })
+    .then((res: any) => {
+      if (!res.success) {
+        message.error(res.error?.message)
+        return
+      }
+      const list = res.result.items
+      loading.value = false
+      dataSource.value = list
+      pagination.total = res.result.totalCount
+      if ((props.selected?.length && list.length) || (flag && addId)) {
+        initSelectionRow(list, addId)
+      }
+    })
+    .catch(() => {
+      loading.value = false
+    })
+}
 
-// 搜索
+defineExpose({
+  getPageDatas
+})
+
+// 重置
+const resetFrom = () => {
+  form.value = {}
+}
+
+// 搜索：已选中数据不过滤
 const queryDataList = () => {
-  const queryDatas = ref<DataType[]>([...(props.datas as DataType[])])
-  const f: any = form.value
-  queryDatas.value = queryDatas.value.filter((d: DataType) => {
+  if (props.isPagination) {
+    getPageDatas(true)
+    return
+  }
+  loading.value = true
+  let queryDatas = [...props.datas]
+  const f = form.value
+  queryDatas = queryDatas.filter((d: DataType) => {
     let valid = true
     if (_selectedRowKeys.value.length > 0 && _selectedRowKeys.value.includes(d[props.rowKey])) {
       return true
@@ -167,13 +244,13 @@ const queryDataList = () => {
     }
     return valid
   })
-  initDatas(queryDatas.value)
+  initDatas(queryDatas)
 }
 
 // 加载数据
 const loading = ref<boolean>(true)
 const dataSource = shallowRef<DataType[]>([])
-const initDatas = (list: any) => {
+const initDatas = (list: DataType[]) => {
   dataSource.value = list
   loading.value = false
   if (props.selected?.length && list.length) {
@@ -182,24 +259,18 @@ const initDatas = (list: any) => {
 }
 
 // 回显
-const initSelectionRow = (list: any) => {
-  const selectedRow = props.selected as string[]
-  const ids = selectedRow.map((d: any) => d[props.rowKey])
+const initSelectionRow = (list: DataType[], addId?: string) => {
+  const selectedRow = props.selected
+  let ids = selectedRow.map((d: any) => d[props.rowKey])
+  if (addId) {
+    // 弹窗内新增数据，并直接选中这条数据
+    props.type === "radio" ? (ids = [addId]) : ids.push(addId)
+  }
   _selectedRowKeys.value = ids
-  _selectedRows.value = list.filter((d: any) => {
+  _selectedRows.value = list.filter((d) => {
     return ids.includes(d[props.rowKey])
   })
 }
-
-// const getDataList = (flag?: boolean) => {
-//   axios({
-//     url: "",
-//     method: "get",
-//     params: form.value,
-//   }).then((res: any) => {
-//     dataSource.value = res.records || [];
-//   });
-// };
 
 // 行选择数据
 const _selectedRowKeys = ref<string[]>([])
@@ -275,4 +346,8 @@ const saveModal = () => {
 }
 </script>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+:deep(.ant-table-pagination.ant-pagination) {
+  margin-bottom: 0;
+}
+</style>

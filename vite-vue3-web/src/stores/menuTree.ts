@@ -42,6 +42,7 @@ export default defineStore("menu", {
           for (let i = 0; i < menus.length; i++) {
             const m = deepCopy(menus[i])
             m.component = m.component ? loadView(m.component) : ""
+            m.meta.key = ""
             routes.push(m)
             if (m.children && m.children.length > 0) {
               initRoute(m.children)

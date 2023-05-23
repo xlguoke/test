@@ -43,7 +43,7 @@ module.exports = {
     "@typescript-eslint/no-unused-vars": "warn",
     // vue首行缩进两字符
     "vue/html-indent": [
-      "error",
+      "off",
       2,
       {
         // 属性缩进的乘数。默认为1。
@@ -60,8 +60,8 @@ module.exports = {
     ],
     // 每行最大属性数关闭
     "vue/max-attributes-per-line": ["off"],
-	// 要求单行元素的内容前后有一个换行符
-    "vue/singleline-html-element-content-newline": "1", 
+    // 要求单行元素的内容前后有一个换行符
+    "vue/singleline-html-element-content-newline": "off", 
     // 编辑器里会给prettier错误进行报错
     "prettier/prettier": "error"
   }

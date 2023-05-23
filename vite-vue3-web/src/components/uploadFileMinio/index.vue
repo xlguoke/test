@@ -38,14 +38,15 @@
 <script setup lang="ts">
 import { reactive, ref, watch, PropType } from "vue"
 import { UploadOutlined, PlusOutlined } from "@ant-design/icons-vue"
+import type { UploadProps } from "ant-design-vue"
 import { message } from "ant-design-vue"
-import type { UploadProps, UploadFile } from "ant-design-vue"
-import request from "@/utils/request"
-import { debounce, deepCopy } from "@/utils/index"
-import { filesType } from "@/type/common/index"
+import { debounce, deepCopy } from "@/utils"
+import minioPutObject, { getMinioFileUrl } from "@/utils/minio.config"
+import type { filesType } from "@/type/common"
 import UploadFileList from "./uploadFileList.vue"
+import { isImage } from "./uploadCommon"
 
-interface ConfigType {
+interface configType {
   multiple?: boolean //多选
   hideFileList?: boolean // 隐藏列表
   hideDelete?: boolean // 隐藏列表的删除图标
@@ -59,25 +60,18 @@ interface ConfigType {
   bucketUri?: string // minio桶名称与文件路径拼接字符串
 }
 
-interface ParamsType {
-  foreignKey?: string
-  foreignTable: string
-  accessoryType: string
-  readonly: boolean
-}
-
 const props = defineProps({
   value: {
-    type: Array,
-    default: () => []
+    type: Array as PropType<filesType[]>,
+    default: function (d: filesType[]) {
+      return d || []
+    }
   },
   config: {
-    type: Object as PropType<ConfigType>,
-    default: () => ({})
-  },
-  params: {
-    type: Object as PropType<ParamsType>,
-    default: () => ({})
+    type: Object as PropType<configType>,
+    default: function (d: configType) {
+      return d || {}
+    }
   },
   btnName: {
     type: String,
@@ -102,12 +96,15 @@ const props = defineProps({
   // 返回 false 或 Promise.reject 时拦截上传
   beforeUpload: {
     type: Function,
-    default: () => Boolean
+    default: undefined
   }
 })
 const emit = defineEmits(["update:value", "success", "failFileList"])
 
-const _config = reactive<ConfigType>({
+interface configKeyType {
+  [key: string]: any
+}
+const _config: configKeyType = reactive<configType>({
   btnName: props.btnName,
   btnType: props.btnType,
   listType: props.listType, // text、picture、picture-card
@@ -116,16 +113,27 @@ const _config = reactive<ConfigType>({
   hideDelete: props.hideDelete,
   isRandomName: false,
   loading: false,
+  bucketUri: "",
   types: [],
   ...props.config
 })
-
 const _fileList = ref<filesType[]>([]) // 上传列表
 const initFileList = async () => {
   if (props.value.length === 0) {
     _fileList.value = []
   } else {
     let list = deepCopy(props.value) as filesType[]
+    for (let i = 0; i < list.length; i++) {
+      let f = list[i]
+      f.loading = false
+      if (isImage(f.name) && !f.blobUrl) {
+        try {
+          list[i].blobUrl = await getMinioFileUrl(list[i].url)
+        } catch (err) {
+          list[i].blobUrl = ""
+        }
+      }
+    }
     _fileList.value = list
   }
 }
@@ -142,25 +150,27 @@ watch(
 
 watch(
   () => props.config,
-  (val) => {
+  (val: configKeyType) => {
     for (let k in val) {
       _config[k] = val[k]
     }
   }
 )
-
+interface filesKey {
+  [key: string]: string[]
+}
 // 上传文件格式
-const fileTypes = {
+const fileTypes: filesKey = {
   excel: ["xls", "xlsx"],
   word: ["doc", "docx"],
   image: ["jpg", "jpeg", "png", "bmp", "svg", "webp", "wmf", "gif", "apng"],
   video: ["mp4", "wmv", "flv", "avi", "mov", "m3u8"]
 }
 
-// 上传前文件类型判定
-const _beforeUpload: UploadProps["beforeUpload"] = (file: UploadFile, fileList: UploadFile[]) => {
+// 上传前文件类型判定、上传前自定义事件
+const _beforeUpload: UploadProps["beforeUpload"] = (file, fileList) => {
   debounce(() => {
-    let volidType = reactive<string[]>([])
+    let volidType = []
     if (_config.types && _config.types.length > 0) {
       for (let i = 0; i < _config.types.length; i++) {
         const ftype = _config.types[i].toLowerCase()
@@ -184,46 +194,38 @@ const _beforeUpload: UploadProps["beforeUpload"] = (file: UploadFile, fileList: 
           return false
         }
       }
-      uploadFun(fileList)
+      uploadFun(fileList as any)
       return false
     }
-    uploadFun(fileList)
+    uploadFun(fileList as any)
   }, 300)
   return false
 }
-// 上传失败列表
-const failFileList = ref<UploadProps["fileList"]>([])
 
-// 文件上传前自定义事件及上传结果处理
-const uploadFun = async (fileList: UploadFile[]) => {
+// 文件上传结果处理
+const failFileList = ref<UploadProps["fileList"]>([]) // 上传失败列表
+const uploadFun = async (fileList: Array<filesType>) => {
   let res: any = props.beforeUpload && (await props.beforeUpload(fileList))
   failFileList.value = []
   if (res === false) return false
   if (res && res.fileList) {
     fileList = res.fileList
   }
-  const formData = new FormData()
-  for (let k in props.params) {
-    formData.append(k, props.params[k])
-  }
   _config.loading = true
   for (let i = 0; i < fileList.length; i++) {
     const file = fileList[i]
-    formData.append("file", file as any)
+    const bucketUri = file.bucketUri || _config.bucketUri
+    file.bucketUri && delete file.bucketUri
     try {
       // 上传
-      const res: any = await request({
-        url: "/api/services/app/FileService/uploadAccessory",
-        method: "post",
-        data: formData
-      })
-      const _file = {
+      const { url, etag } = await minioPutObject(file, _config.isRandomName, bucketUri)
+      let _file = {
         uid: file.uid,
         name: file.name,
         status: "done",
         size: file.size,
-        url: res.result.url,
-        id: res.result.id
+        url,
+        id: etag
       }
       if (_config.multiple) {
         let ind = _fileList.value?.findIndex((d) => d.uid == file.uid) || 0
@@ -239,7 +241,7 @@ const uploadFun = async (fileList: UploadFile[]) => {
     } catch (err) {
       console.log(`第${i + 1}个上传异常：`, err)
       console.log("异常文件：", fileList[i])
-      failFileList.value.push(file)
+      failFileList.value.push(file as any)
       let ind = _fileList.value?.findIndex((d) => d.uid == file.uid) || 0
       if (ind !== -1) {
         _fileList.value?.splice(ind, 1)
@@ -275,6 +277,31 @@ const updateFileList = () => {
 </script>
 
 <style lang="less" scoped>
+// .upload-file-item {
+//   width: 50%;
+//   padding: 10px;
+//   display: inline-flex;
+//   align-items: center;
+//   border: 1px solid #eee;
+//   border-radius: 4px;
+//   box-sizing: border-box;
+//   float: left;
+
+//   &:nth-child(2n) {
+//     margin-left: 20px;
+//   }
+
+//   :deep(.ant-image) {
+//     width: 36px;
+//     height: 36px;
+
+//     img {
+//       widows: 100%;
+//       height: 100%;
+//     }
+//   }
+// }
+
 .upload-warp {
   display: block;
 
@@ -299,15 +326,25 @@ const updateFileList = () => {
         border-color: @theme_color;
         color: @theme_color;
       }
-
-      .ant-upload {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        height: 100%;
-      }
     }
   }
 }
+
+// .upload-list-inline :deep(.ant-upload-list-picture-container) {
+//   width: 100%;
+
+//   &:nth-child(2n) .ant-upload-list-item {
+//     margin-left: 12px;
+//   }
+// }
+
+// .upload-list-inline :deep(.ant-upload-list-item) {
+//   width: calc(100% - 12px);
+// }
+
+// .hide-delete {
+//   :deep(.ant-upload-list-item-card-actions) {
+//     display: none;
+//   }
+// }
 </style>

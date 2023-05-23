@@ -46,7 +46,7 @@
 
 <script setup lang="ts">
 import { ref, watch, PropType } from "vue"
-import { getMinioFileUrl } from "@/utils/minio.config.js"
+import { getMinioFileUrl } from "@/utils/minio.config"
 import type { filesType } from "@/type/common"
 import { downMinioFile, showMinioFile } from "../uploadFile/uploadCommon"
 const fallback = ref(

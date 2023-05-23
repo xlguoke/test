@@ -207,7 +207,7 @@ export const previewPDF = (url: string) => {
     return
   }
   const page: any = window.open(
-    `${window.location.origin}${window.location.pathname}static/pdfjs-es5/web/viewer.html?file=${url}`,
+    `${window.location.origin}/static/pdfjs-es5/web/viewer.html?file=${url}`,
     "文件预览"
   )
   if (!page) return
