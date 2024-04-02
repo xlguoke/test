@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets"
+		xmlns:cdv="http://cordova.apache.org/ns/1.0"
+		id="cn.ilis.uhb"
+		version="1.10.1">
+	<name>ILIS ELN</name>
+	<description>.</description>
+
+	<content src="index.html"/>
+
+	<!-- Security Related Settings -->
+	<access origin="*"/>
+	<allow-intent href="http://*/*"/>
+	<allow-intent href="https://*/*"/>
+
+	<!-- Platform Configs & Platform Overriding Configs -->
+	<platform name="android">
+		<preference name="scheme" value="http"/>
+		<icon density="ldpi" src="src/assets/android/icon/drawable-ldpi-icon.png" />
+		<icon density="mdpi" src="src/assets/android/icon/drawable-mdpi-icon.png" />
+		<icon density="hdpi" src="src/assets/android/icon/drawable-hdpi-icon.png" />
+		<icon density="xhdpi" src="src/assets/android/icon/drawable-xhdpi-icon.png" />
+		<icon density="xxhdpi" src="src/assets/android/icon/drawable-xxhdpi-icon.png" />
+		<icon density="xxxhdpi" src="src/assets/android/icon/drawable-xxxhdpi-icon.png" />
+		<preference name="AndroidWindowSplashScreenAnimatedIcon" value="src/assets/android/splash/splash-screen.png" />
+	</platform>
+</widget>

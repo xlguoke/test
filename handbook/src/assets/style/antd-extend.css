@@ -1,0 +1,136 @@
+/* 自定义表单：登录、修改密码、试验记录 */
+.custom-form .ant-form-item-control-input-content>.ant-input,
+.custom-form .ant-form-item-control-input-content>.ant-input-password,
+.custom-form .ant-form-item-control-input-content>.ant-input-affix-wrapper {
+  border-color: transparent !important;
+  background-color: transparent !important;
+  border-bottom: 1px solid #D8D8D8 !important;
+  border-radius: 0;
+}
+
+.custom-form .ant-form-item-control-input-content>.ant-input:focus,
+.custom-form .ant-form-item-control-input-content>.ant-input-affix-wrapper-focused {
+  box-shadow: none !important;
+}
+
+.custom-form .ant-form-item-control-input-content>.ant-input:hover,
+.custom-form .ant-form-item-control-input-content>.ant-input:focus,
+.custom-form .ant-form-item-control-input-content>.ant-input-affix-wrapper-focused:not(.ant-input-affix-wrapper) {
+  border-color: transparent !important;
+  border-bottom-color: var(--primary-color) !important;
+}
+
+.custom-form .ant-input-affix-wrapper-status-error:not(.ant-input-affix-wrapper-disabled):not(.ant-input-affix-wrapper-borderless).ant-input-affix-wrapper,
+:where(.css-dev-only-do-not-override-1azs7gj).ant-input-status-error:not(.ant-input-disabled):not(.ant-input-borderless).ant-input {
+  border-color: transparent !important;
+  border-bottom-color: var(--error-color) !important;
+}
+
+.custom-form.ant-form-vertical .ant-form-item-label {
+  padding: 0
+}
+
+
+/* 首页更新提示弹窗 */
+.home-update-modal {
+  max-width: 350px;
+  min-width: 260px;
+  width: 70% !important;
+}
+.home-update-modal .ant-modal-content{
+  padding: 0;
+}
+.home-update-modal .ant-modal-body{
+  padding: 2rem 3rem;
+}
+.update-content {
+  text-align: center;
+}
+
+.update-content .ant-checkbox-group {
+  display: inline-block;
+  width: 150px;
+}
+
+.update-content .ant-checkbox-wrapper {
+  display: flex;
+  margin-top: 0.5rem;
+}
+
+
+
+/* 试验任务 */
+.test-task-tabs {
+  background-color: #fff;
+}
+
+.test-task-tabs .ant-tabs-nav-list {
+  width: 100%;
+}
+
+.test-task-tabs .ant-tabs-nav-list .ant-tabs-tab {
+  flex: 1;
+  justify-content: center;
+  padding: 10px 0;
+  font-size: 16px;
+}
+
+
+.test-task-tabs .ant-tabs-top >.ant-tabs-nav{
+  margin-bottom: 1rem;
+}
+
+.test-task-datas .ant-checkbox-wrapper>span:not(.ant-checkbox) {
+  display: block;
+  flex: 1;
+}
+
+/* 试验登记 */
+.test-task-detail .ant-tabs-large>.ant-tabs-nav {
+  margin-bottom: 0;
+}
+
+.test-task-detail .ant-tabs-large>.ant-tabs-nav .ant-tabs-tab {
+  padding: 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* 模板管理 */
+.module-datas .ant-checkbox-wrapper>span:not(.ant-checkbox) {
+  display: flex;
+  flex: 1;
+}
+
+/* 系统设置页面弹窗 */
+.sys-modal .ant-modal-body {
+  padding: 15px 30px;
+}
+
+.drawer-search .ant-drawer-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.custom-spin.ant-spin-spinning {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.ant-checkbox-group {
+  width: 100%;
+}
+
+.ant-spin-nested-loading, 
+.ant-spin-container{
+  height: 100%;
+  overflow: auto;
+}

@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="cordova-plugin-udr" version="1.0.0"
+    xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>UdrPlugin</name>
+
+    <js-module name="UdrPlugin" src="www/UdrPlugin.js">
+        <clobbers target="cordova.plugins.udr" />
+    </js-module>
+
+    <platform name="android">
+        <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="UdrPlugin">
+                <param name="android-package" value="com.hitek.cordova.udr.UdrPlugin" />
+            </feature>
+        </config-file>
+        <config-file parent="/*" target="AndroidManifest.xml"></config-file>
+        <source-file src="src/android/UdrPlugin.java" target-dir="src/com/hitek/cordova/udr" />
+
+        <!-- arr引用 -->
+        <resource-file src="src/android/UdrLib.aar" target="../../../app/libs/UdrLib.aar" />
+        <framework src="src/android/udr.gradle" custom="true" type="gradleReference" />
+
+    </platform>
+</plugin>
