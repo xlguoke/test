@@ -246,7 +246,7 @@
           <p class="card-header">
             <span class="iconfont icon-paixingbang"></span>
             <span class="bold title">项目委托统计</span>
-            <span class="fr">累计总数： 999</span>
+            <span class="fr">累计总数： 666</span>
           </p>
           <ul class="consign-no">
             <li v-for="(n, i) in state.consignNo" :key="n.id" class="item">
