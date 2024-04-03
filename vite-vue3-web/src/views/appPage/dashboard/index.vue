@@ -328,11 +328,11 @@ const state = reactive<{
   consignNo: [
     {
       id: "1",
-      name: "委托单位委托单位委托单位委托单位委托单位委托单位委托单位委托单位委托单位委托单位委托单位委托单位",
+      name: "委托单位委托单位委托单位委托单位委托单位委托单位委托单位委托单位委托单位委",
       num: 299,
       rate: 100
     },
-    { id: "2", name: "委托单位", num: 199, rate: 80 },
+    { id: "2", name: "委托单位", num: 19, rate: 80 },
     { id: "3", name: "委托单位", num: 99, rate: 65 },
     { id: "4", name: "委托单位", num: 69, rate: 51 },
     { id: "5", name: "委托单位", num: 19, rate: 32 }
