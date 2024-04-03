@@ -328,7 +328,11 @@ const state = reactive<{
   consignNo: [
     {
       id: "1",
+<<<<<<< HEAD
       name: "委托单位委托单位委托单位委位委托单位委托单位委托单位委",
+=======
+      name: "委托单位委托单位委托单位委托单位委托单位委托单位委托单位委托单位委托单位",
+>>>>>>> 3dbdd78 (chore: change text)
       num: 299,
       rate: 100
     },
