@@ -7,7 +7,7 @@
         </a-col>
         <a-col :span="12" class="rt">
           <ul>
-            <li>客服电话：023-12314</li>
+            <li>客服电话：023-1231456</li>
             <li>QQ:12312312414</li>
             <li>
               <i class="iconfont icon-erweima"></i>
