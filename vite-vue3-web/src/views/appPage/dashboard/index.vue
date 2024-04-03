@@ -283,7 +283,7 @@ import NoticeDetail from "./components/noticeDetail.vue"
 const userInfo = reactive({
   url: "",
   userName: "管理员",
-  corp: "海特科技",
+  corp: "xxxx",
   wx: "微信昵称"
 })
 
