@@ -317,7 +317,7 @@ const state = reactive<{
   noticeDatas: [
     {
       id: "1",
-      content: "公告内容公告内容公告内容公告内容公告内容公告内容公告内容公告内容公告内容",
+      content: "公告内容公告内容公告内容公告内容公告内容公告内容容",
       status: 1
     },
     { id: "2", content: "公告内容公告内容", status: 1 },
