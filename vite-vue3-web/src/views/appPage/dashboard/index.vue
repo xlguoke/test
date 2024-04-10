@@ -36,7 +36,7 @@
         <a-card shadow="never">
           <p class="card-header">
             <span class="iconfont icon-tianchongxing-"></span>
-            <span class="bold title">原材料预委托</span>
+            <span class="bold title">原材料预委托66666</span>
           </p>
           <p class="ft16">
             <span class="bold ft16">未受理预委托</span>
@@ -246,7 +246,7 @@
           <p class="card-header">
             <span class="iconfont icon-paixingbang"></span>
             <span class="bold title">项目委托统计</span>
-            <span class="fr">累计总数： 999</span>
+            <span class="fr">累计总数： 666</span>
           </p>
           <ul class="consign-no">
             <li v-for="(n, i) in state.consignNo" :key="n.id" class="item">
@@ -317,7 +317,7 @@ const state = reactive<{
   noticeDatas: [
     {
       id: "1",
-      content: "公告内容公告内容公告内容公告内容公告内容公告内容公告内容公告内容公告内容",
+      content: "公告内容公告内容公告内容公告内容公告内容公告内容容",
       status: 1
     },
     { id: "2", content: "公告内容公告内容", status: 1 },
@@ -328,11 +328,11 @@ const state = reactive<{
   consignNo: [
     {
       id: "1",
-      name: "委托单位委托单位委托单位委托单位委托单位委托单位委托单位委托单位委托单位委托单位委托单位委托单位",
+      name: "委托单位委托单位委托单位委位委托单位委托单位委托单位委",
       num: 299,
       rate: 100
     },
-    { id: "2", name: "委托单位", num: 199, rate: 80 },
+    { id: "2", name: "委托单位", num: 19, rate: 80 },
     { id: "3", name: "委托单位", num: 99, rate: 65 },
     { id: "4", name: "委托单位", num: 69, rate: 51 },
     { id: "5", name: "委托单位", num: 19, rate: 32 }
