@@ -1,0 +1,138 @@
+stages:
+  - preflight
+  - lint
+  - test
+  - build
+  - deploy
+  - release
+
+default:
+  image: node:20-alpine
+  before_script:
+    - export HTTP_PROXY=$PROXY HTTPS_PROXY=$PROXY
+    - corepack enable
+    - corepack prepare pnpm@9.7.0 --activate
+    - pnpm config set store-dir .pnpm-store proxy $PROXY https-proxy $PROXY registry https://registry.npmmirror.com
+  cache:
+    key:
+      files:
+        - pnpm-lock.yaml
+    paths:
+      - node_modules
+      - .pnpm-store
+
+.if-on-default-branch: &if-on-default-branch
+  if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+.if-on-merge-request: &if-on-merge-request
+  if: $CI_PIPELINE_SOURCE == "merge_request_event"
+.if-web-triggered: &if-web-triggered
+  if: $CI_PIPELINE_SOURCE == "web"
+
+prepare:
+  stage: preflight
+  script:
+    - pnpm install
+  cache:
+    key:
+      files:
+        - pnpm-lock.yaml
+    paths:
+      - node_modules
+      - .pnpm-store
+    policy: pull-push
+  rules:
+    - <<: *if-on-merge-request
+    - <<: *if-on-default-branch
+    - <<: *if-web-triggered
+    - if: $CI_COMMIT_TAG
+
+lint:
+  stage: lint
+  script:
+    - pnpm lint
+  rules:
+    - <<: *if-on-merge-request
+      changes:
+        - src/**/*
+        - test/**/*
+
+test:
+  stage: test
+  script:
+    - pnpm test -- --reporter=junit --outputFile=test.xml
+  artifacts:
+    when: always
+    reports:
+      junit: test.xml
+    expire_in: 4 hours
+  rules:
+    - <<: *if-on-merge-request
+      changes:
+        - src/**/*
+        - test/**/*
+    - <<: *if-web-triggered
+    - if: $CI_COMMIT_TAG
+
+build:
+  stage: build
+  script: pnpm build
+  artifacts:
+    paths:
+      - dist
+    expire_in: 4 hrs
+  rules:
+    - <<: *if-on-default-branch
+    - <<: *if-web-triggered
+    - if: $CI_COMMIT_TAG
+
+deploy:
+  stage: deploy
+  image: docker:24.0.5
+  before_script:
+    - export HTTP_PROXY=$PROXY HTTPS_PROXY=$PROXY
+  needs:
+    - job: build
+      artifacts: true
+  script:
+    - docker build -t $REGISTRY_HOST/$REGISTRY_GROUP/app:latest .
+    # create a docker container this might be failed if the container already exists
+    - |
+      set +e
+      docker create --name ilis-union-app -p 80:80 $REGISTRY_HOST/$REGISTRY_GROUP/app
+      if [ $? -ne 0 ]; then
+        echo "ilis-union-app container creation failed"
+      fi
+      set -e
+    - docker restart ilis-union-app
+  environment:
+    name: app
+    url: http://192.168.2.241
+  rules:
+    - <<: *if-on-merge-request
+      when: never
+    - <<: *if-on-default-branch
+      changes:
+        - src/**/*
+        - Dockerfile
+    - <<: *if-web-triggered
+
+release:
+  stage: release
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - pnpm build
+  artifacts:
+    paths:
+      - dist
+    expire_in: 1 week
+  release:
+    name: Release $CI_COMMIT_TAG
+    description: $CI_COMMIT_MESSAGE
+    tag_name: $CI_COMMIT_TAG
+    ref: $CI_COMMIT_SHA
+    assets:
+      links:
+        - name: ilis-union-app-$CI_COMMIT_TAG
+          link_type: package
+          url: $CI_API_V4_URL/projects/$CI_PROJECT_ID/jobs/artifacts/$CI_COMMIT_TAG/download?job=release
