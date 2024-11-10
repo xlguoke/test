@@ -1,9 +1,0 @@
-{
-  "version": "1",
-  "name": "auth.ilis.cn",
-  "type": "collection",
-  "ignore": [
-    "node_modules",
-    ".git"
-  ]
-}
