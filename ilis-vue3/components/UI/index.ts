@@ -1,6 +1,0 @@
-export { default as BaseTitle } from './BaseTitle.vue'
-export { default as BaseText } from './BaseText.vue'
-export { default as BaseStatusTag } from './BaseStatusTag.vue'
-export { default as BaseSelectDepart } from './BaseSelectDepart.vue'
-export { default as BaseInputSelector } from '~/anyThing/components/input/InputSelector.vue'
-export { default as BaseSelectorView } from './BaseSelectorView.vue'
