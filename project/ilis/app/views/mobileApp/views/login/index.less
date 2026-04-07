@@ -1,0 +1,102 @@
+.login {
+  background: #fff;
+  padding-bottom: 16px;
+
+  .login-gfzx {
+    position: relative;
+    margin-bottom: 15px;
+
+    .login-switch-unit {
+      position: absolute;
+      right: 16px;
+      top: 16px;
+      z-index: 100;
+      color: #fff;
+    }
+
+    .login-gfzx-con {
+      position: absolute;
+      top: 40%;
+      left: 24px;
+      transform: translateY(-50%);
+      color: #fff;
+    }
+
+    .login-gfzx-title {
+      font-size: 24px;
+      font-weight: bold;
+      line-height: 30px;
+      letter-spacing: 1px;
+      font-family: '黑体';
+    }
+
+    .login-gfzx-name {
+      font-size: 15px;
+      line-height: 22px;
+      margin-top: 10px;
+      letter-spacing: 1px;
+
+      img {
+        vertical-align: middle;
+        height: 16px;
+        margin-bottom: 4px;
+        margin-right: 6px;
+      }
+    }
+  }
+
+  :deep(.van-field__left-icon) img {
+    width: 20px;
+    margin-right: 8px;
+  }
+
+  .login-header {
+    padding-top: 46px;
+    padding-bottom: 32px;
+    text-align: center;
+    background: #154bd0;
+
+    img {
+      max-height: 88px;
+      max-width: 88px;
+    }
+
+    .login-header-name {
+      padding-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #fff;
+      font-family: 黑体;
+    }
+  }
+
+  .login-btn {
+    margin: 32px 15px;
+  }
+
+  .login-codeImg {
+    width: 84px;
+    height: 28px;
+    border: solid 1px #e2e2e2;
+
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .login-department {
+    :deep(.van-dialog__content) {
+      max-height: 240px;
+      overflow-y: auto;
+    }
+
+    :deep(.van-radio-group) {
+      padding: 10px 15px;
+    }
+
+    :deep(.van-radio) {
+      padding: 5px 0;
+    }
+  }
+}

@@ -1,0 +1,93 @@
+.custom-form {
+  .van-field {
+    &__label {
+      align-items: center;
+
+      &--required:before {
+        display: inline-block;
+        font-family: SimSun, sans-serif;
+        line-height: 1;
+      }
+    }
+
+    &__error-message {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      transform: translateY(100%);
+      z-index: 1;
+      font-size: 14px;
+    }
+
+    input, textarea{
+      padding: 4px 11px;
+      border-bottom: 1px solid #ebebf0;
+      &:focus {
+        border-bottom: 1px solid var(--van-blue);
+      }
+    }
+  }
+
+  .van-cell {
+    margin-bottom: 2.8rem;
+    overflow: visible;
+    padding: unset;
+
+    &:last-child {
+      margin-bottom: 5rem;
+    }
+
+    &::after {
+      left: 0;
+      right: 0;
+      border: unset;
+    }
+  }
+}
+// 自定义的notify样式，目前用于CustomNotify组件
+.van-notify.custom-notify{
+  width: 384px;
+  display: flex;
+  align-items: flex-start;
+  top: 20px;
+  right: 0;
+  left: unset;
+  padding: 20px 24px;
+  margin-right: 24px;
+  text-align: left;
+  line-height: 24px;
+  color: rgba(0, 0, 0, 0.88);
+  border-radius: 2px;
+  background-color: #fff;
+  box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+
+  .title {
+    font-size: 16px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .icon {
+    font-size: 24px;
+    color: var(--primary-color);
+
+    &-close {
+      padding: 5px;
+
+      &:hover {
+        color: rgba(0, 0, 0, 0.88);
+        background-color: rgba(0, 0, 0, 0.06);
+      }
+    }
+  }
+}
+
+.van-checkbox{
+  &__icon{
+    &--square{
+      border-radius: 2px;
+      overflow: hidden;
+    }
+  }
+}

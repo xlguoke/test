@@ -1,0 +1,113 @@
+@size16: 16px;
+@size14: 14px;
+@size13: 13px;
+@size12: 12px;
+
+.sampleInput-wrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+
+  .sampleInput-content {
+    flex: 1;
+    overflow: auto;
+    flex-direction: column;
+
+    .textarea {
+      width: calc(100% - 40px);
+      height: 80px;
+      margin: 0 auto 10vh;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 10px;
+      box-sizing: border-box;
+      font-size: 16px;
+      line-height: 20px;
+
+      &::placeholder {
+        opacity: .4;
+      }
+    }
+
+    .sampleInput-box {
+      width: 100%;
+      // padding-bottom: 15px;
+      background: #fff;
+
+      .sampleInputTag {
+        border-top: 10px solid #f5f5f5;
+      }
+    }
+  }
+
+  .sampleInput-list {
+    padding: 0 20px;
+    max-height: calc(100% - 76px);
+    overflow: auto;
+    box-sizing: border-box;
+
+    .sampleInput-item {
+      margin-top: 20px;
+      background: #fff;
+      box-sizing: border-box;
+      border-radius: 5px;
+      border: 1px solid #e9e9e9;
+
+      .sampleInput-title {
+        height: 50px;
+        padding: 0 10px 0 20px;
+        font-size: 14px;
+        line-height: 20px;
+        color: #333;
+        font-weight: 700;
+        border-bottom: 1px solid #e9e9e9;
+
+        .sampleInput-item-btn {
+          font-size: 12px;
+          color: #0079fe;
+          font-weight: 500;
+        }
+      }
+
+      .sampleInput-item-content {
+        padding: 10px 20px;
+
+        .sampleInput-item-info {
+          font-size: 14px;
+          color: #999999;
+          line-height: 20px;
+          margin-top: 5px;
+        }
+      }
+    }
+  }
+
+  .scan-box {
+    .scan-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 25vw;
+      height: 25vw;
+      background: #1890ff;
+      border-radius: 50%;
+      margin: 0 auto;
+      font-size: 20px;
+      line-height: 24px;
+      word-break: break-all;
+      color: #fff;
+    }
+
+    .scan-tip {
+      font-size: 14px;
+      line-height: 28px;
+      text-align: center;
+      color: #AEAEAE;
+    }
+  }
+
+  .sampleInput-btn {
+    padding: 0 10px 10px;
+  }
+}

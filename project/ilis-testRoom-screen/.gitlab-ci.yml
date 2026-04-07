@@ -1,0 +1,4 @@
+include:
+  - component: $CI_SERVER_FQDN/$CI_PROJECT_NAMESPACE/into-ci/node@2.0.2
+    inputs:
+      slug: facility-inspection-system

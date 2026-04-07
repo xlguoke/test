@@ -1,0 +1,13 @@
+{
+  "android": {
+    "debug": {},
+    "release": {
+      "keystore": "./hitek-release-key.keystore",
+      "storePassword": "hiteksoft2020",
+      "alias": "hitek-key-alias",
+      "password": "hiteksoft2020",
+      "keystoreType": "",
+      "packageType": "apk"
+    }
+  }
+}

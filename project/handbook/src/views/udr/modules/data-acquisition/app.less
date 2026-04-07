@@ -1,0 +1,91 @@
+.data-acquisition {
+  background-color: #F8F8F9;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .tab-wrap {
+    box-shadow: 0px 4px 8px 0px #eaf5ff;
+  }
+
+  .content {
+    flex: 1;
+    min-height: 0;
+    margin-top: 1.2rem;
+    padding: 0 1.5rem 1.5rem;
+    overflow-y: auto;
+  }
+}
+
+.title-bar-wrap {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 45px;
+  line-height: 45px;
+  background: #0066ec;
+  color: #fff;
+  font-size: 18px;
+  z-index: 1000;
+  text-align: center;
+}
+
+.page-title-min {
+  margin-top: 0;
+  margin-bottom: 1.2rem;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 19px;
+}
+
+.page-title-min::before {
+  content: '';
+  float: left;
+  margin-top: 2px;
+  margin-right: 10px;
+  width: 4px;
+  height: 14px;
+  background-color: #0284fe;
+  border-radius: 0 3px 3px 0;
+}
+
+.custom-card {
+  margin-bottom: 1.2rem;
+  padding: 1.5rem 2rem;
+  min-height: 242px;
+  background-color: #fff;
+  border-radius: 0.4rem;
+  overflow: hidden;
+  box-shadow: 0px 4px 8px 0px #eaf5ff;
+}
+
+.button-group {
+  margin-top: 1.5rem;
+  text-align: right;
+}
+
+.button-group .van-button {
+  margin-left: 1rem;
+  width: 10rem;
+}
+
+.field-input {
+  flex: 1;
+  width: 0;
+  padding-left: 0;
+}
+
+.handle-btn {
+  color: #0066ec;
+  cursor: pointer;
+  &:hover {
+    opacity: 0.8;
+  }
+
+  & + .handle-btn {
+    margin-left: 0.6rem;
+  }
+  &.danger {
+    color: #e63434;
+  }
+}

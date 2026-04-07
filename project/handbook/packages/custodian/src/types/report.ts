@@ -1,0 +1,193 @@
+import { z } from 'zod'
+
+const attachmentItem = z.object({
+  id: z.string(),
+  type: z.string(),
+  needResave: z.boolean().nullable(),
+  testObjectId: z.string().nullable(),
+  testTaskId: z.string(),
+  testTaskAttachmentFolderId: z.string(),
+  name: z.string(),
+  uri: z.string().nullable(),
+  commAttachmentId: z.string().nullable(),
+})
+
+const qualificationTypeItem = z.object({
+  id: z.string().nullable(),
+  reportId: z.string().nullable(),
+  qualificationId: z.string(),
+  qualificationName: z.string(),
+  sealId: z.string(),
+  sealName: z.string(),
+  signType: z.string(),
+  autoSign: z.boolean(),
+  sealType: z.enum(['QUALIFY', 'OTHER']),
+  sort: z.number(),
+})
+
+const verdict = z.object({
+  id: z.string().nullable(),
+  sysCompanyCode: z.string().nullable(),
+  createName: z.string().nullable(),
+  createBy: z.string().nullable(),
+  createDate: z.string().nullable(),
+  updateName: z.string().nullable(),
+  updateBy: z.string().nullable(),
+  updateDate: z.string().nullable(),
+  unitCode: z.string().nullable(),
+  testObjectId: z.string().nullable(),
+  testTaskId: z.string().nullable(),
+  testItemId: z.string().nullable(),
+  testVerdict: z.string().nullable(),
+  testVerdictRemark: z.string().nullable(),
+  isQualified: z.string().nullable(),
+  deleted: z.boolean(),
+  udrCustomize: z.string().nullable(),
+  qualified: z.boolean(),
+})
+
+const listPersonItem = z.object({
+  type: z.string(),
+  test_task_code: z.string(),
+  username: z.string(),
+  realname: z.string(),
+})
+
+const listPeriodItem = z.object({
+  id: z.string(),
+  testItemId: z.string(),
+  ageDay: z.string(),
+  order: z.number(),
+  ageDayNumber: z.number(),
+  ageDayUnit: z.string(),
+})
+
+export enum ReportStatus {
+  '已创建' = '8',
+  '待确认提交' = '9',
+  '复核中' = '10',
+  '审核中' = '15',
+  '批准中' = '20',
+  '已批准' = '30',
+}
+
+const testTaskReport = z.object({
+  taskId: z.string(),
+  reportId: z.string(),
+  reportSn: z.string(),
+  reportStatus: z.nativeEnum(ReportStatus),
+  statusDesc: z.string(),
+  reportCreator: z.string().nullable(),
+  submittedUser: z.string().nullable(),
+  waitSubmitUser: z.string().nullable(),
+  signedUser: z.string().nullable(),
+  waitSignUser: z.string().nullable(),
+  signNodeName: z.string().nullable(),
+  signType: z.string().nullable(),
+  needMeSubmit: z.boolean(),
+  needMeSignature: z.boolean(),
+  qualification: z.string(),
+  seal: z.string(),
+  pdfRoundMode: z.boolean(),
+  mergeAuditSignature: z.boolean(),
+  convertStatus: z.string(),
+  isScrap: z.string(),
+  reportType: z.string(),
+  revised: z.boolean(),
+  sourceRid: z.string(),
+  reviseVersion: z.number(),
+  reviseOpinion: z.string().nullable(),
+})
+
+const report = z.object({
+  id: z.string(),
+  createName: z.string(),
+  createBy: z.string(),
+  createDate: z.number(),
+  updateName: z.string(),
+  updateBy: z.string(),
+  updateDate: z.number(),
+  companyId: z.string().nullable(),
+  bpmStatus: z.string(),
+  reviewDate: z.number().nullable(),
+  auditDate: z.number().nullable(),
+  signDate: z.number().nullable(),
+  reportNumber: z.string(),
+  historyId: z.string().nullable(),
+  handoverWay: z.string().nullable(),
+  printStatus: z.string(),
+  issueStatus: z.string(),
+  archiveStatus: z.string().nullable(),
+  chargeStatus: z.string().nullable(),
+  reportType: z.string(),
+  reportStatus: z.string(),
+  testTimeBegin: z.number().nullable(),
+  testTimeEnd: z.number().nullable(),
+  version: z.string().nullable(),
+  consignUnitName: z.string().nullable(),
+  consignCode: z.string().nullable(),
+  consignDate: z.string().nullable(),
+  projectName: z.string().nullable(),
+  projectPartAndUse: z.string().nullable(),
+  contractName: z.string().nullable(),
+  contractNumber: z.string().nullable(),
+  recordeNumber: z.string().nullable(),
+  taskNumber: z.string().nullable(),
+  coreId: z.string().nullable(),
+  coreSn: z.string().nullable(),
+  isQualified: z.string().nullable(),
+  verdict: z.string().nullable(),
+  verdictRemark: z.string().nullable(),
+  isParamSplit: z.boolean(),
+  periodId: z.string().nullable(),
+  reportSeals: z.any().nullable(),
+  isScrap: z.string(),
+  revised: z.boolean(),
+  sourceRid: z.string(),
+  sourceRsn: z.string().nullable(),
+  reviseRid: z.string().nullable(),
+  reviseSnSuffix: z.string().nullable(),
+  reviseVersion: z.number(),
+}).nullable()
+
+const reportDetail = z.object({
+  qualificationTypes: z.array(qualificationTypeItem),
+  attachments: z.array(attachmentItem),
+  curUserName: z.string(),
+  autoIsQualified: z.number().nullable(),
+  unVerdictTasks: z.array(z.string()),
+  listPeriod: z.array(listPeriodItem),
+  verdict,
+  testTimeBegin: z.number().nullable(),
+  testTimeEnd: z.number().nullable(),
+  listPerson: z.array(listPersonItem),
+  canReportByParamSplit: z.boolean(),
+  taskRootFolderId: z.string(),
+
+  snStr: z.any().nullable(),
+  reportPeriod: z.any().nullable(),
+  reportTestParams: z.any().nullable(),
+  commitRecord: z.any().nullable(),
+  report,
+  ABReports: z.array(z.any()),
+}).nullable()
+
+const reportFile = z.object({
+  id: z.string(),
+  name: z.string(),
+  type: z.string(),
+  fileType: z.string(),
+  useType: z.string(),
+  sourceType: z.string(),
+  _parentId: z.string().nullable(),
+  fileUrl: z.string(),
+  uploadDate: z.string(),
+  testTaskId: z.string().nullable(),
+  iconCls: z.string(),
+  taskFileTreeModels: z.string().nullable(),
+})
+
+export type ReportDetail = z.infer<typeof reportDetail>
+export type TestTaskReport = z.infer<typeof testTaskReport>
+export type ReportFile = z.infer<typeof reportFile>
+export const Validator = { reportDetail, testTaskReport }

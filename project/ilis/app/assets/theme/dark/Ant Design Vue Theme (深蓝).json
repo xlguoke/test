@@ -1,0 +1,14 @@
+{
+  "token": {
+    "wireframe": false,
+    "sizeStep": 4,
+    "sizeUnit": 4,
+    "borderRadius": 4,
+    "colorPrimary": "#0066ec",
+    "colorSuccess": "#24B276",
+    "colorWarning": "#FF9A2E",
+    "colorError": "#ff6666",
+    "colorInfo": "#035acc",
+    "colorBgBase": "#0a0c0e"
+  }
+}

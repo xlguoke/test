@@ -1,0 +1,53 @@
+repositories{
+	maven { url 'https://maven.aliyun.com/repository/google' }
+	maven { url 'https://maven.aliyun.com/repository/public' }
+	maven { url "https://www.jitpack.io" }
+
+    jcenter()
+    flatDir{
+        dirs 'libs'
+    }
+}
+
+dependencies {
+    implementation(name:'UdrLib', ext:'aar')
+    implementation(name:'AIKit', ext:'aar')
+    implementation(name:'SparkChain', ext:'aar')
+    implementation(name:'opus', ext:'aar')
+
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.preference:preference:1.2.1'
+
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+    implementation 'cn.hutool:hutool-core:5.8.22'
+
+    implementation 'com.google.mlkit:digital-ink-recognition:18.1.0'
+    implementation 'com.github.TalbotGooday:AndroidPdfViewer:3.1.0-beta.3'
+
+    implementation 'com.yanzhenjie.andserver:api:2.1.12'
+    //annotationProcessor 'com.yanzhenjie.andserver:processor:2.1.12'
+    implementation 'com.github.xujiaji:happy-bubble:1.2.6'
+
+    implementation 'com.github.aicareles:Android-BLE:3.3.1'
+    implementation 'com.github.princekin-f:EasyFloat:2.0.4'
+    implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
+    implementation 'javax.annotation:javax.annotation-api:1.3.2'
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
+    implementation "com.google.code.findbugs:jsr305:3.0.2"
+    implementation 'io.gsonfire:gson-fire:1.9.0'
+    implementation 'net.sourceforge.htmlcleaner:htmlcleaner:2.29'
+    implementation 'com.hjq:xxpermissions:8.2'
+    implementation 'com.google.guava:guava:31.1-android'
+
+}
+
+android {
+    defaultConfig {
+        ndk {
+            abiFilters 'arm64-v8a', 'x86_64'
+        }
+    }
+}

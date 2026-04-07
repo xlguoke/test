@@ -1,0 +1,110 @@
+.taskAssignedDetail {
+  padding-bottom: 64px;
+
+  :deep(.van-empty__description) {
+    word-break: break-word;
+    padding: 0 15px;
+  }
+
+  .taskAssignedDetail-baseInfo {
+    margin: 8px 0;
+  }
+
+  .taskAssignedDetail-btns  {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    .reAssignTask{
+      text-align: right;
+      height: 40px;
+      line-height: 40px;
+      background: #eee;
+      padding-right: 10px;
+      a {
+        color: #1890FF;
+        font-style: normal;
+      }
+    }
+  }
+
+  :deep(.van-collapse-item__content) {
+    padding: 0;
+    background: transparent;
+    color: inherit;
+  }
+
+  :deep(.van-field__label) {
+    color: #333;
+    text-align: right;
+  }
+
+  :deep(.van-field__control) {
+    color: #666;
+  }
+
+  .taskAssignedDetail-notData {
+    :deep(.van-empty__image) {
+      width: 80px;
+      height: auto;
+    }
+  }
+
+  .taskAssignedDetail-file {
+    margin: 8px 0;
+
+    .taskAssignedDetail-file-row {
+      padding: 8px 15px;
+      background: #fff;
+      border-top: 1px solid #ebedf0;
+      display: flex;
+      align-items: center;
+
+      &:first-child {
+        border-top: 0;
+      }
+
+      &::after {
+        content: "";
+        display: block;
+        height: 1px;
+        clear: both;
+      }
+    }
+
+    .taskAssignedDetail-file-icon {
+      width: 46px;
+      height: 46px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      overflow: hidden;
+      color: #fff;
+      margin-right: 4px;
+      font-size: 12px;
+    }
+
+    .taskAssignedDetail-file-info {
+      overflow: hidden;
+      padding-left: 8px;
+      flex: 1;
+    }
+
+    .taskAssignedDetail-file-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  .taskAssignedDetail-title {
+    font-size: 14px;
+    font-weight: bold;
+    padding: 20px 0 8px 15px;
+  }
+  .reportApproval-code {
+    padding: 10px 16px;
+    font-weight: bold;
+    color: #444;
+  }
+}

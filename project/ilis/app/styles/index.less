@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "ant-design-vue/dist/reset.css";
+@import "./theme/antdv.less";
+@import "./theme/scrollbar.less";
+@import "./theme/ewei.less";
+
+@import "./utils.less";
+
+/**
+  注意：为什么要写两个重复的 :root？
+  由于 vant 中的主题变量也是在 :root 下声明的，所以在有些情况下会由于优先级的问题无法成功覆盖。
+  通过 :root:root 可以显式地让你所写内容的优先级更高一些，从而确保主题变量的成功覆盖。
+**/
+:root:root {
+  --van-blue: #0066ec;
+  
+  /* Ant Design主题CSS变量 - 用于Tailwind动态颜色 */
+  --colorPrimary: #0066ec;
+  --colorError: #ff4d4f;
+  --colorSuccess: #52c41a;
+  --colorWarning: #faad14;
+  --colorInfo: #1677ff;
+}
+
+@layer components {
+  .screen-card {
+  @apply border border-[#fff] rounded-lg shadow-md overflow-hidden;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
+  }
+}
+

@@ -1,0 +1,99 @@
+.reportDetail {
+  padding-bottom: 64px;
+
+  :deep(.van-empty__description) {
+    word-break: break-word;
+    padding: 0 15px;
+  }
+
+  .reportDetail-baseInfo {
+    margin: 8px 0;
+  }
+
+  .reportDetail-btns {
+    margin: 15px 15px 0 15px;
+    margin-top: 15px;
+    border-top: solid 1px #e2e2e2;
+    padding-top: 15px;
+
+    .van-button {
+      margin-bottom: 8px;
+    }
+  }
+
+  :deep(.van-collapse-item__content) {
+    padding: 0;
+    background: transparent;
+    color: inherit;
+  }
+
+  :deep(.van-field__label) {
+    color: #333;
+    text-align: right;
+  }
+
+  :deep(.van-field__control) {
+    color: #666;
+  }
+
+  .reportDetail-notData {
+    :deep(.van-empty__image) {
+      width: 80px;
+      height: auto;
+    }
+  }
+
+  .reportDetail-file {
+    margin: 8px 0;
+
+    .reportDetail-file-row {
+      padding: 8px 15px;
+      background: #fff;
+      border-top: 1px solid #ebedf0;
+      display: flex;
+      align-items: center;
+
+      &:first-child {
+        border-top: 0;
+      }
+
+      &::after {
+        content: "";
+        display: block;
+        height: 1px;
+        clear: both;
+      }
+    }
+
+    .reportDetail-file-icon {
+      width: 46px;
+      height: 46px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      overflow: hidden;
+      color: #fff;
+      margin-right: 4px;
+      font-size: 12px;
+    }
+
+    .reportDetail-file-info {
+      overflow: hidden;
+      padding-left: 8px;
+      flex: 1;
+    }
+
+    .reportDetail-file-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  .reportDetail-title {
+    font-size: 14px;
+    font-weight: bold;
+    padding: 20px 0 8px 15px;
+  }
+}

@@ -1,0 +1,46 @@
+meta {
+  name: ILIS Server Instance
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/instances/{{code}}
+  body: none
+  auth: none
+}
+
+headers {
+  X-Auth: {{auth}}
+  X-Auth-Nonce: {{nonce}}
+  X-Auth-Sign: {{sign}}
+}
+
+vars:pre-request {
+  code: gfzx
+  auth: ilis
+}
+
+assert {
+  res.status: eq 200
+}
+
+script:pre-request {
+  const cryptoJs = require('crypto-js');
+  
+  const nonce = Date.now();
+  bru.setVar('nonce', nonce);
+  bru.setEnvVar('sign', String(cryptoJs.MD5(`121f42460bc15b2666d84cc6f5de6ed1${nonce}`)));
+}
+
+tests {
+  test('should return dev server', function() {
+    const body = res.getBody();
+    expect(body.name).to.equal('重庆市交通规划和技术发展中心');
+    expect(body.code).to.equal('gfzx');
+    expect(body.server.name).to.equal('dev');
+    expect(body.server.addr).to.equal('http://192.168.2.65:8080');
+  });
+  
+  
+}

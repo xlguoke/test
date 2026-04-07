@@ -1,0 +1,156 @@
+@size16: 16px;
+@size14: 14px;
+@size13: 13px;
+@size12: 12px;
+
+.fieldSampling-wrap {
+  display: flex;
+  flex-direction: column;
+  // width: 100%;
+  // height: calc(100vh - 45px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+
+  .fieldSampling-content {
+    flex: 1;
+    overflow: auto;
+
+    .fieldSampling-box {
+      width: 100%;
+      padding-bottom: 15px;
+      background: #fff;
+
+      .fieldSamplingTag {
+        border-top: 10px solid #f5f5f5;
+        padding-top: 8px;
+      }
+    }
+  }
+
+  .fieldSampling-title {
+    position: relative;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 32px;
+    padding: 5px 30px;
+    box-sizing: border-box;
+
+    &::after {
+      content: '';
+      width: 4px;
+      height: 16px;
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      border-radius: 2px;
+      background: #1E9FFF;
+      transform: translateY(-50%);
+    }
+
+    &.required {
+      &::before {
+        position: absolute;
+        box-sizing: border-box;
+        content: "*";
+        color: red;
+        font-size: 14px;
+        left: 5px;
+        top: 13px;
+      }
+    }
+  }
+
+  .fieldSampling-item {
+    position: relative;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    box-sizing: border-box;
+
+    &:nth-child(n+1) {
+      &::after {
+        position: absolute;
+        box-sizing: border-box;
+        content: ' ';
+        pointer-events: none;
+        left: 16px;
+        bottom: 0;
+        right: 16px;
+        border-bottom: 1px solid #ebedf0;
+        transform: scaleY(.5);
+      }
+    }
+
+    &.required {
+      .fieldSampling-label::before {
+        content: "*";
+        color: red;
+        font-size: 14px;
+      }
+    }
+
+    .fieldSampling-label {
+      width: 100px;
+      font-size: @size14;
+      margin-right: 12px;
+    }
+
+    .fieldSampling-value {
+      flex: 1;
+      font-size: @size14;
+    }
+  }
+
+
+
+  .fieldSampling-btn {
+    cursor: pointer;
+    color: #1E9FFF;
+    font-size: 14px;
+  }
+
+  .file-wrap {
+    padding: 0 15px;
+    box-sizing: border-box;
+  }
+
+  .full-box {
+    width: 100%;
+    display: flex;
+    padding: 0 15px;
+    box-sizing: border-box;
+
+    .half-box {
+      flex: 1;
+      overflow-x: hidden;
+      overflow-y: visible;
+
+      .fieldSampling-item {
+        padding: 5px 0;
+        text-align: right;
+
+        &:nth-child(n+1) {
+          &::after {
+            position: absolute;
+            box-sizing: border-box;
+            content: ' ';
+            pointer-events: none;
+            left: 50%;
+            bottom: 0;
+            width: 100%;
+            border-bottom: 1px solid #ebedf0;
+            transform: translateX(-50%);
+          }
+        }
+      }
+
+      .fieldSampling-label {
+        width: 90px;
+      }
+    }
+  }
+}

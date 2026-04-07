@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <title>重庆市公路水运工程质量检测管理门户</title>
+    <link rel="stylesheet" href="./static/iconfont/iconfont.css" />
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <%- injectScript %>
+
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #_span_jiucuo {
+        display: none;
+      }
+      .loading-box {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100vh;
+        background-color: #fff;
+      }
+    </style>
+
+    
+  </head>
+
+  <body>
+    <div id="app" style="width: 100%;">
+    <div class="loading-box">
+        <img src="./loading.gif" alt="" />
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+    <script
+      id="_jiucuo_"
+      sitecode="5000000041"
+      src="https://zfwzgl.www.gov.cn/exposure/jiucuo.js"
+    ></script>
+  </body>
+
+  <script type="text/javascript" src="https://gov.govwza.cn/dist/aria.js?appid=4580ec4259b35858dce63f7a1d6c1098" id="ariascripts"></script>
+  <script type="text/javascript" src="https://gov.govwza.cn/dist/public/pinyin.min.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://gov.govwza.cn/dist/public/theme/1/css/font.min.css">
+</html>

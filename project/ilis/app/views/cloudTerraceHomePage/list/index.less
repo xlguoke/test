@@ -1,0 +1,252 @@
+@staticPath: "/ilis2/plug-in/feStatic/vueImage";
+
+.bgImg(@name) {
+  background-image: url("@{staticPath}/@{name}");
+  background-repeat: no-repeat;
+}
+
+.sampleScanRecord {
+  .bgImg('platform-home-bg.png');
+  background-size: 100% 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.header_wrap {
+  background-color: #fff;
+  width: 100%;
+  height: 80px;
+  box-shadow: 0px 4px 10px 0px rgba(0, 102, 236, 0.1);
+  // 甘肃畅陇定制样式
+  &.header_wrap_gscl{
+    background-color: #004298;
+    h2 , a{
+      color: #fff !important;
+    }
+  }
+  
+  .content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 32px;
+    height: 100%;
+    position: relative;
+  }
+
+  h2 {
+    font-size: 24px;
+  }
+
+  .rt {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  a {
+    color: #333;
+    font-size: 16px;
+  }
+}
+
+.page_main {
+  height: calc(100vh - 125px);
+  overflow: auto;
+  :deep(.ant-tabs-nav-scroll){
+    text-align: center;
+  }
+
+  :deep(.ant-spin-spinning){
+    position: absolute;
+    top: 80px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255,255,255,0.5);
+    z-index: 100;
+  }
+
+  :deep(.ant-tabs) {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    .ant-tabs-bar {
+      border-bottom: none;
+      margin: 30px 0;
+
+      .ant-tabs-tab {
+        font-size: 16px;
+      }
+
+      .ant-tabs-tab-active {
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+    }
+
+    .ant-tabs-content {
+      flex: 1;
+      height: 0;
+    }
+  }
+}
+
+.body_wrap {
+  margin: 0 auto;
+  padding-top: 20px;
+  width: 1200px;
+  height: 100%;
+  .scrollWrap{
+    display: flex;
+    align-items: center;
+  }
+  .sys_list {
+    width: 100%;
+    padding: 5px;
+    margin-top: 30px;
+    max-height: calc(100% - 40px);
+    overflow-y: auto;
+  }
+
+  .sys_item {
+    position: relative;
+    margin-bottom: 32px;
+    display: inline-block;
+    width: calc(50% - 16px);
+    height: 258px;
+    padding: 32px;
+    box-sizing: border-box;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0px 4px 10px 0px rgba(0, 102, 236, 0.1);
+    overflow: hidden;
+    // 甘肃畅陇定制样式
+    &.sys_item_gscl{
+      height: 164px !important;
+      img{
+        width: 100px !important;
+        height: 100px !important;
+      }
+    }
+
+    &::before{
+      content: '';
+      position: absolute;
+      left: -6%;
+      bottom: -24%;
+      width: 50%;
+      height: 50%;
+      background-color: rgba(188,223,239,0.1);
+      border-radius: 100% 100% 0 100%;
+      z-index: 0;
+      transform: rotate(10deg);
+    }
+
+    &::after{
+      content: '';
+      position: absolute;
+      right: -5%;
+      bottom: -30%;
+      width: 70%;
+      height: 80%;
+      background-color: rgba(188,223,239,0.1);
+      border-radius: 100% 100% 0 100%;
+      z-index: 0;
+      transform: rotate(-10deg);
+    }
+
+    &:nth-child(2n) {
+      margin-left: 32px;
+    }
+
+    .sys_head {
+      display: flex;
+      align-items: center;
+      ;
+
+      img {
+        width: 68px;
+        height: 68px;
+        margin-right: 16px;
+        border-radius: 10px;
+      }
+
+      .sys_name {
+        font-weight: 900;
+        margin-bottom: 5px;
+        font-size: 20px;
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--colorPrimary);
+      }
+
+
+
+      .handle_a {
+        margin-top: 8px;
+        a{
+          display: inline-block;
+          width: 88px;
+          line-height: 28px;
+          border: 1px solid var(--colorPrimary);
+          border-radius: 2px;
+          color: var(--colorPrimary);
+          text-align: center;
+        }
+        a:hover{
+          background-color: #f5f5f5;
+        }
+        a:last-child {
+          margin-left: 16px;
+        }
+      }
+    }
+
+    .sys_descride{
+      position: relative;
+      margin-top: 16px;
+      height: 110px;
+      overflow-y: auto;
+      z-index: 10;
+      font-size: 12px;
+    }
+  }
+
+  .sys_det {
+    border: 1px dashed #ccc;
+    height: 500px;
+    margin-top: 5px;
+    padding: 60px 20px;
+  }
+}
+
+.activate {
+  border-color: #4a8de5 !important;
+  background: #e6f0fd !important;
+}
+
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  /*控制纵向滚动条大小*/
+  height: 4px;
+  /*控制横向滚动条大小*/
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #adadad;
+}

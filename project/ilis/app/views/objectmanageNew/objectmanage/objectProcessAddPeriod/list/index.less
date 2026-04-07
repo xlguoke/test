@@ -1,0 +1,52 @@
+.projectManageList {
+    .projectManageList-btn {
+        padding: 10px 0;
+    }
+
+    .projectManageList-search {
+        input {
+            width: 300px;
+            vertical-align: middle;
+        }
+
+        button{
+            vertical-align: middle;
+        }
+    }
+
+    .projectManageList-percent {
+        width: 80%;
+        height: 8px;
+        border-radius: 4px;
+        background: #ccc;
+        position: relative;
+        vertical-align: middle;
+        display: inline-block;
+
+        .projectManageList-percent-bar {
+            background: #40a9ff;
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 8px;
+            border-radius: 4px;
+
+            &.active {
+                background: #52c41a;
+            }
+        }
+    }
+
+    .ant-table-tbody {
+        .anticon {
+            color: #52c41a;
+            font-size: 14px;
+        }
+    }
+}
+
+.projectManageList-addModal {
+    .ant-checkbox-group {
+        line-height: inherit;
+    }
+}

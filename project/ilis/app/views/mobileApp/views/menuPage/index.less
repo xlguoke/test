@@ -1,0 +1,46 @@
+.menuPage {
+  :deep(.van-search) {
+    padding: 0;
+  }
+
+  .menuPage-main {
+    background: #fff;
+    padding: 15px;
+
+    .menuPage-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+      border-left: solid 4px #154bd0;
+      line-height: 16px;
+      padding-left: 8px;
+    }
+
+    .menuPage-main-list {
+      display: flex;
+      align-items: flex-start;
+      padding-top: 15px;
+      padding-bottom: 5px;
+      flex-wrap: wrap;
+
+      & > div {
+        width: 25%;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+    }
+
+    .menuPage-main-name {
+      font-size: 12px;
+      padding-top: 8px;
+    }
+
+    img {
+      width: 48px;
+      height: 48px;
+    }
+  }
+}

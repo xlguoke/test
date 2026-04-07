@@ -1,0 +1,95 @@
+.standardCuringWarehouseManage {
+  :deep(.van-info) {
+    padding: 2px 5px;
+    right: -5px;
+  }
+
+  .standardCuringWarehouseManage-btn {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 46px;
+    z-index: 10;
+  }
+
+  .standardCuringWarehouseManage-row {
+    .van-col {
+      padding: 10px 0;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #fff;
+      border-bottom: solid 1px #f5f5f5;
+      color: #777;
+
+      .iconfont {
+        margin-right: 4px;
+      }
+    }
+  }
+
+  .standardCuringWarehouseManage-list {
+    padding: 15px;
+
+    .standardCuringWarehouseManage-box {
+      border: solid 1px #e2e2e2;
+      background: #fff;
+      border-radius: 4px;
+      margin-bottom: 15px;
+
+      &.standardCuringWarehouseManage-boxAdd {
+        padding: 10px 15px;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #1989fa;
+      }
+
+      &:first-child {
+        margin-top: 0;
+      }
+
+      .standardCuringWarehouseManage-boxHeader {
+        border-bottom: solid 1px #e2e2e2;
+        padding: 8px 15px;
+
+        .van-col--6 {
+          padding-left: 7.5px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          color: #1989fa;
+        }
+      }
+
+      .standardCuringWarehouseManage-boxBody {
+        color: #888;
+
+        :deep(.van-checkbox__label) {
+          width: 100%;
+        }
+
+        .standardCuringWarehouseManage-period {
+          display: flex;
+
+          & > div {
+            padding: 4px;
+          }
+        }
+
+        & > div {
+          border-top: solid 1px #e2e2e2;
+          padding: 8px 15px;
+          padding-right: 0;
+          font-size: 12px;
+
+          &:first-child {
+            border-top: 0;
+          }
+        }
+      }
+    }
+  }
+}

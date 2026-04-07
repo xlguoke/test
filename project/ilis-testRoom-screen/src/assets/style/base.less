@@ -1,0 +1,150 @@
+@import url("tailwindcss/tailwind.css");
+
+:root {
+  --el-color-primary: @theme_color;
+}
+
+:root:root {
+  // van-cell-group
+  --van-cell-group-inset-padding: 0;
+  --van-blue: #0066ec;
+}
+
+
+p,
+ul,
+li {
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  background-color: @theme_color;
+}
+
+a {
+  font-weight: 500;
+  color: inherit;
+  text-decoration: inherit;
+}
+
+ul,
+li {
+  list-style: none;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow-y: hidden;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 4px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+button:hover {
+  border-color: #646cff;
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+// /**全局滚动条的宽度*/
+// ::-webkit-scrollbar {
+//   width: 5px;
+//   height: 5px;
+//   background-color: #03174A;
+//   border-radius: 5px;
+// }
+
+// /*全局滚动条的滑块*/
+// ::-webkit-scrollbar-thumb {
+//   background-color: #0D397B;
+//   border-radius: 5px;
+// }
+
+// ::-webkit-scrollbar-thumb:hover {
+//   background: #1451ad;
+// }
+
+::-webkit-scrollbar {
+  width: 0;
+}
+
+// ::-webkit-scrollbar {
+//   width: 10px;
+//   background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%);
+// }
+// ::-webkit-scrollbar-thumb {
+//   border-radius: 5px;
+//   background: #0066ec;
+// }
+.card {
+  border: 1px solid #dbe8fa;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.clearfix::after {
+  height: 0;
+  content: "";
+  display: block;
+  clear: both;
+  visibility: hidden;
+}
+
+.fl {
+  float: left;
+}
+
+.fr {
+  float: right;
+}
+
+.font-1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.font-2 {
+  text-overflow: -o-ellipsis-lastline;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; // 显示多行，修改这里的数字即可
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+@font-face {
+  font-family: 'YSFont';
+  src: url('/font/ysyth.ttf');
+}
+
+// 优设标题黑字体
+.font-ys {
+  font-family: 'YSFont';
+  letter-spacing: 0.12em;
+}

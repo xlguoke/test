@@ -1,0 +1,62 @@
+.projectDetail {
+  font-size: 12px;
+  .projectDetail-tab {
+
+    .projectDetail-tab-btn {
+      border-bottom: solid 1px var(--colorSplit);
+
+      a {
+        display: inline-block;
+        padding: 8px 15px;
+        border-bottom: solid 2px transparent;
+        text-decoration: none;
+        color: var(--colorText);
+
+        &.router-link-exact-active.router-link-active{
+          border-color: var(--colorPrimary);
+          color: var(--colorPrimary);
+        }
+      }
+    }
+  }
+}
+.testReport {
+  .testReport-search {
+    margin: 10px 0 4px;
+
+    .testReport-search-all {
+      width: 300px;
+      margin-right: 5px;
+    }
+
+    button {
+      margin-right: 5px;
+    }
+
+    .ant-form-item {
+      margin-bottom: 5px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    .ant-calendar-picker {
+      width: 100%;
+    }
+
+    .ant-form-item-label label {
+      font-size: 12px;
+    }
+  }
+}
+.form-item-span {
+  font-size: 12px;
+  padding-left: 1px;
+}
+#tipsMsg {
+  color: var(--colorSuccess);
+  text-align: right;
+  padding-right: 10px;
+  margin: 4px;
+}

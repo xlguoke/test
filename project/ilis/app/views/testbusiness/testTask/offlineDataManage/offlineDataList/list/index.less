@@ -1,0 +1,65 @@
+.loading-css {
+  height: calc(100vh - 30px);
+  width: calc(100% - 17px);
+  overflow: hidden;
+}
+
+.search-form {
+  .ant-form-item {
+    margin-bottom: 8px;
+    margin-right: 6px;
+  }
+
+  :deep(.ant-calendar-picker) {
+    width: 220px;
+  }
+
+  :deep(.ant-select) {
+    width: 200px;
+  }
+
+  .ant-input-affix-wrapper {
+    width: 260px;
+  }
+
+  .ant-btn {
+    margin-right: 10px;
+  }
+}
+
+.batch-handle {
+  margin-bottom: 4px;
+}
+
+.relation-task {
+  .record-sn {
+    font-size: 12px;
+  }
+}
+
+.data-status {
+  &::before {
+    content: '';
+    display: inline-block;
+    margin-right: 5px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  &.status-10::before {
+    background-color: red;
+  }
+
+  &.status-20::before {
+    background-color: #ffe000;
+  }
+
+  &.status-30::before {
+    background-color: #08bf08;
+  }
+}
+
+:deep(.ant-table-pagination.ant-pagination) {
+  margin-bottom: 0;
+}

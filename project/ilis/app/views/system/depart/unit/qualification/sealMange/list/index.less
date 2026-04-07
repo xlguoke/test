@@ -1,0 +1,35 @@
+.sealMange {
+  display: flex;
+
+  .sealMange-left {
+    flex: 1;
+    padding-right: 16px;
+  }
+
+  .sealMange-handler {
+    width: 4px;
+    cursor: col-resize;
+    border-left: solid 1px #e2e2e2;
+  }
+
+  .sealMange-right {
+    width: 55%;
+    padding-left: 16px;
+  }
+
+  .drag-handler {
+    font-size: 18px;
+    color: #1890ff;
+    cursor: pointer;
+  }
+
+  .ant-table-row {
+    &.target-top>td {
+      border-top: 1px solid #409eff;
+    }
+
+    &.target-bottom>td {
+      border-bottom: 1px solid #409eff;
+    }
+  }
+}

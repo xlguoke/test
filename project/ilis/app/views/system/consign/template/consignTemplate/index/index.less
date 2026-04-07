@@ -1,0 +1,113 @@
+.consignInfoConfig {
+  padding: 16px;
+
+  .vgl-item > div{
+    border: 1px solid #e2e2e2;
+    background-color: #fff;
+  }
+
+  :deep(.vue-grid-item.vue-grid-placeholder) {
+    background: #607d8b;
+    opacity: .2;
+  }
+
+  .consignInfoConfig-btn {
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+    background: #eee;
+    padding: 8px 16px;
+    border: solid 1px #e2e2e2;
+  }
+
+  .consignInfoConfig-wrap {
+    border: solid 1px #e2e2e2;
+    min-height: 480px;
+    padding: 0 8px;
+
+    .ant-form-item {
+      margin-bottom: 0;
+    }
+
+    :deep(.ant-tabs-bar) {
+      padding: 0 8px;
+      margin-bottom: 8px;
+    }
+  }
+
+  .consignInfoConfig-label {
+    text-align: right;
+    background: #f5f5f5;
+    padding: 0 4px;
+    font-size: 12px;
+    height: 32px;
+    line-height: 32px;
+    border-right: solid 1px #d2d2d2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 150px;
+
+    .consignInfoConfig-labelSetting {
+      float: left;
+      position: relative;
+      z-index: 999;
+      cursor: pointer;
+      margin-left: 4px;
+      margin-right: 4px;
+
+      .anticon {
+        font-size: 14px;
+        color: #777;
+      }
+    }
+  }
+
+  :deep(.vue-resizable .consignInfoConfig-row) {
+    .consignInfoConfig-labelSetting {
+      display: block;
+    }
+  }
+
+  .consignInfoConfig-value {
+    height: 32px;
+    flex: 1;
+
+    :deep(.ant-input-number-input),
+    :deep(.ant-input-number),
+    :deep(.ant-input),
+    :deep(.ant-select-selection--single),
+    :deep(.ant-select-selector) {
+      border: 0;
+      height: 30px;
+      box-shadow: none !important;
+      width: 100%;
+    }
+
+    :deep(.ant-input-number-disabled),
+    :deep(.ant-input-disabled) {
+      background: #fff;
+      cursor: inherit;
+
+      .ant-input-number-input {
+        cursor: inherit;
+      }
+    }
+
+    :deep(.ant-select-selection__rendered) {
+      height: 32px;
+      line-height: 32px;
+    }
+
+    :deep(.ant-select-disabled) {
+      .ant-select-selection {
+        cursor: inherit;
+        background: #fff;
+      }
+
+      .ant-select-selection__placeholder,
+      .ant-select-arrow {
+        display: none;
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+@font-face {
+  font-family: "FZXiaoBiaoSong-B05S";
+  src: url("方正小标宋简体.ttf");
+}
+
+@font-face {
+  font-family: "FZHei-B01S";
+  src: url("方正黑体简体.TTF");
+}
+
+@font-face {
+  font-family: "FZKai-Z03S";
+  src: url("方正楷体简体.TTF");
+}
+
+@font-face {
+  font-family: "FZFangSong-Z02S";
+  src: url("方正仿宋简体.TTF");
+}
