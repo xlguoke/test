@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" id="cn.ilis.uhb" version="1.13.34">
+  <name>ILIS ELN</name>
+  <description>.</description>
+  <content src="index.html"/>
+  <access origin="*"/>
+  <allow-intent href="http://*/*"/>
+  <allow-intent href="https://*/*"/>
+  <platform name="android">
+    <edit-config file="AndroidManifest.xml" xmlns:android="http://schemas.android.com/apk/res/android" target="/manifest/application/activity[@android:name='MainActivity']" mode="merge">
+      <activity android:theme="@style/Theme.UdrHandBook.Blue"/>
+    </edit-config>
+    <preference name="android-minSdkVersion" value="26"/>
+    <preference name="scheme" value="http"/>
+    <preference name="AndroidWindowSplashScreenAnimatedIcon" value="src/assets/android/splash/splash-screen.png"/>
+    <icon density="ldpi" src="src/assets/android/icon/drawable-ldpi-icon.png"/>
+    <icon density="mdpi" src="src/assets/android/icon/drawable-mdpi-icon.png"/>
+    <icon density="hdpi" src="src/assets/android/icon/drawable-hdpi-icon.png"/>
+    <icon density="xhdpi" src="src/assets/android/icon/drawable-xhdpi-icon.png"/>
+    <icon density="xxhdpi" src="src/assets/android/icon/drawable-xxhdpi-icon.png"/>
+    <icon density="xxxhdpi" src="src/assets/android/icon/drawable-xxxhdpi-icon.png"/>
+    <config-file parent="/manifest" target="AndroidManifest.xml" xmlns:android="http://schemas.android.com/apk/res/android">
+      <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+    </config-file>
+  </platform>
+</widget>

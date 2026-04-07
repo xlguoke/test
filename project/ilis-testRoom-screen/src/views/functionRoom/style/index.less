@@ -1,0 +1,429 @@
+// 优设标题黑字体
+.font-ys {
+  font-family: 'YSFont';
+  letter-spacing: 2px;
+}
+
+//重写 vant loading 
+.van-loading {
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(5, 29, 65, 0.5);
+  z-index: 500;
+  text-align: center;
+  line-height: 100vh;
+
+  .van-loading__text {
+    color: #a4c1ff;
+    margin-top: .2rem;
+    line-height: 24px;
+    font-size: 0.3rem;
+  }
+}
+
+// 重写 ant-design-vue mesage
+.ant-message {
+  top: 10%;
+
+  .ant-message-notice .ant-message-notice-content {
+    padding: 0.1rem 0.16rem;
+    font-size: 0.28rem;
+    border-radius: 0.08rem;
+
+    .anticon {
+      font-size: 0.28rem;
+    }
+  }
+}
+
+// flex布局
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.flex-h-1 {
+  flex: 1;
+  height: 0;
+}
+
+// 内容容器
+.content-wrap {
+  flex: 1;
+  width: calc(100vw - 1.2rem - 2px);
+  height: 0;
+  box-sizing: border-box;
+  color: #fff;
+}
+
+// 底部按钮
+.foot-btns {
+  margin-top: .2rem;
+  display: flex;
+  user-select: none;
+
+  .btn {
+    flex: 1;
+    line-height: 1.12rem;
+    font-size: 0.64rem;
+    text-align: center;
+    background: rgba(18, 140, 255, 0.08);
+    border: 1px solid #005db4;
+    text-shadow: 2px 0 0.2rem #158eff;
+    cursor: pointer;
+    .font-ys;
+
+    &:active {
+      background: rgba(18, 140, 255, 0.2);
+    }
+
+    &.disabled {
+      opacity: 0.5;
+
+      &:active {
+        background: rgba(18, 140, 255, 0.08);
+      }
+    }
+  }
+
+  .start,
+  .end {
+    position: relative;
+    flex: 2;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 50%;
+      height: 1px;
+      transform: translateX(-50%);
+      background: linear-gradient(to right, transparent, #18f0ff, transparent);
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 50%;
+      height: 1px;
+      transform: translateX(-50%);
+      background: linear-gradient(to right, transparent, #18f0ff, transparent);
+    }
+  }
+
+  .back+.start {
+    margin-left: 0.3rem;
+  }
+}
+
+// 内容按钮容器
+.device-action {
+  display: flex;
+  justify-content: space-around;
+  margin: 0.3rem 0;
+  height: 0.66rem;
+}
+
+// 内容按钮
+.bg-btn {
+  display: inline-block;
+  min-width: 3.2rem;
+  height: 0.66rem;
+  background: url("@/assets/images/btn-bg.svg") 0 0/100% 100%;
+  line-height: 0.66rem;
+  font-size: 0.36rem;
+  text-align: center;
+  .font-ys;
+
+  &.bg-btn-min {
+    min-width: 2.2rem;
+    height: 0.48rem;
+    line-height: 0.48rem;
+    font-size: 0.2rem;
+  }
+}
+
+.no-data {
+  text-align: center;
+  line-height: 0.6rem;
+  font-size: 0.24rem;
+  color: #a4c1ff;
+}
+
+.task-list {
+  color: #568ee3;
+
+  .task-item {
+    position: relative;
+    padding: 0.15rem 0.3rem;
+    margin-bottom: 0.2rem;
+    border: 1px solid #6996db;
+
+    &.active {
+      border-color: #1890ff;
+      box-shadow: inset 0 0 0.15rem #1861ff;
+      background: url(@/assets/images/check.png) no-repeat;
+      background-position: right bottom;
+      background-size: 0.58rem 0.58rem;
+      color: #fff;
+      text-shadow: 2px 1px 5px #1890ff;
+    }
+
+    .sample-name {
+      font-size: 0.36rem;
+    }
+
+    .sample-info {
+      margin-top: .1rem;
+      font-size: 0.24rem;
+
+      .van-col {
+        display: flex;
+      }
+
+      .label {
+        display: inline-block;
+        min-width: 2rem;
+        line-height: 0.36rem;
+        text-align: right;
+      }
+    }
+  }
+}
+
+.param-item {
+  margin-bottom: 10px;
+  padding: 0.18rem 0.4rem;
+  color: #4677c2;
+  box-sizing: border-box;
+
+  &.active {
+    position: relative;
+    background: linear-gradient(to right, transparent, #102849, transparent),
+      url(@/assets/images/sign.png) no-repeat left center/0.26rem 0.26rem;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 1px;
+      width: 100%;
+      background: linear-gradient(to right, transparent, #5d90c2, transparent);
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 1px;
+      width: 100%;
+      background: linear-gradient(to right, transparent, #5d90c2, transparent);
+    }
+
+    span {
+      background-image: linear-gradient(#fff 20%, #0095ff 80%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  }
+
+  &.test {
+    color: #465a79;
+  }
+}
+
+// 数据列表容器
+.data-list-warp {
+  margin: 0.2rem 0;
+  flex: 1;
+  height: 0;
+  background: linear-gradient(138deg, rgba(18, 140, 255, 0.26) 0%, rgba(18, 140, 255, 0) 100%),
+    url(@/assets/images/bg.png);
+  background-size: 100% 100%;
+}
+
+// 数据列表-滚动容器
+.data-list-scroll {
+  padding: 0 0.38rem;
+  height: calc(100% - 1.9rem);
+  overflow-y: auto;
+}
+
+// 数据列表
+.data-list-box {
+  margin-bottom: .1rem;
+  overflow-y: auto;
+  height: 0;
+  flex: 1;
+
+  .data-list-item {
+    position: relative;
+    padding: 0.24rem 0 0.14rem 0.37rem;
+    margin: 0 0.38rem 0.16rem;
+    font-size: 0.18rem;
+    background: #051d41;
+    box-sizing: border-box;
+    border: 2px solid;
+    border-image: linear-gradient(180deg, #18e8ff 0%, #1890ff 100%) 2;
+    box-shadow: inset 0px 0px 15px 0px #0084ff;
+
+    .item-name {
+      letter-spacing: 2px;
+      color: #ffffff;
+      font-size: 0.28rem;
+      margin-bottom: 0.18rem;
+      word-break: break-word;
+      white-space: normal;
+    }
+
+    .van-col {
+      line-height: .3rem;
+    }
+
+    .item-label {
+      display: inline-block;
+      min-width: 1.44rem;
+      text-align: right;
+      color: #D3E6FF;
+    }
+
+    .item-value {
+      margin-left: 0.06rem;
+      display: inline-block;
+      word-break: break-word;
+      white-space: normal;
+      padding-right: 0.06rem;
+    }
+
+    .item-status-icon {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 0.82rem;
+      height: 0.82rem;
+    }
+
+  }
+}
+
+// 到期信息
+.expire-info-warp {
+  padding: 0 0.3rem;
+  margin-bottom: 0.1rem;
+  height: 100%;
+  overflow-y: auto;
+
+  .mt {
+    margin-top: .2rem;
+  }
+
+  // 总量
+  .inventory-total {
+    margin-top: 0.25rem;
+    margin-bottom: 0.3rem;
+    text-align: center;
+    font-family: "YSFont";
+    letter-spacing: 2px;
+
+    .num-box {
+      font-size: 0.35rem;
+      display: inline-block;
+      position: relative;
+
+      .num {
+        font-size: 0.64rem;
+        text-shadow: 0px 0px 10px #00c8ff;
+        vertical-align: middle;
+        display: inline-block;
+        margin-bottom: 4px;
+      }
+    }
+
+    .num-detail {
+      font-size: 0.24rem;
+      background: linear-gradient(180deg, #2cf1ff 0%, #2c8bff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: #2c8bff;
+      position: absolute;
+      right: -2.3rem;
+      top: 46%;
+      transform: translateY(-50%);
+      padding: 0.16rem;
+    }
+
+    .update-time {
+      font-size: 0.24rem;
+      text-shadow: 0px 0px 4px #50c9f8;
+
+      .van-icon {
+        margin-right: 0.06rem;
+        color: #bceaff;
+        box-shadow: 0px 0px 2px 0px #0066ec;
+      }
+    }
+  }
+
+  // 周期统计
+  .invantory-info-wrap {
+    display: flex;
+    justify-content: space-between;
+
+    .inventory-info-item {
+      width: 32%;
+    }
+  }
+}
+
+// 详情tab
+.my-tab {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  border-bottom: 1px solid #0e124b;
+
+  .it {
+    width: 50%;
+    height: 1rem;
+    line-height: 1rem;
+    text-align: center;
+    font-size: 0.35rem;
+  }
+
+  .active {
+    color: #18e7ff;
+  }
+
+  .border_icon {
+    width: 4rem;
+    height: 2px;
+    opacity: 1;
+    background: linear-gradient(270deg,
+        rgba(24, 231, 255, 0) 0%,
+        #18e7ff 47%,
+        rgba(24, 231, 255, 0) 100%);
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .data-list-box .data-list-item .van-col {
+    line-height: initial;
+  }
+}

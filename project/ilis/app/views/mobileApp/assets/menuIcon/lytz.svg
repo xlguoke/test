@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="96px" height="96px" viewBox="0 0 96 96" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>留样台账</title>
+    <defs>
+        <linearGradient x1="0%" y1="0%" x2="100%" y2="100%" id="linearGradient-1">
+            <stop stop-color="#97ABFF" offset="0%"></stop>
+            <stop stop-color="#123597" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="菜单页" transform="translate(-76.000000, -1432.000000)">
+            <g id="编组-23" transform="translate(76.000000, 1432.000000)">
+                <g id="编组" transform="translate(0.000000, 0.000000)">
+                    <g id="设备外出管理" fill="url(#linearGradient-1)">
+                        <rect id="矩形备份-5" x="0" y="0" width="96" height="96" rx="24"></rect>
+                    </g>
+                    <g id="编组-2" transform="translate(31.000000, 24.000000)">
+                        <g id="编组">
+                            <path d="M27,4.5 L29.7,4.5 C32.6823376,4.5 35.1,7.03011176 35.1,10.1511628 C35.1,13.5859419 35.1,16.5022199 35.1,18.9 M12.15,45 C10.2167388,45 7.96673828,45 5.4,45 C2.41766235,45 0,42.4698882 0,39.3488372 L0,10.1511628 C0,7.03011176 2.41766235,4.5 5.4,4.5 L8.5,4.5" id="形状" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"></path>
+                            <rect id="矩形" fill="#FFFFFF" x="6.3" y="17.1" width="17.1" height="4.5" rx="2.25"></rect>
+                            <rect id="矩形备份-8" fill="#FFFFFF" x="6.3" y="26.6" width="8.1" height="4.5" rx="2.25"></rect>
+                            <rect id="矩形" stroke="#FFFFFF" stroke-width="4.5" x="9" y="0" width="17.1" height="9" rx="3.6"></rect>
+                        </g>
+                        <g id="留样处置" transform="translate(14.400000, 22.500000)" fill="#FFFFFF" fill-rule="nonzero">
+                            <path d="M13.95,0 C6.25833495,0 0,6.25833495 0,13.95 C0,21.641665 6.25833495,27.9 13.95,27.9 C21.641665,27.9 27.9,21.641665 27.9,13.95 C27.9,6.25833495 21.641665,0 13.95,0 Z M13.95,24.3 C8.24370337,24.3 3.6,19.6563017 3.6,13.95 C3.6,8.24370337 8.24369832,3.6 13.95,3.6 C19.6562966,3.6 24.3,8.24369832 24.3,13.95 C24.3,19.6562966 19.6563017,24.3 13.95,24.3 L13.95,24.3 Z" id="形状"></path>
+                        </g>
+                        <text id="留" font-family="jiangchengyuanti700W, 江城圆体" font-size="14.4" font-weight="bold" fill="#FFFFFF">
+                            <tspan x="21.6" y="41.8">留</tspan>
+                        </text>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

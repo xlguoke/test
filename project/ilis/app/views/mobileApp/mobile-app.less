@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// 定制vant样式
+:root:root {
+  --van-blue: #154bd0;
+  --van-nav-bar-height: 52px;
+  --van-nav-bar-background: var(--van-blue);
+  --van-nav-bar-title-text-color: #fff;
+  --van-nav-bar-icon-color: #fff;
+  --van-tag-line-height: 22px;
+  --van-collapse-item-content-background: #f5f5f5;
+}
+
+.van-nav-bar__right {
+  color: #fff;
+}
+
+// 全局样式
+body,
+dl,
+dd,
+ul,
+ol,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+pre,
+form,
+input,
+textarea,
+p,
+hr,
+thead,
+tbody,
+tfoot,
+div,
+th,
+td {
+  font-family: "Microsoft YaHei";
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+  color: var(--van-blue);
+}
+
+html {
+  -ms-text-size-adjust: none;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+  font-family: "Microsoft YaHei";
+}
+
+body {
+  color: #333;
+  font-family: "Microsoft YaHei";
+  font-size: 14px;
+  line-height: 22px;
+  background: #f5f5f5;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: "Microsoft YaHei";
+}
+
+b,
+strong {
+  font-weight: bold;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+img {
+  border: 0 none;
+  width: auto\9;
+  max-width: 100%;
+  vertical-align: top;
+  height: auto;
+}
+
+.clearfix {
+  zoom: 1;
+}
+
+.clearfix:before {
+  clear: both;
+  height: 0;
+  width: 0;
+  content: "";
+  display: table;
+}
+
+.clearfix:after {
+  clear: both;
+  height: 0;
+  width: 0;
+  content: "";
+  display: table;
+}
+
+.textOverflow {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.textOverflow2 {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+}
+
+.blue {
+  color: var(--van-blue);
+}
+
+.green {
+  color: green;
+}
+
+.red {
+  color: red;
+}
+
+.empty {
+  opacity: 0.55;
+  color: #757575;
+}

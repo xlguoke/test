@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="750px" height="508px" viewBox="0 0 750 508" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>路径 2</title>
+    <defs>
+        <linearGradient x1="51.2826169%" y1="0%" x2="51.2826169%" y2="100%" id="linearGradient-1">
+            <stop stop-color="#3770FF" offset="0%"></stop>
+            <stop stop-color="#154BD0" offset="100%"></stop>
+        </linearGradient>
+        <path d="M0,0 L750,0 L750,488.5 C696.536493,503.142647 647.536493,506.642647 603,499 C536.195261,487.536029 494.5,456.5 405,466 C326.460424,474.336603 270.25,507.5 167,507.5 C98.1666667,507.5 42.5,497.666667 0,478 L0,0 Z" id="path-2"></path>
+    </defs>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="路径-2">
+            <mask id="mask-3" fill="white">
+                <use xlink:href="#path-2"></use>
+            </mask>
+            <use id="蒙版" fill="url(#linearGradient-1)" xlink:href="#path-2"></use>
+            <path d="M0,516.5 C68.6666667,482.833333 133.333333,466 194,466 C285,466 458,516.5 508,516.5 C541.333333,516.5 622,499.666667 750,466 L750,572.5 L0,516.5 Z" fill="#FFFFFF" opacity="0.200000003" mask="url(#mask-3)"></path>
+            <path d="M-1.8189894e-12,436.5 C33,436.5 79.5,460.333333 139.5,508 C229.5,579.5 340,527.5 401,508 C462,488.5 539,466 608.5,466 C654.833333,466 702,473.5 750,488.5 L750,555.5 L-1.8189894e-12,572.5 L-1.8189894e-12,436.5 Z" id="路径-3" fill="#FFFFFF" opacity="0.300000012" mask="url(#mask-3)"></path>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,52 @@
+//body {
+//    background: green;
+//}
+//
+//h1; h2 {
+//    font-weight: normal;
+//}
+//ul {
+//    list-style-type: none;
+//    padding: 0;
+//}
+//a {
+//    color: #42b983;
+//}
+
+// 第二种
+.body-box {
+  .search-header {
+    padding: 8px 15px;
+  }
+  .body-box-header {
+    // background:#ededed;
+  }
+  .body-box-content {
+    height: calc(100% - 54px);
+    .content-left {
+      overflow: auto;
+      height: calc(100% - 54px);
+      position: fixed;
+      left: 0;
+      // background: #fff;
+      bottom: -2px;
+      width: 320px;
+    }
+    .content-right {
+      // background: #ededed;
+      //margin-left: 320px;
+      padding-left:15px;
+      height: calc(100% - 54px);
+      position: fixed;
+      right: 0;
+      left: 320px;
+      &-table {
+        // background: #fff;
+        height: 100%;
+        overflow: auto;
+
+      }
+    }
+  }
+}
+

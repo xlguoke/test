@@ -1,0 +1,52 @@
+.reviewApprovalOpinionsList {
+  padding: 15px 15px 0 15px;
+
+  .reviewApprovalOpinionsList-notData {
+    :deep(.van-empty__image) {
+      width: 80px;
+      height: auto;
+    }
+  }
+
+  .reviewApprovalOpinionsList-box {
+    border: solid 1px #e2e2e2;
+    background: #fff;
+    border-radius: 2px;
+    margin-bottom: 15px;
+
+    &.reviewApprovalOpinionsList-boxAdd {
+      padding: 10px 15px;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #1989fa;
+    }
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    .reviewApprovalOpinionsList-boxHeader {
+      border-bottom: solid 1px #e2e2e2;
+      padding: 12px 15px;
+
+      .van-col--8 {
+        padding-left: 7.5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #1989fa;
+      }
+    }
+
+    .reviewApprovalOpinionsList-boxBody {
+      padding: 12px 15px;
+      color: #888;
+
+      & > div {
+        display: flex;
+      }
+    }
+  }
+}

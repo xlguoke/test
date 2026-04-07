@@ -1,0 +1,60 @@
+.sampleScanRecord {
+  .hitek-form-layout {
+    margin-bottom: 15px;
+  }
+
+  .sampleScanRecord-search {
+    margin-bottom: 10px;
+    padding-left: 10px;
+  }
+
+  :deep(.ant-table) {
+    margin-top: 15px;
+  }
+  .ant-table-fixed-right {
+    box-shadow: -6px 0 6px -7px rgba(0, 0, 0, 0.15);
+  }
+  .ant-pagination{
+    margin-bottom: 0;
+  }
+}
+.hitek-form-layout-label {
+  width: 100px !important;
+}
+
+.cell-ellipsis {
+  max-height: 36px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.table-draggable-handle {
+  height: 100% !important;
+  left: auto !important;
+  right: -5px;
+  cursor: col-resize;
+  touch-action: none;
+  border: none;
+  position: absolute;
+  transform: none !important;
+  bottom: 0;
+}
+.resize-table-th {
+  position: relative;
+  .vdr {
+    width: 9px !important;
+    opacity: 0;
+    transition: 0.1s;
+    border-left: 1px dashed #ccc;
+    border-right: 1px dashed #ccc;
+    cursor: col-resize !important;
+  }
+  .ant-table-column-title {
+    user-select: none;
+  }
+}
+.ant-table-thead:hover .vdr {
+  opacity: 1;
+}

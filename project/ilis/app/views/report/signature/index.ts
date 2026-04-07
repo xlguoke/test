@@ -1,0 +1,43 @@
+export interface IReportSignature {
+  sseEmitter: null
+  reportId: '402882c19a51ed1c019a528051864367'
+  reportNumber: 'BG-20251105-1-1'
+  reportType: 'formal'
+  consignId: '402882c19a51ed1c019a527e3d306100'
+  taskId: '402882c19a51ed1c019a527edce2035f'
+  testRecordCode: 'JL-20251105-1-1'
+  sampleName: '土样'
+  testObjectCode: 'YP-1、T-SZJC-HSL（HGF）-T(JTG 3430-2020)-53'
+  testTaskCode: 'RW-SZJC-0327'
+  signType: null
+  signDate: 1762272000000
+  paramName: '含水率,回弹模量'
+  consignCode: 'WT-1-SZJC-262'
+  projectName: '重庆渝蓉高速公路有限公司独柱墩检测项目-测试'
+  consignUnitName: '0328结算零星任务1123-测试'
+  standard: '111111'
+  projectPartAndUse: ''
+  sealDate: null
+  authCode: null
+  quaSealNames: null
+  crossSealNames: null
+  crossNum: 42
+  eleNum: 7
+  signUserName: null
+  eleStampAuditStatus: '00'
+  reportFiles: null
+  fileCount: 1
+  attachmentMap: null
+  reportIds: null
+  reportPicSignVersionMap: null
+  reportEleSignVersionMap: null
+  quaLocations: null
+  message: null
+  reportQualifications: '市政检测;测试资质;质监CAL-悬停;质监章123;资质--测试印章提醒'
+  reportQualificationIds: '297e85c295a337270195a81dbe65428a;2c91208193b9cba00193ba2c71140003;2c939b5f7dfed7ff017e0e2a9b701549;2c939b5f7dfed7ff017e0e2b1e28154a;402882c195a1d4450195a2263f08056c'
+  reportSeals: 'T1;T2;T3;TEST1;公路工程-综合甲级;公路桥隧专项;市政检测;报告专用章;检验检测专用章;测试印章;测试印章1111;质监CAL（个人签名）;质监CMA;质监章（企业印章）'
+  reportSealIds: '2c91208193b9cba00193ba2cc0cb0004;2c9284d08f51e270018f6718a01c3003;2c939b5f7dfed7ff017e0e2a9b701549;2c939b5f7dfed7ff017e0e2b1e28154a;2c939b5f7dfed7ff017e0e2b8234154e;2c939b5f7e4e1fb1017e563039b71832;40282f82933d20c601933d3f85020000;402882c18a415bc6018a44374084085c;402882c18ba8c060018ba8d70063076e;402882c18fe613e4018fe714fb84011a;4028b2f490068ce4019006900a220000;4028b2f490068ce40190069056500003;4028b2f49665bff70196664645d9001a;4867ab88abc944699ad4c3e90904d579'
+  processId: null
+  reportFileId: null
+  projectAcceptor: ''
+}

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="initial-scale=1,user-scalable=no,maxinum-scale=1,minimum-scale=1,width=device-width,height=device-height">
+  <meta content="telephone=no" name="format-detection">
+  <meta name="applicable-device" content="mobile">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="format-detection" content="telephone=no,email=no">
+  <title>海特智慧试验室 - 智慧温湿度系统</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      color: #333;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    .main {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      padding-top: 88px;
+      display: none;
+    }
+
+    .main-title {
+      font-size: 18px;
+      letter-spacing: 1px;
+    }
+
+    .main-code {
+      height: 38px;
+      padding: 0 8px;
+      margin-top: 32px;
+      border-radius: 4px;
+      border: solid 1px #e2e2e2;
+      width: 80%;
+      outline: 0;
+      text-align: center;
+    }
+
+    .main-btn {
+      border: 0;
+      width: 80%;
+      padding: 12px 0;
+      margin-top: 16px;
+      border-radius: 4px;
+      background: #0269ed;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="main" id="main">
+    <img src="./assets/logo.svg" width="120px" />
+    <p class="main-title">海特智慧试验室</p>
+    <input id="unitCode" class="main-code" type="text" placeholder="请输入单位编码" />
+    <button class="main-btn" onclick="getServer();">确定</button>
+  </div>
+  <script>
+    init();
+
+    function getServer() {
+      var code = unitCode.value;
+
+      if (!code) {
+        alert("请输入单位编码！");
+        return;
+      }
+
+      localStorage.setItem("unitCode", code);
+      init();
+    }
+
+    function init() {
+      var unitCode = localStorage.getItem("unitCode");
+
+      if (!unitCode) {
+        main.style.display = "flex";
+        return;
+      }
+
+      window.location.replace("http://192.168.2.65/-/iot-app/index.html?inAndroid=1&unitCode=" + unitCode);
+    }
+  </script>
+</body>
+</html>

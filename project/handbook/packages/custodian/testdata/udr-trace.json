@@ -1,0 +1,150 @@
+{
+  "logs": {
+    "物理性能": [
+      {
+        "inputType": 1,
+        "newVal": "有",
+        "oldVal": "无",
+        "opCatag": 2,
+        "opTime": "2024-09-29 10:13:19",
+        "opType": 1,
+        "target": "P20:R20",
+        "userId": "1",
+        "userName": "测试用户1"
+      },
+      {
+        "inputType": 1,
+        "newVal": "有",
+        "opCatag": 1,
+        "opTime": "2024-09-29 10:13:21",
+        "opType": 1,
+        "target": "P21:R21",
+        "userId": "1",
+        "userName": "测试用户1"
+      },
+      {
+        "inputType": 1,
+        "newVal": "无裂缝无弯曲",
+        "opCatag": 1,
+        "opTime": "2024-09-29 10:13:34",
+        "opType": 1,
+        "target": "P32:X32",
+        "userId": "1",
+        "userName": "测试用户1"
+      }
+    ],
+    "比表面积、试料层体积": [
+      {
+        "inputType": 2,
+        "newVal": "1",
+        "opCatag": 1,
+        "opTime": "2024-09-29 10:12:32",
+        "opType": 1,
+        "target": "A2:C2",
+        "userId": "1",
+        "userName": "测试用户1"
+      },
+      {
+        "inputType": 2,
+        "newVal": "3",
+        "opCatag": 1,
+        "opTime": "2024-09-29 10:12:35",
+        "opType": 1,
+        "target": "A3:C3",
+        "userId": "1",
+        "userName": "测试用户1"
+      },
+      {
+        "inputType": 2,
+        "newVal": "2",
+        "opCatag": 1,
+        "opTime": "2024-09-29 10:12:36",
+        "opType": 1,
+        "target": "D2:I2",
+        "userId": "1",
+        "userName": "测试用户1"
+      },
+      {
+        "inputType": 2,
+        "newVal": "1",
+        "oldVal": "-0.147",
+        "opCatag": 2,
+        "opTime": "2024-09-29 10:12:42",
+        "opType": 1,
+        "target": "J11:M11",
+        "userId": "1",
+        "userName": "测试用户1"
+      },
+      {
+        "inputType": 2,
+        "oldVal": "1",
+        "opCatag": 0,
+        "opTime": "2024-09-29 10:12:47",
+        "opType": 1,
+        "target": "J11:M11",
+        "userId": "1",
+        "userName": "测试用户1"
+      },
+      {
+        "inputType": 2,
+        "newVal": "1",
+        "opCatag": 1,
+        "opTime": "2024-09-29 10:12:57",
+        "opType": 1,
+        "subSheetName": "表尾",
+        "target": "C1:E1",
+        "userId": "1",
+        "userName": "测试用户1"
+      },
+      {
+        "inputType": 2,
+        "newVal": "2",
+        "opCatag": 1,
+        "opTime": "2024-09-29 10:12:58",
+        "opType": 1,
+        "subSheetName": "表尾",
+        "target": "H1:J1",
+        "userId": "1",
+        "userName": "测试用户1"
+      },
+      {
+        "inputType": 2,
+        "newVal": "3",
+        "opCatag": 1,
+        "opTime": "2024-09-29 10:12:59",
+        "opType": 1,
+        "subSheetName": "表尾",
+        "target": "M1:O1",
+        "userId": "1",
+        "userName": "测试用户1"
+      }
+    ],
+    "胶砂强度": [
+      {
+        "inputType": 1,
+        "memo": "NewButton.11(checkbox)",
+        "newVal": "1",
+        "oldVal": "0",
+        "opCatag": 2,
+        "opTime": "2024-09-29 10:13:57",
+        "opType": 9,
+        "target": "单独打印3d资料",
+        "userId": "1",
+        "userName": "测试用户1"
+      },
+      {
+        "inputType": 1,
+        "memo": "NewButton.10(checkbox)",
+        "newVal": "1",
+        "oldVal": "0",
+        "opCatag": 2,
+        "opTime": "2024-09-29 10:13:59",
+        "opType": 9,
+        "target": "单独打印28d资料",
+        "userId": "1",
+        "userName": "测试用户1"
+      }
+    ]
+  },
+  "version": "1.0"
+}

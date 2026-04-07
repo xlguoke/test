@@ -1,0 +1,48 @@
+.van-tabs.van-tabs--line {
+  margin-top: .1rem;
+  flex: 1;
+  height: 0;
+
+  .van-tabs__wrap {
+    height: 0.6rem;
+    border-bottom: 1px solid #1163B6;
+  }
+
+  .van-tabs__nav {
+    background-color: transparent;
+  }
+
+  .van-tab {
+    margin-right: 1rem;
+    font-family: 'YSFont';
+    letter-spacing: 2px;
+    font-size: .36rem;
+    font-weight: 400;
+    line-height: .36rem;
+    color: #4882E5;
+  }
+
+  .van-tab--active {
+    color: #fff;
+    text-shadow: 0px 0px 9px #158EFF;
+  }
+
+  .van-tabs__line {
+    width: 1rem;
+  }
+
+  .van-tabs__content {
+    height: calc(100% - 0.6rem);
+    width: 100%;
+
+    .van-tab__panel {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .van-tab__panel-wrapper--inactive {
+      height: 100%;
+    }
+  }
+}

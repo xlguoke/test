@@ -1,0 +1,412 @@
+@import "./styleConfig.less";
+
+// 全局样式
+body,
+dl,
+dd,
+ul,
+ol,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+pre,
+form,
+input,
+textarea,
+p,
+hr,
+thead,
+tbody,
+tfoot,
+th,
+td {
+  margin: 0;
+  padding: 0;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+}
+
+html {
+  -ms-text-size-adjust: none;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+  font-family: "Microsoft YaHei";
+}
+
+body {
+  font-size: 12px;
+  color: #151515;
+  font-family: "Microsoft YaHei";
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family: "Microsoft YaHei";
+}
+
+b,
+strong {
+  font-weight: bold;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+img {
+  border: 0 none;
+  width: auto\9;
+  max-width: 100%;
+  vertical-align: top;
+  height: auto;
+}
+
+button,
+input,
+select,
+textarea {
+  font-size: 100%;
+  margin: 0;
+  vertical-align: baseline;
+}
+
+button,
+html input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+  -webkit-appearance: button;
+  cursor: pointer;
+}
+
+button[disabled],
+input[disabled] {
+  cursor: default;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  box-sizing: border-box;
+  padding: 0;
+}
+
+input[type="search"] {
+  -webkit-appearance: textfield;
+  -moz-box-sizing: content-box;
+  -webkit-box-sizing: content-box;
+  box-sizing: content-box;
+}
+
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+input:focus {
+  outline: none;
+}
+
+select[size],
+select[multiple],
+select[size][multiple] {
+  border: 1px solid #aaa;
+  padding: 0;
+}
+
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+main,
+nav,
+section,
+summary {
+  display: block;
+}
+
+audio,
+canvas,
+video,
+progress {
+  display: inline-block;
+}
+
+body {
+  background: #fff;
+}
+
+input::-webkit-input-speech-button {
+  display: none;
+}
+
+button,
+input,
+textarea {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+/**
+自定义样式
+**/
+.hitek-add-modal {
+  .ant-modal-body {
+    max-height: 450px;
+    overflow-y: auto;
+    min-height: 300px;
+  }
+}
+
+.hitek-height-full {
+  height: 100%;
+}
+
+// .hitek-tableRow-active {
+//   background-color: #e6f7ff !important;
+// }
+
+// 输入框只读央视
+.readonlyCls {
+  //background: white !important;
+  color: #000000a6 !important;
+  cursor: unset !important;
+}
+
+.clearfix {
+  zoom: 1;
+}
+
+.clearfix:before {
+  clear: both;
+  height: 0;
+  width: 0;
+  content: "";
+  display: table;
+}
+
+.clearfix:after {
+  clear: both;
+  height: 0;
+  width: 0;
+  content: "";
+  display: table;
+}
+
+.rolldate-container .rolldate-panel {
+  font-size: 12px;
+}
+
+.rolldate-container header {
+  font-size: 14px;
+}
+
+.rolldate-container .rolldate-btn {
+  font-size: 14px;
+}
+
+// 解决tree组件需要点击三角形才可展开
+.common-tree-clickRow.ant-tree {
+  .ant-tree-treenode-disabled {
+    position: relative;
+
+    .ant-tree-switcher {
+      position: absolute;
+      width: 100%;
+      left: 0;
+      top: 7px;
+      z-index: 1;
+      text-align: left;
+      padding-left: 7px;
+    }
+
+    .ant-tree-node-content-wrapper {
+      margin-left: 24px;
+    }
+  }
+}
+
+.hitek-form-lable {
+  // color: #000000d9;
+
+  &:before {
+    display: inline-block;
+    margin-right: 4px;
+    content: "*";
+    font-family: SimSun;
+    line-height: 1;
+    font-size: 14px;
+    color: var(--colorError);
+  }
+
+  &:after {
+    content: ": ";
+    padding-right: 3px;
+    padding-left: 1px;
+    // color: rgba(0, 0, 0, 0.85);
+  }
+}
+
+.toolBtn-bar {
+  margin-left: 8px;
+}
+
+// 可拖拽的modal样式
+.canDrag-modal {
+  .ant-modal {
+    padding-bottom: 0;
+  }
+
+  .ant-modal-header {
+    cursor: move;
+  }
+}
+
+
+// .light-row {
+//   background-color: #fff;
+// }
+
+// .dark-row {
+//   background-color: #fafafa;
+// }
+
+// 表单布局
+.hitek-form-layout {
+  .hitek-form-layout-required {
+    color: red;
+    margin-right: 4px;
+    vertical-align: middle;
+    font-weight: bold;
+    // &:before {
+    //display: inline-block;
+    //margin-right: 4px;
+    //content: "*";
+    //font-family: SimSun;
+    //line-height: 1;
+    //font-size: 14px;
+    //color: #f5222d;
+    // }
+  }
+
+  .hitek-form-layout-label {
+    float: left;
+    width: 100px;
+    padding-right: 2px;
+    line-height: 28px;
+    text-align: right;
+    font-size: 12px;
+    // color: rgba(0, 0, 0, 0.85);
+
+    &::after {
+      content: ": ";
+      padding-right: 3px;
+      padding-left: 1px;
+      // color: rgba(0, 0, 0, 0.85);
+    }
+  }
+
+  .hitek-form-layout-con {
+    overflow: hidden;
+
+    .ant-select,
+    .ant-input {
+      width: 100%;
+    }
+  }
+
+  &::after {
+    clear: both;
+  }
+}
+
+.hitek-tooltip {
+  .ant-tooltip-arrow::before {
+    background: #40a9ff;
+  }
+
+  .ant-tooltip-inner {
+    background: #40a9ff;
+    font-size: 12px;
+  }
+}
+
+.anticon {
+  svg {
+    font-size: inherit;
+  }
+}
+
+.p16 {
+  padding: 16px;
+}
+
+.mt16 {
+  margin-top: 16px;
+}
+
+.mr16 {
+  margin-right: 16px;
+}
+
+.ml16 {
+  margin-left: 16px;
+}
+
+.mb16 {
+  margin-bottom: 16px;
+}
+
+.mt8 {
+  margin-top: 8px;
+}
+
+.mr8 {
+  margin-right: 8px;
+}
+
+.ml8 {
+  margin-left: 8px;
+}
+
+.mb8 {
+  margin-bottom: 8px;
+}
+
+.f12 {
+  font-size: 12px;
+}
+
+
+.ht-page-title {
+  margin: 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ht-page-title::before {
+  content: '';
+  display: inline-block;
+  margin-top: -2px;
+  width: 4px;
+  height: 14px;
+  background-color: var(--colorPrimary);
+  margin-right: 6px;
+  vertical-align: middle;
+  border-top-right-radius: 2px;
+  border-bottom-right-radius: 2px;
+}

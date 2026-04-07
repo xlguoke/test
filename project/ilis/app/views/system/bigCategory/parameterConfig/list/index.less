@@ -1,0 +1,32 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+.require label::before{
+    display: inline-block;
+    margin-right: 4px;
+    color: #f5222d;
+    font-size: 14px;
+    font-family: SimSun,sans-serif;
+    line-height: 1;
+    content: "*";
+}
+.from-box{
+    padding: 20px;
+    .tree{
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #d9d9d9;
+        border-radius: 4px;
+        padding-right: 20px;
+    }
+    .empty{
+        font-size: 12px;
+        line-height: 30px;
+        height: 30px;
+        color: rgba(0,0,0,.85);
+        border: 1px solid #d9d9d9;
+        border-radius: 4px;
+        padding-left:8px
+    }
+}

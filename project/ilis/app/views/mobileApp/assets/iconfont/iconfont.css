@@ -1,0 +1,215 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 2073942 */
+  src: url('iconfont.woff2?t=1634116887960') format('woff2'),
+       url('iconfont.woff?t=1634116887960') format('woff'),
+       url('iconfont.ttf?t=1634116887960') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.iconfont-edit:before {
+  content: "\e65c";
+}
+
+.iconfont-table:before {
+  content: "\e6da";
+}
+
+.iconfont-xiazai:before {
+  content: "\e854";
+}
+
+.iconfont-xiazaiqudong:before {
+  content: "\e64d";
+}
+
+.iconfont-quanping:before {
+  content: "\e648";
+}
+
+.iconfont-yanse-zhengchang3beifen:before {
+  content: "\e63b";
+}
+
+.iconfont-neishenbuhegegaishanliucheng:before {
+  content: "\e601";
+}
+
+.iconfont-fenpeipeizhi:before {
+  content: "\e751";
+}
+
+.iconfont-buhege:before {
+  content: "\e7cd";
+}
+
+.iconfont-shiyan:before {
+  content: "\e642";
+}
+
+.iconfont-churuku:before {
+  content: "\e73b";
+}
+
+.iconfont-shikuaiquyang:before {
+  content: "\e654";
+}
+
+.iconfont-weiwaijihua:before {
+  content: "\e6f4";
+}
+
+.iconfont-biaoyangshi:before {
+  content: "\e742";
+}
+
+.iconfont-ziyuan72:before {
+  content: "\e623";
+}
+
+.iconfont-img3_liuyangchuli:before {
+  content: "\e606";
+}
+
+.iconfont-shuaxin:before {
+  content: "\e610";
+}
+
+.iconfont-wendu2:before {
+  content: "\e7c3";
+}
+
+.iconfont-shidu:before {
+  content: "\e6e3";
+}
+
+.iconfont-wendu-sheshidu:before {
+  content: "\e663";
+}
+
+.iconfont-wendu:before {
+  content: "\e605";
+}
+
+.iconfont-wendu1:before {
+  content: "\e651";
+}
+
+.iconfont-ruku:before {
+  content: "\e698";
+}
+
+.iconfont-dingwei:before {
+  content: "\e62e";
+}
+
+.iconfont-shouquan:before {
+  content: "\e600";
+}
+
+.iconfont-shijiguanlixuanzhong:before {
+  content: "\e608";
+}
+
+.iconfont-company:before {
+  content: "\e688";
+}
+
+.iconfont-circulation:before {
+  content: "\e603";
+}
+
+.iconfont-wenjian:before {
+  content: "\e6b4";
+}
+
+.iconfont-useRecord:before {
+  content: "\e63c";
+}
+
+.iconfont-repairRecord:before {
+  content: "\e683";
+}
+
+.iconfont-calibrationRecord:before {
+  content: "\e63e";
+}
+
+.iconfont-more:before {
+  content: "\e785";
+}
+
+.iconfont-checkRecord:before {
+  content: "\e61d";
+}
+
+.iconfont-maintainRecord:before {
+  content: "\e629";
+}
+
+.iconfont-bindWechat:before {
+  content: "\e62b";
+}
+
+.iconfont-sort:before {
+  content: "\e63a";
+}
+
+.iconfont-scan:before {
+  content: "\e66d";
+}
+
+.iconfont-search:before {
+  content: "\e653";
+}
+
+.iconfont-bind:before {
+  content: "\e706";
+}
+
+.iconfont-notice:before {
+  content: "\e60a";
+}
+
+.iconfont-equipment:before {
+  content: "\e604";
+}
+
+.iconfont-warehouseOut:before {
+  content: "\e65b";
+}
+
+.iconfont-examine:before {
+  content: "\e61c";
+}
+
+.iconfont-approval:before {
+  content: "\e61b";
+}
+
+.iconfont-wechat:before {
+  content: "\e61e";
+}
+
+.iconfont-verificationCode:before {
+  content: "\e656";
+}
+
+.iconfont-password:before {
+  content: "\e66c";
+}
+
+.iconfont-userName:before {
+  content: "\e7c8";
+}
+
+.iconfont-create:before {
+  content: "\e68a";
+}
+

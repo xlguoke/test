@@ -1,0 +1,139 @@
+.equipmentDetail {
+  .equipmentDetail-notData {
+   :deep(.van-empty__image) {
+     width: 80px;
+     height: auto;
+   } 
+  }
+
+  .equipmentDetail-list {
+    padding: 15px 15px 0 15px;
+  
+    .equipmentDetail-list-box {
+      border: solid 1px #e2e2e2;
+      background: #fff;
+      border-radius: 2px;
+      margin-bottom: 15px;
+  
+      &:first-child {
+        margin-top: 0;
+      }
+  
+      .equipmentDetail-list-boxHeader {
+        border-bottom: solid 1px #e2e2e2;
+        padding: 12px 15px;
+        line-height: 22px;
+
+        a {
+          font-size: 12px;
+        }
+      }
+  
+      .equipmentDetail-list-boxBody {
+        padding: 12px 15px;
+        color: #888;
+  
+        & > div {
+          display: flex;
+        }
+      }
+    }
+  }
+
+  .equipmentDetail-name {
+    padding: 15px;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    background: #fff;
+    color: #444;
+
+    .equipmentDetail-name-tag {
+      font-size: 12px;
+      padding: 4px 8px;
+      // background: #73D13D;
+      color: #154bd0;
+      border: solid 1px #154bd0;
+      border-radius: 2px;
+      margin-left: 8px;
+    }
+  }
+
+  .equipmentDetail-baseInfo {
+    margin: 8px 0;
+  }
+
+  .equipmentDetail-btns {
+    margin: 15px 15px 30px 15px;
+    border-top: solid 1px #e2e2e2;
+    padding-top: 15px;
+
+    .van-button {
+      margin-bottom: 8px;
+    }
+  }
+
+  :deep(.van-collapse-item__content) {
+    padding: 0;
+    background: transparent;
+    color: inherit;
+  }
+
+  :deep(.van-field__label) {
+    color: #333;
+    text-align: right;
+  }
+
+  :deep(.van-field__control) {
+    color: #666;
+  }
+
+  .equipmentDetail-file {
+    margin: 8px 0;
+
+    .equipmentDetail-file-row {
+      padding: 8px 15px;
+      background: #fff;
+      border-top: 1px solid #ebedf0;
+      display: flex;
+      align-items: center;
+
+      &:first-child {
+        border-top: 0;
+      }
+
+      &::after {
+        content: "";
+        display: block;
+        height: 1px;
+        clear: both;
+      }
+    }
+
+    .equipmentDetail-file-icon {
+      float: left;
+      width: 46px;
+      height: 46px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      overflow: hidden;
+      color: #fff;
+      margin-right: 4px;
+      font-size: 12px;
+    }
+
+    .equipmentDetail-file-info {
+      overflow: hidden;
+      padding-left: 8px;
+      flex: 1;
+    }
+  }
+
+  .equipmentDetail-title {
+    font-size: 14px;
+    font-weight: bold;
+    padding: 20px 0 8px 15px;
+  }
+}

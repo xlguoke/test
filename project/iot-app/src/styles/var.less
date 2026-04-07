@@ -1,0 +1,124 @@
+/**
+  注意：为什么要写两个重复的 :root？
+  由于 vant 中的主题变量也是在 :root 下声明的，所以在有些情况下会由于优先级的问题无法成功覆盖。
+  通过 :root:root 可以显式地让你所写内容的优先级更高一些，从而确保主题变量的成功覆盖。
+**/
+
+:root:root {
+  // van-cell-group
+  --van-cell-group-inset-padding: 0;
+  --van-blue: #0066ec;
+  --van-text-color: #224059;
+  --van-search-padding: 0;
+  --van-stepper-input-width: calc(100% - var(--van-stepper-input-height) * 2 - 2px * 2);
+  --van-empty-description-font-size: 12px;
+  --van-nav-bar-height: 60px;
+  --van-search-input-height: 30px;
+  --van-search-action-font-size: 12px;
+  --van-button-round-radius: 8px;
+  --van-button-radius: 8px;
+  --van-list-text-font-size: 12px;
+  --van-popup-round-radius: 8px;
+  --van-uploader-border-radius: 8px;
+  --van-radio-size: 12px;
+  --van-checkbox-size: 12px;
+  --van-popup-close-icon-size: 15px;
+  --van-radio-dot-size: 5px;
+  --van-nav-bar-title-font-size: 16.6667px;
+}
+
+.van-hairline--bottom:after {
+  border: none;
+}
+.van-nav-bar .van-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: #224059;
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 100%);
+  border: 1px solid #ffffff;
+}
+.van-nav-bar__content {
+  padding-top: 14px;
+}
+.van-nav-bar__left,
+.van-nav-bar__right {
+  top: 14px;
+}
+.van-search {
+  border: 1px solid #ffffff;
+  border-radius: 8px;
+
+  .van-search__field {
+    overflow: visible;
+    height: 30px;
+  }
+
+  .van-field__control {
+    font-size: 12px;
+    padding: 4px 0;
+    height: 24px;
+    &::placeholder {
+      color: #59768f;
+    }
+  }
+}
+
+.van-uploader__upload {
+  border: 1px solid #ffffff;
+}
+
+.van-checkbox__icon {
+  width: 20px !important;
+  height: 20px !important;
+  font-size: 20px;
+  .van-icon {
+    // background: linear-gradient(180deg, #97a6b2 0%, #6a8091 100%);
+    border-radius: 4px;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    border: 1px solid #ffffff;
+  }
+}
+
+.van-popup {
+  position: absolute !important;
+  input {
+    color: #fff;
+    &::placeholder {
+      color: #ccc;
+      font-size: 12px;
+    }
+  }
+  .van-field__label,
+  .van-radio__label {
+    color: #fff !important;
+    font-size: 12px;
+  }
+  .van-cell__right-icon {
+    color: #fff;
+  }
+}
+.van-radio__label {
+  line-height: unset !important;
+}
+.van-dialog {
+  .van-dialog__header {
+    color: #fff;
+  }
+  .van-button {
+    color: #fff;
+  }
+}
+
+.van-cell:after {
+  border-bottom-width: 0.5px !important;
+}
+
+.van-button.van-button--primary.van-button--plain {
+  border-color: #fff;
+}

@@ -1,0 +1,109 @@
+<template>
+  <div class="content-wrap flex-column">
+    <RoomCard title="功能室信息" class="flex-column">
+      <!-- 试验室信息 -->
+      <RoomLabInfo :lab-info="labInfo" />
+    </RoomCard>
+    <RoomCard title="库存信息" class="flex-h-1 flex-column">
+      <div id="contentWrap" class="expire-info-warp flex-column flex-1">
+        <div class="inventory-total">
+          <p class="num-box">
+            库存总量
+            <span class="num">{{ expireInfoData.total }}</span>
+            台
+            <span class="num-detail" @click="goDetails('ALL')">查看详情></span>
+          </p>
+          <p class="update-time">
+            <van-icon name="clock" />
+            <span>更新时间：{{ updateTime }}</span>
+          </p>
+        </div>
+
+        <InventoryInfo
+          title="检校到期"
+          inline
+          unit="台"
+          entry-txt="检校即将到期(30d)"
+          out-txt="已到期"
+          :entry-num="expireInfoData.todayExpire"
+          :out-num="expireInfoData.expired"
+          @entry="goDetails('TODAY_EXPIRE')"
+          @out="goDetails('EXPIRED')"
+        />
+
+        <InventoryInfo
+          title="设备外出"
+          inline
+          unit="台"
+          class="mt"
+          :entry-num="expireInfoData.todayIn"
+          :out-num="expireInfoData.todayOut"
+          @entry="goDetails('TODAY_IN')"
+          @out="goDetails('TODAY_OUT')"
+        />
+      </div>
+    </RoomCard>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, inject, watchEffect } from "vue"
+import { message } from "ant-design-vue"
+import { RoomCard, RoomLabInfo, InventoryInfo } from "../../components"
+import { useBaseInfo } from "../../composables/useBaseInfo"
+import { getExternalInspectionRoom } from "@/api/externalTestRoom.api"
+import { formatDate } from "@/utils/utils"
+import { useRouter } from "vue-router"
+
+const { labInfo } = useBaseInfo()
+const router = useRouter()
+
+let expireInfoData = ref({
+  total: 0, // 库存总量
+  todayExpire: 0, // 今日过期
+  expired: 0, // 已过期
+  todayIn: 0,
+  todayOut: 0,
+  weekIn: 0,
+  weekOut: 0,
+  monthIn: 0,
+  monthOut: 0
+})
+
+// 最新更新日期
+let updateTime = ref(formatDate(new Date(), 3))
+
+const loading = ref(inject("loading") as boolean)
+
+const goDetails = (type) => {
+  router.push({
+    path: "/functionRoom/externalTestDetails",
+    query: {
+      type: type,
+      labId: labInfo.value.id
+    }
+  })
+}
+
+const getStandardCuringRoomInfo = () => {
+  if (!labInfo.value.id) return
+  getExternalInspectionRoom(labInfo.value.id)
+    .then((res) => {
+      loading.value = false
+      if (res.code !== 20000) {
+        return message.error(res.message || "系统异常，请稍后重试")
+      }
+
+      expireInfoData.value = res.data
+      updateTime.value = formatDate(new Date(), 3)
+    })
+    .catch((err) => {
+      loading.value = false
+      console.error(err)
+    })
+}
+
+watchEffect(() => {
+  getStandardCuringRoomInfo()
+})
+</script>

@@ -1,0 +1,302 @@
+@import "./styleConfig.less";
+
+// 全局样式
+body,dl,dd,ul,ol,h1,h2,h3,h4,h5,h6,pre,form,input,textarea,p,hr,thead,tbody,tfoot,th,td {
+	margin: 0;
+	padding: 0;
+}
+
+ul,ol {
+	list-style: none;
+}
+
+a {
+	text-decoration: none;
+}
+
+html {
+	-ms-text-size-adjust: none;
+	-webkit-text-size-adjust: none;
+	text-size-adjust: none;
+}
+
+body {
+	font-size: @fontSize;
+}
+
+body,button,input,select,textarea {
+	font-family: 'Microsoft YaHei';
+}
+
+b,strong {
+	font-weight: bold;
+}
+
+i,em {
+	font-style: normal;
+}
+
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+img {
+	border: 0 none;
+	width: auto\9;
+	max-width: 100%;
+	vertical-align: top;
+	height: auto;
+}
+
+button,input,select,textarea {
+	font-size: 100%;
+	margin: 0;
+	vertical-align: baseline;
+}
+
+button,html input[type="button"],input[type="reset"],input[type="submit"] {
+	-webkit-appearance: button;
+	cursor: pointer;
+}
+
+button[disabled],input[disabled] {
+	cursor: default;
+}
+
+input[type="checkbox"],input[type="radio"] {
+	box-sizing: border-box;
+	padding: 0;
+}
+
+input[type="search"] {
+	-webkit-appearance: textfield;
+	-moz-box-sizing: content-box;
+	-webkit-box-sizing: content-box;
+	box-sizing: content-box;
+}
+
+input[type="search"]::-webkit-search-decoration {
+	-webkit-appearance: none;
+}
+
+input:focus {
+	outline: none;
+}
+
+select[size],select[multiple],select[size][multiple] {
+	border: 1px solid #AAA;
+	padding: 0;
+}
+
+article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section,summary {
+	display: block;
+}
+
+audio,canvas,video,progress {
+	display: inline-block;
+}
+
+body {
+	background: #fff;
+}
+
+input::-webkit-input-speech-button {
+	display: none
+}
+
+button,input,textarea {
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+.clearfix {
+	zoom: 1;
+}
+
+.clearfix:before {
+	clear: both;
+	height: 0;
+	width: 0;
+	content: "";
+	display: table;
+}
+
+.clearfix:after {
+	clear: both;
+	height: 0;
+	width: 0;
+	content: "";
+	display: table;
+}
+
+// 初始化 antd 样式
+.ant-btn {
+	font-size: @fontSize;
+	height: @height;
+}
+
+.ant-input {
+	font-size: @fontSize;
+	height: @height;
+	padding: 4px 8px;
+}
+
+.ant-input-search .ant-input {
+	height: 32px;
+}
+
+.ant-input-number {
+	font-size: @fontSize;
+	height: @height;
+	vertical-align: middle;
+}
+
+.ant-input-number-input {
+	height: @height - 2px;
+}
+
+.ant-select-selection--single {
+	height: @height;
+}
+
+.ant-select-selection__rendered {
+	line-height: @height - 2px;
+	margin-left: 8px;
+	margin-right: 8px;
+}
+
+.ant-select-selection-selected-value {
+	font-size: @fontSize;
+}
+
+.ant-select-selection__placeholder,
+.ant-select-search__field__placeholder {
+	font-size: @fontSize;
+}
+
+.ant-table-thead > tr > th,
+.ant-table-tbody > tr > td {
+	padding: 10px 8px;
+	font-size: @fontSize;
+	i.anticon {
+		font-size: @iconSize;
+		margin-right: 5px;
+	}
+}
+
+.ant-table-thead > tr > th {
+	font-weight: bold;
+}
+
+.ant-form label {
+	font-size: @fontSize;
+}
+
+.ant-form-item .ant-form-item-label >label {
+  font-size: @fontSize;
+}
+
+.ant-form-item-control {
+	line-height: @height;
+}
+
+.ant-form-item-label {
+	line-height: @height;
+}
+
+.ant-form-item {
+	margin-bottom: 15px;
+}
+
+.ant-modal-title {
+	font-size: 14px;
+}
+
+.ant-modal-header {
+	padding: 8px 15px;
+	background:#247abb;
+	.ant-modal-title {
+		color: #fff;
+	}
+}
+
+.ant-modal-close-x {
+	width: 38px;
+	height: 38px;
+	line-height: 38px;
+	font-size: 14px;
+}
+
+.ant-modal-body {
+	padding: 15px;
+}
+
+.ant-select-tree {
+	font-size: @fontSize;
+}
+
+.ant-select-selection--multiple {
+	padding-bottom: 0;
+	min-height: 28px;
+}
+
+.ant-select-selection--multiple .ant-select-selection__choice {
+	font-size: @fontSize;
+}
+
+.ant-select-selection--multiple > ul > li,
+.ant-select-selection--multiple .ant-select-selection__rendered > ul > li {
+	margin-top: 2px;
+	height: 22px;
+	line-height: 20px;
+}
+
+.ant-tree {
+	font-size: @fontSize;
+}
+
+.ant-pagination-prev,
+.ant-pagination-next,
+.ant-pagination-jump-prev,
+.ant-pagination-jump-next {
+	min-width: @height;
+	height: @height;
+	line-height: @height;
+}
+
+.ant-pagination-item {
+	min-width: @height;
+	height: @height;
+	line-height: @height - 2px;
+	font-size: 12px;
+}
+
+.ant-pagination-options-quick-jumper {
+	height: @height;
+	line-height: @height;
+	font-size: @fontSize;
+}
+
+.ant-pagination-options-quick-jumper input {
+	height: @height;
+}
+
+.ant-select-dropdown-menu {
+	font-size: @fontSize;
+}
+
+.ant-modal-body {
+	font-size: 12px;
+}
+
+.rolldate-container .rolldate-panel {
+	font-size:12px;
+}
+
+.rolldate-container header {
+	font-size: 14px;
+}
+
+.rolldate-container .rolldate-btn{
+	font-size: 14px;
+}

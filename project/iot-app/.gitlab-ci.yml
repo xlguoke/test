@@ -1,0 +1,21 @@
+include:
+  - component: $CI_SERVER_FQDN/$CI_PROJECT_NAMESPACE/into-ci/node@2.0.2
+    inputs:
+      slug: $CI_PROJECT_NAME
+
+deploy:staging:
+  stage: deploy
+  tags: [windows, staging]
+  variables:
+    DEPLOY_DIR: D:\ilis\html\
+    DEPLOY_PATH: "$DEPLOY_DIR$SLUG"
+  needs:
+    - job: build
+      artifacts: true
+  environment:
+    name: $SLUG-241
+    url: "http://192.168.90.241/-/$CI_PROJECT_NAME"
+  script:
+    - |
+      Remove-Item $DEPLOY_PATH -Force -Recurse -Confirm:$false -ErrorAction SilentlyContinue
+      Copy-Item $NODE_BUILD_DIR $DEPLOY_PATH -Force -Recurse

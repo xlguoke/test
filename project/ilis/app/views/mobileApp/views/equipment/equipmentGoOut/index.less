@@ -1,0 +1,178 @@
+.equipmentGoOut {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  :deep(.van-nav-bar__right):active{
+    opacity:1;
+  }
+  .title:active,.icon-scan:active{
+    opacity: .7;
+  }
+  // 扫码登记
+  .scan-register{
+    position:relative;
+    display: inline-block;
+    .title{
+      display: inline-block;
+      line-height:30px;
+    }
+    .scan-dropdown{
+      position:absolute;
+      right:-10px;
+      top:80%;
+      height:0;
+      overflow:hidden;
+      line-height:30px;
+      background-color:#fff;
+      color:#333;
+      border-radius:6px;
+      z-index:100;
+      box-shadow: 0 0 5px rgba(1,1,1,.1);
+      transition:.1s ease;
+      &.open-dropdown{
+        height:auto;
+        min-width:50px;
+        padding:10px 0;
+        top:90%;
+        overflow:visible;
+        .item{
+          height:30px;
+        }
+      }
+      &::before{
+        content:'';
+        position:absolute;
+        left:50%;
+        top:-8px;
+        margin-left:-6px;
+        border-top:1px solid transparent;
+        border-left:6px solid transparent;
+        border-right:6px solid transparent;
+        border-bottom:8px solid #fff;
+      }
+      .item{
+        padding:0 10px;
+        height:0;
+        overflow:hidden;
+        white-space: nowrap;
+        transition:.2s ease-in;
+        &:hover{
+          background-color: #e7eeff;
+        }
+      }
+    }
+  }
+
+  .equipmentGoOut-body {
+    display: flex;
+    flex-wrap: nowrap;
+    flex: 1;
+    border-top: solid 1px #e2e2e2;
+    overflow-y: auto;
+
+    .equipmentGoOut-left {
+      border-right: solid 1px #e2e2e2;
+      overflow-y: auto;
+
+      :deep(.van-sidebar) {
+        border-left: 0;
+      }
+
+      :deep(.van-sidebar-item) {
+        padding: 14px 0;
+        font-size: 14px;
+      }
+
+      :deep(.van-sidebar-item--select)::before {
+        height: 22px;
+        background: #154bd0;
+      }
+
+      :deep(.van-sidebar-item--select) :deep(.van-sidebar-item__text) {
+        color: #154bd0;
+      }
+
+      div {
+        text-align: center;
+        line-height: 38px;
+        border-left: solid 4px transparent;
+
+        &.active {
+          border-color: #154bd0;
+          background: #fff;
+        }
+      }
+    }
+
+    .equipmentGoOut-right {
+      flex: 1;
+      background: #fff;
+      overflow-y: auto;
+      height: 100%;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+
+      :deep(.van-divider) {
+        font-size: 14px;
+        color: #333;
+        font-weight: bold;
+        border-color: #9f9f9f;
+      }
+
+      .equipmentGoOut-row {
+        font-size: 12px;
+        color: #666;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 15px;
+        border-bottom: solid 1px #e2e2e2;
+
+        .equipmentGoOut-info {
+          flex: 1;
+          padding-right: 10px;
+        }
+
+        div {
+          font-size: 14px;
+        }
+
+        p {
+          color: #888;
+          font-size: 12px;
+        }
+
+        .equipmentGoOut-state {
+          width: 96px;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          color: #888;
+          font-size: 12px;
+          :deep(.van-checkbox__icon){
+            font-size:20px;
+          }
+        }
+      }
+    }
+  }
+
+  .van-sidebar-item--disabled{
+    color:#323233;
+  }
+
+}
+.equipmentGoOut-foot {
+  padding: 8px 10px;
+  display: flex;
+  column-gap: 12px;
+  button{
+    flex:1;
+  }
+}

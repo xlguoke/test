@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ILIS Dev — Entrypoints</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; padding: 2rem; }
+    h1 { font-size: 1.5rem; margin-bottom: .5rem; }
+    .hint { color: #888; font-size: .85rem; margin-bottom: 1.5rem; }
+    .search { width: 100%; max-width: 400px; padding: .5rem .75rem; border: 1px solid #d9d9d9; border-radius: 6px; font-size: .9rem; margin-bottom: 1.5rem; outline: none; }
+    .search:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,.15); }
+    .group { margin-bottom: 1.5rem; }
+    .group-title { font-size: 1rem; font-weight: 600; margin-bottom: .5rem; color: #555; }
+    .links { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .35rem .75rem; }
+    .links a { color: #1677ff; text-decoration: none; font-size: .85rem; padding: .25rem 0; border-radius: 4px; }
+    .links a:hover { text-decoration: underline; }
+    .count { color: #999; font-size: .75rem; margin-left: .5rem; }
+  </style>
+</head>
+<body>
+  <h1>ILIS Entrypoints</h1>
+  <p class="hint">Click a page to open it via Vite dev server. API calls are proxied to the backend.</p>
+  <input class="search" type="text" placeholder="Filter entrypoints..." autofocus>
+  <div id="list"></div>
+
+  <script type="module">
+    const meta = await fetch('/entrypoints-meta.json').then(r => r.json())
+    const entries = Object.entries(meta).sort(([a], [b]) => a.localeCompare(b))
+
+    const groups = {}
+    for (const [key] of entries) {
+      const group = key.split('/')[0]
+      if (!groups[group]) groups[group] = []
+      groups[group].push(key)
+    }
+
+    const list = document.getElementById('list')
+    const search = document.querySelector('.search')
+
+    function render(filter = '') {
+      const f = filter.toLowerCase()
+      list.innerHTML = ''
+      for (const [group, keys] of Object.entries(groups)) {
+        const filtered = keys.filter(k => !f || k.toLowerCase().includes(f))
+        if (filtered.length === 0) continue
+        const div = document.createElement('div')
+        div.className = 'group'
+        div.innerHTML = `<div class="group-title">${group}<span class="count">${filtered.length}</span></div>`
+        const links = document.createElement('div')
+        links.className = 'links'
+        for (const key of filtered) {
+          const a = document.createElement('a')
+          a.href = `/entrypoints/${key}`
+          a.textContent = key
+          links.appendChild(a)
+        }
+        div.appendChild(links)
+        list.appendChild(div)
+      }
+    }
+
+    render()
+    search.addEventListener('input', () => render(search.value))
+  </script>
+</body>
+</html>

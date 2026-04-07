@@ -1,0 +1,76 @@
+.equipment-add-wrap {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  .equipment-add-body {
+    flex: 1;
+    overflow: auto;
+    .hint {
+      line-height: 100px;
+      color: #999;
+      text-align: center;
+    }
+    .equipment-list {
+      padding: 10px;
+      .item {
+        padding: 5px 8px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        background-color: #fff;
+        border-radius: 4px;
+        .item-left {
+          width: 0;
+          flex: 1;
+          .equipment-sn {
+            font-size: 12px;
+          }
+        }
+        .item-right {
+          margin-left: 10px;
+          width: 20px;
+          font-size: 18px;
+          color: red;
+        }
+      }
+    }
+  }
+  .scan-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+
+    margin-top: 5px;
+    .scan-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      height: 80px;
+      background: #1890ff;
+      border-radius: 50%;
+      margin: 0 auto;
+    }
+
+    .scan-tip {
+      font-size: 14px;
+      line-height: 28px;
+      text-align: center;
+      color: #aeaeae;
+    }
+  }
+  .scan-name {
+    margin-bottom: 10px;
+    text-align: center;
+    font-size: 12px;
+    color: #999;
+  }
+  .equipment-add-foot {
+    padding: 5px 10px;
+  }
+}
