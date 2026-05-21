@@ -68,14 +68,22 @@
     | `order-list` | 用户订单列表 | 按状态筛选、分页 |
     | `admin-orders-list` | 后台订单列表 | 筛选+分页、含会员信息 |
 
-    **会员模块（4 个）**
-    | `member-info` | 会员信息 | 等级/积分/余额/消费 |
-    | `member-point-logs` | 积分流水 | 分页 |
-    | `member-level-check` | 等级更新 | 根据累计消费自动升降（内部调用）|
-    | `admin-members-list` | 会员列表 | 搜索、分页 |
+    **会员模块（5 个）**
+    | `member-info` | 会员信息 | 等级/积分/余额/消费/等级名称/权益说明/续期进度 |
+    | `member-benefits` | 等级福利配置 | 获取当前等级权益 + 所有等级对比表 |
+    | `member-point-logs` | 积分流水 | 分页、按类型筛选 |
+    | `member-level-check` | 等级更新 | 根据成长值自动升级（内部调用）|
+    | `member-level-progress` | 等级进度 | 返回升级进度、续期进度 |
 
-    **会员管理模块（2 个）**
-    | `admin-members-detail` | 会员详情 | 完整信息+流水 |
+    **会员充值模块（4 个）**
+    | `member-recharge-tiers` | 充值档位列表 | 获取3个档位(¥98/¥980/¥2,980)、计算赠送金额/成长值/积分 |
+    | `member-recharge` | 发起充值 | 校验档位→创建充值订单→调用收钱吧→返回jsapi参数 |
+    | `member-recharge-callback` | 充值回调 | 收钱吧验签→更新余额→发放成长值和积分→检查等级→记录流水 |
+    | `member-recharge-logs` | 充值记录 | 分页查询充值历史 |
+
+    **会员管理模块（3 个）**
+    | `admin-members-list` | 会员列表 | 搜索、分页、等级筛选 |
+    | `admin-members-detail` | 会员详情 | 完整信息+流水+充值记录 |
     | `admin-point-adjust` | 积分调整 | 增减积分、记录流水（原子操作）|
 
     **收银模块（3 个）**
@@ -167,8 +175,12 @@
 - 收钱吧沙箱联调
 
 ### 第 5 步：会员模块
-- `member-info` + `member-point-logs` + `member-level-check`
+- `member-info` + `member-benefits` + `member-point-logs` + `member-level-check`
 - `admin-members-list` + `admin-members-detail` + `admin-point-adjust`
+
+### 第 5.5 步：会员充值模块
+- `member-recharge-tiers` + `member-recharge` + `member-recharge-callback` + `member-recharge-logs`
+- 收钱吧充值沙箱联调
 
 ### 第 6 步：收银模块
 - `cashier-order-create` + `cashier-balance-pay` + `member-code-decode`
@@ -178,7 +190,7 @@
 
 ## Restated Understanding
 - 当前任务：基于设计文档实现全部后端逻辑
-- 当前核心目标：30 个云函数 + 9 个集合 + 收钱吧对接完整可用
+- 当前核心目标：34 个云函数 + 11 个集合 + 收钱吧对接完整可用
 - 暂不处理：前端联调、部署
 
 ## Checkpoint Summary
