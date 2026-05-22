@@ -1,0 +1,21 @@
+{
+  "name": "ling-qi-dian",
+  "version": "1.0.0",
+  "private": true,
+  "description": "机车俱乐部饮品与社区系统",
+  "scripts": {
+    "dev:app": "pnpm --filter @lingqi/app dev",
+    "dev:admin": "pnpm --filter @lingqi/admin dev",
+    "build:app": "pnpm --filter @lingqi/app build",
+    "build:admin": "pnpm --filter @lingqi/admin build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  },
+  "volta": {
+    "node": "20.11.0",
+    "pnpm": "8.15.0"
+  }
+}
