@@ -1,7 +1,7 @@
 # 数据库 Schema 设计文档
 
 > 本文档定义机车俱乐部饮品与社区系统的全部 MongoDB 集合结构
-> 版本: v4.0 | 日期: 2026-06-01
+> 版本: v4.1 | 日期: 2026-06-01
 >
 > **产品基准**：`full-feature-list.md` v4.0 | 集合覆盖：22 个 MongoDB 集合
 
@@ -486,6 +486,7 @@ db.categories.createIndex({ status: 1 })
 | `images` | Array<String> | ❌ | [] | 商品图片URL列表 |
 | `status` | Number | ✅ | 1 | 状态：1上架/0下架/-1删除 |
 | `sort_order` | Number | ✅ | 0 | 排序权重 |
+| `tags` | Array\<String\> | ❌ | [] | 商品标签（如["新品","热销","推荐"]） |
 | `spec_groups` | Array\<Object\> | ❌ | [] | 规格组定义 |
 | `sku_list` | Array<Object> | ✅ | [] | SKU列表 |
 | `create_time` | Date | ✅ | now | 创建时间 |
@@ -519,6 +520,9 @@ db.goods.createIndex({ sort_order: -1 })
 
 // 状态查询
 db.goods.createIndex({ status: 1 })
+
+// 标签查询（多值匹配）
+db.goods.createIndex({ tags: 1, status: 1 })
 ```
 
 ---
