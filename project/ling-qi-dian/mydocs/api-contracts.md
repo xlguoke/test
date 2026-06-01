@@ -1,9 +1,9 @@
 # API 接口契约文档
 
 > 本文档定义机车俱乐部系统的全部云函数接口契约
-> 版本: v3.0 | 日期: 2026-05-31
+> 版本: v4.0 | 日期: 2026-06-01
 >
-> **产品基准**：`full-feature-list.md` v3.8 | 接口覆盖：全部 51 个云函数（合并后约 15 个入口）
+> **产品基准**：`full-feature-list.md` v4.0 | 接口覆盖：全部 51 个云函数（合并后约 15 个入口）
 
 ---
 
@@ -562,6 +562,8 @@ Content-Type: application/json
 > **参数说明**：
 > - `pay_method` 可选：`wechat` / `alipay` / `balance`
 > - `env` 可选：`wechat` / `browser`
+> - **收钱吧配置**：`terminal_no` 存储于环境变量 `SQB_TERMINAL_NO`，一期固定终端号
+> - **收钱吧订单号**：precreate 成功后返回 `sn`，存储至 `orders.sqb_sn` 字段，用于退款/查询
 
 **响应（微信内）**
 ```json
@@ -683,6 +685,45 @@ Content-Type: application/json
 > - 服务端 hold 5 秒后返回（有结果立即返回），减少 70% 请求量
 > - `order_status`: pending/paid/making/completed/cancelled/refunded
 > - `pay_status`: 0=待支付，1=已支付，2=已取消
+
+### 14B. 查询支付结果（收钱吧 query）
+
+> **对应功能**：API-SHQ-001-07
+
+**云函数**: `order`（路由分发）
+
+**请求**
+```http
+POST /api/v1/pay/query
+Cookie: 自动携带（withCredentials: true）
+Content-Type: application/json
+
+{
+  "order_no": "202605211430001"
+}
+```
+
+**响应**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "request_id": "uuid-v4",
+  "data": {
+    "order_no": "202605211430001",
+    "sqb_sn": "202605211430001001",
+    "pay_status": 1,
+    "pay_time": "2026-05-21T14:35:00Z",
+    "total_amount": 5000
+  }
+}
+```
+
+> **字段说明**：
+> - 服务端调用收钱吧 `query` 接口查询支付结果
+> - `sqb_sn`: 收钱吧内部订单号，用于退款/查询
+> - `pay_status`: 0=待支付，1=支付成功，2=支付失败
+> - `total_amount`: 实付金额（分）
 
 ### 15. 查询订单列表
 

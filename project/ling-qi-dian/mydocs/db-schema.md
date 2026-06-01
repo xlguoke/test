@@ -1,9 +1,9 @@
 # 数据库 Schema 设计文档
 
 > 本文档定义机车俱乐部饮品与社区系统的全部 MongoDB 集合结构
-> 版本: v3.0 | 日期: 2026-05-31
+> 版本: v4.0 | 日期: 2026-06-01
 >
-> **产品基准**：`full-feature-list.md` v3.8 | 集合覆盖：17 个 MongoDB 集合
+> **产品基准**：`full-feature-list.md` v4.0 | 集合覆盖：22 个 MongoDB 集合
 
 ---
 
@@ -24,20 +24,25 @@
 |:---|:---|:---|:---|
 | `members` | 会员主表 | 1万+ | CRUD |
 | `member_levels` | 会员等级配置 | 7 | 查询 |
+| `member_level_changes` | 等级变更记录 | 1万+ | 插入、查询 |
 | `point_logs` | 积分流水 | 10万+ | 插入、查询 |
 | `balance_logs` | 余额变动流水 | 5万+ | 插入、查询 |
 | `recharge_logs` | 充值记录 | 5万+ | 插入、查询 |
 | `activities` | 开业活动配置 | 1~5 | CRUD |
+| `banners` | Banner 配置 | 10+ | CRUD |
 | `carts` | 购物车 | 1万+ | 查询、更新 |
 | `categories` | 商品分类 | 20+ | CRUD |
 | `goods` | 商品信息 | 100+ | CRUD |
 | `orders` | 订单主表 | 10万+ | CRUD |
+| `order_status_logs` | 订单状态变更日志 | 10万+ | 插入、查询 |
 | `community_posts` | 社区帖子 | 1万+ | CRUD |
 | `community_comments` | 评论 | 5万+ | 插入、查询、删除 |
 | `community_likes` | 点赞记录 | 10万+ | 插入、删除 |
 | `admin_users` | 后台账号 | 10+ | CRUD |
 | `admin_operation_logs` | 后台操作日志 | 1万+ | 插入、查询 |
 | `tables` | 桌号管理 | 50+ | CRUD |
+| `frontend_errors` | 前端错误上报 | 5万+ | 插入、查询 |
+| `alert_queue` | 告警队列 | 1万+ | 插入、查询 |
 | `slow_queries` | 慢查询记录 | 1万+ | 插入、查询 |
 
 ---
@@ -592,6 +597,7 @@ db.goods.createIndex({ status: 1 })
 | `point_deduct` | Number | ✅ | 0 | 积分抵扣金额（分） |
 | `pay_amount` | Number | ✅ | - | 实付金额（分） |
 | `pay_way` | String | ✅ | - | 支付方式：wechat/balance/cash |
+| `sqb_sn` | String | ❌ | "" | 收钱吧订单号（precreate 成功后返回），用于退款/查询 |
 | `pay_status` | Number | ✅ | 0 | 支付状态：0待支付/1已支付/2已取消 |
 | `pay_time` | Date | ❌ | null | 支付时间 |
 | `order_status` | String | ✅ | "pending" | 订单状态 |
@@ -1058,6 +1064,217 @@ db.tables.createIndex({ status: 1 })
 db.slow_queries.createIndex({ timestamp: -1 })
 db.slow_queries.createIndex({ duration: -1 })
 db.slow_queries.createIndex({ endpoint: 1 })
+```
+
+---
+
+### 16. banners（Banner 配置表）
+
+存储首页 Banner 轮播配置，支持运营后台管理。
+
+> **对应功能**：ADM-BANNER-001
+
+```json
+{
+  "_id": "ObjectId",
+  "title": "开业活动",
+  "image": "https://cdn.example.com/banner/opening.jpg",
+  "link": "/pages/member/recharge",
+  "sort_order": 1,
+  "status": 1,
+  "create_time": "2026-06-01T00:00:00Z",
+  "update_time": "2026-06-01T00:00:00Z"
+}
+```
+
+**字段说明**
+
+| 字段 | 类型 | 必填 | 默认值 | 说明 |
+|:---|:---|:---:|:---|:---|
+| `_id` | ObjectId | ✅ | auto | 主键 |
+| `title` | String | ✅ | - | Banner 标题 |
+| `image` | String | ✅ | - | Banner 图片 URL（≤ 2MB，建议 750×300px） |
+| `link` | String | ❌ | "" | 点击跳转链接 |
+| `sort_order` | Number | ✅ | 0 | 排序值（升序展示） |
+| `status` | Number | ✅ | 1 | 状态：1启用/0停用 |
+| `create_time` | Date | ✅ | now | 创建时间 |
+| `update_time` | Date | ✅ | now | 更新时间 |
+
+**索引**
+
+```javascript
+// 排序查询
+db.banners.createIndex({ sort_order: 1, status: 1 })
+```
+
+---
+
+### 17. member_level_changes（等级变更记录表）
+
+记录会员等级变更历史，用于等级追溯。
+
+> **对应功能**：API-DATA-001-06
+
+```json
+{
+  "_id": "ObjectId",
+  "member_id": "用户ID",
+  "old_level": 0,
+  "new_level": 1,
+  "trigger_type": "recharge",
+  "trigger_id": "充值记录ID",
+  "create_time": "2026-06-01T10:00:00Z"
+}
+```
+
+**字段说明**
+
+| 字段 | 类型 | 必填 | 默认值 | 说明 |
+|:---|:---|:---:|:---|:---|
+| `_id` | ObjectId | ✅ | auto | 主键 |
+| `member_id` | String | ✅ | - | 会员ID |
+| `old_level` | Number | ✅ | - | 变更前等级 |
+| `new_level` | Number | ✅ | - | 变更后等级 |
+| `trigger_type` | String | ✅ | - | 触发类型：recharge/consume/trigger |
+| `trigger_id` | String | ❌ | "" | 触发来源ID（充值记录ID等） |
+| `create_time` | Date | ✅ | now | 创建时间 |
+
+**索引**
+
+```javascript
+// 会员等级变更查询
+db.member_level_changes.createIndex({ member_id: 1, create_time: -1 })
+```
+
+---
+
+### 18. order_status_logs（订单状态变更日志表）
+
+记录订单状态变更历史，用于状态审计。
+
+> **对应功能**：API-DATA-001-07
+
+```json
+{
+  "_id": "ObjectId",
+  "order_id": "订单ID",
+  "from_status": "pending",
+  "to_status": "paid",
+  "operator_type": "member",
+  "operator_id": "用户ID",
+  "create_time": "2026-06-01T10:00:00Z"
+}
+```
+
+**字段说明**
+
+| 字段 | 类型 | 必填 | 默认值 | 说明 |
+|:---|:---|:---:|:---|:---|
+| `_id` | ObjectId | ✅ | auto | 主键 |
+| `order_id` | String | ✅ | - | 订单ID |
+| `from_status` | String | ✅ | - | 变更前状态 |
+| `to_status` | String | ✅ | - | 变更后状态 |
+| `operator_type` | String | ✅ | - | 操作者类型：system/admin/member |
+| `operator_id` | String | ❌ | "" | 操作者ID |
+| `create_time` | Date | ✅ | now | 创建时间 |
+
+**索引**
+
+```javascript
+// 订单状态变更查询
+db.order_status_logs.createIndex({ order_id: 1, create_time: 1 })
+```
+
+---
+
+### 19. frontend_errors（前端错误上报表）
+
+记录前端错误信息，用于错误监控。
+
+> **对应功能**：API-MONITOR-001-01
+
+```json
+{
+  "_id": "ObjectId",
+  "timestamp": "2026-06-01T10:00:00Z",
+  "error_message": "TypeError: Cannot read property",
+  "stack": "Error stack trace...",
+  "page_url": "https://bikeclub.cn/pages/cart/cart",
+  "user_agent": "Mozilla/5.0...",
+  "user_id": "用户ID",
+  "request_id": "uuid-v4"
+}
+```
+
+**字段说明**
+
+| 字段 | 类型 | 必填 | 默认值 | 说明 |
+|:---|:---|:---:|:---|:---|
+| `_id` | ObjectId | ✅ | auto | 主键 |
+| `timestamp` | Date | ✅ | now | 错误时间 |
+| `error_message` | String | ✅ | - | 错误信息 |
+| `stack` | String | ❌ | "" | 错误堆栈 |
+| `page_url` | String | ✅ | - | 页面 URL |
+| `user_agent` | String | ❌ | "" | 浏览器 UA |
+| `user_id` | String | ❌ | "" | 用户ID |
+| `request_id` | String | ❌ | "" | 关联请求ID |
+
+**索引**
+
+```javascript
+// 时间查询
+db.frontend_errors.createIndex({ timestamp: -1 })
+
+// 用户错误查询
+db.frontend_errors.createIndex({ user_id: 1, timestamp: -1 })
+```
+
+---
+
+### 20. alert_queue（告警队列表）
+
+存储待推送告警信息，定时任务扫描并推送钉钉/企微。
+
+> **对应功能**：API-MONITOR-001-02
+
+```json
+{
+  "_id": "ObjectId",
+  "alert_type": "payment_error",
+  "alert_level": "high",
+  "message": "支付接口调用失败",
+  "request_id": "uuid-v4",
+  "endpoint": "/api/v1/order/pay",
+  "error_detail": "收钱吧 API 超时",
+  "status": "pending",
+  "push_time": null,
+  "create_time": "2026-06-01T10:00:00Z"
+}
+```
+
+**字段说明**
+
+| 字段 | 类型 | 必填 | 默认值 | 说明 |
+|:---|:---|:---:|:---|:---|
+| `_id` | ObjectId | ✅ | auto | 主键 |
+| `alert_type` | String | ✅ | - | 告警类型：payment_error/refund_error/system_error |
+| `alert_level` | String | ✅ | "medium" | 告警级别：high/medium/low |
+| `message` | String | ✅ | - | 告警消息 |
+| `request_id` | String | ❌ | "" | 关联请求ID |
+| `endpoint` | String | ❌ | "" | 接口路径 |
+| `error_detail` | String | ❌ | "" | 错误详情 |
+| `status` | String | ✅ | "pending" | 状态：pending/pushed/ignored |
+| `push_time` | Date | ❌ | null | 推送时间 |
+| `create_time` | Date | ✅ | now | 创建时间 |
+
+**索引**
+
+```javascript
+// 待推送告警查询
+db.alert_queue.createIndex({ status: 1, create_time: 1 })
+
+// 时间查询
+db.alert_queue.createIndex({ create_time: -1 })
 ```
 
 ---

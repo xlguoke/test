@@ -1,7 +1,7 @@
 # 前端路由设计文档
 
 > 本文档定义三端（点单端、社区端、后台管理）的全部页面路由及 API 调用关系
-> 版本: v2.0 | 日期: 2026-05-23
+> 版本: v3.0 | 日期: 2026-06-01
 
 ---
 
@@ -66,17 +66,22 @@ const id = route.params.id
 
 | 序号 | 路径 | 页面 | 说明 |
 |:---:|:---|:---|:---|
-| 1 | `/pages/index/index` | 首页 | 商品列表、分类、购物车 |
-| 2 | `/pages/goods/detail` | 商品详情 | 规格选择、加入购物车 |
-| 3 | `/pages/order/confirm` | 订单确认 | 桌号、备注、支付 |
-| 4 | `/pages/order/list` | 订单列表 | 历史订单 |
-| 5 | `/pages/order/detail` | 订单详情 | 订单状态、商品明细 |
-| 6 | `/pages/member/index` | 会员中心 | 等级、积分、余额 |
-| 7 | `/pages/member/benefits` | 会员权益 | 分品类折扣、等级对比 |
-| 8 | `/pages/member/recharge` | 充值中心 | 充值档位、支付 |
-| 9 | `/pages/member/points` | 积分明细 | 积分流水 |
-| 10 | `/pages/member/records` | 充值记录 | 充值历史 |
-| 11 | `/pages/cashier/index` | 收银台 | 店员收银（可选） |
+| 1 | `/pages/index/index` | 首页 | 商品列表、分类、搜索 |
+| 2 | `/pages/cart/cart` | 购物车 | TabBar 页面，商品管理、结算 |
+| 3 | `/pages/goods/detail` | 商品详情 | 规格选择、加入购物车 |
+| 4 | `/pages/order/confirm` | 订单确认 | 桌号、备注、支付 |
+| 5 | `/pages/order/list` | 订单列表 | 历史订单（TabBar 页面） |
+| 6 | `/pages/order/detail` | 订单详情 | 订单状态、商品明细 |
+| 7 | `/pages/member/index` | 个人中心 | TabBar 页面，等级、积分、余额 |
+| 8 | `/pages/member/benefits` | 会员权益 | 分品类折扣、等级对比 |
+| 9 | `/pages/member/recharge` | 充值中心 | 充值档位、支付 |
+| 10 | `/pages/member/profile` | 用户资料 | 头像、昵称、手机号 |
+| 11 | `/pages/member/point-logs` | 积分明细 | 积分流水 |
+| 12 | `/pages/member/balance-logs` | 余额明细 | 余额变动流水 |
+| 13 | `/pages/member/recharge-logs` | 充值记录 | 充值历史 |
+| 14 | `/pages/cashier/index` | 收银台 | 店员收银（二期） |
+
+> **TabBar 配置**：首页 / 订单 / 购物车 / 个人中心（4 项）
 
 ### 详细路由定义
 
@@ -85,8 +90,8 @@ const id = route.params.id
 **页面功能**
 - 商品分类展示
 - 商品列表
-- 购物车悬浮按钮
-- 底部导航栏
+- 搜索功能
+- 底部导航栏（TabBar）
 
 **API 调用**
 | API | 用途 |
