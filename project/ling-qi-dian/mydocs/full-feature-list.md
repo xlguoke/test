@@ -1,4 +1,4 @@
-# 机车俱乐部饮品与社区系统 — 产品功能清单 v3.8
+# 机车俱乐部饮品与社区系统 — 产品功能清单 v4.0
 
 > **本文档定位**：产品功能清单，是系统的**唯一产品真相源**（Single Source of Truth）。
 >
@@ -11,7 +11,7 @@
 >   └── .trae/specs/*/（技术 Spec，声明基于本清单的 § 范围）
 > ```
 >
-> **下层文档约定**：每个 Spec / 契约文档头部需声明"产品基准：full-feature-list.md v3.8 §X~§Y"。
+> **下层文档约定**：每个 Spec / 契约文档头部需声明"产品基准：full-feature-list.md v4.0 §X~§Y"。
 >
 > **功能编号规则**：
 > - `H5-{模块}-{序号}`：H5 端功能
@@ -44,15 +44,15 @@
 - **主色统一**：青绿色 `#4ECDC4`，全局主题色变量 `--color-primary` [H5-THEME-001-02]
 - **预设主题**：
   - 浅色模式（默认）：白底 + 深色文字 + 主题色点缀 [H5-THEME-001-03]
-  - 深色模式：深灰底 `#1A1A1A` + 浅色文字 + 主题色点缀 [H5-THEME-001-04]
-- **主题切换**：会员中心→设置→主题切换开关，切换后全局即时生效 [H5-THEME-001-05]
-- **主题持久化**：localStorage 存储用户选择，下次打开自动应用 [H5-THEME-001-06]
-- **系统主题跟随**：首次打开时检测 `prefers-color-scheme`，自动匹配系统主题 [H5-THEME-001-07]
+  - 深色模式：深灰底 `#1A1A1A` + 浅色文字 + 主题色点缀 [🔵 二期] [H5-THEME-001-04]
+- **主题切换**：会员中心→设置→主题切换开关，切换后全局即时生效 [🔵 二期] [H5-THEME-001-05]
+- **主题持久化**：localStorage 存储用户选择，下次打开自动应用 [🔵 二期] [H5-THEME-001-06]
+- **系统主题跟随**：首次打开时检测 `prefers-color-scheme`，自动匹配系统主题 [🔵 二期] [H5-THEME-001-07]
 
 ### 0.2 设计 Token 清单 [H5-THEME-002]
 
 #### 色彩变量
-| 变量名 | 浅色模式 | 深色模式 | 用途 |
+| 变量名 | 浅色模式 | 深色模式（🔵 二期） | 用途 |
 |:---|:---|:---|:---|
 | `--color-primary` | `#4ECDC4` | `#4ECDC4` | 主题色（按钮/链接/高亮） |
 | `--color-bg` | `#FFFFFF` | `#1A1A1A` | 页面背景 |
@@ -99,7 +99,7 @@
 ```
 pages/
 ├── index/index              # 首页（商品浏览/分类/搜索）
-├── cart/cart                # 购物车
+├── cart/cart                # 购物车（TabBar 页面）
 ├── order/confirm            # 订单确认
 ├── order/pay                # 订单支付
 └── order/success            # 支付成功
@@ -143,6 +143,25 @@ subpackages/cashier/
 - 用户进入会员中心/订单列表时预加载对应子包 [H5-ROUTE-001-02]
 - 主包体积控制在 2MB 以内，首屏加载时间 < 2s [H5-ROUTE-001-03]
 
+**分开打包与独立部署策略** [H5-ROUTE-001-10]：
+> 一期点单端和社区端在同一 uni-app 工程中开发，通过分包策略管理；二期社区模块可独立打包部署。
+
+- **pages.json 配置策略** [H5-ROUTE-001-11]：
+  - 一期：`pages.json` 包含主包 + order/member 子包，community 子包标记 `preload: false`
+  - 二期独立打包：创建 `pages.community.json`（仅含 community 子包），构建时通过环境变量 `VITE_APP_MODULE` 切换入口配置
+  - 构建命令：`npm run build:h5`（全量构建）、`npm run build:h5:community`（仅社区模块）
+- **独立部署路由策略** [H5-ROUTE-001-12]：
+  - 点单端部署：`https://order.bikeclub.cn`，Nginx 反向代理至 uniCloud H5 托管
+  - 社区端独立部署：`https://club.bikeclub.cn`，独立 H5 托管或 CDN 静态部署
+  - 一期同域部署：`https://bikeclub.cn`（点单主应用），社区作为子包按需加载
+- **跨域认证方案** [H5-ROUTE-001-13]：
+  - 同域部署：共享 httpOnly Cookie，无需额外处理
+  - 跨域独立部署：采用 Token 中继方案——点单端跳转社区端时 URL 携带 `token` 参数，社区端接收后写入 localStorage，后续请求通过 `Authorization: Bearer` 头携带；Token 有效期与主站一致
+  - 安全约束：Token 中继仅限 `*.bikeclub.cn` 域名，服务端校验 Referer/Origin
+- **共享包版本管理** [H5-ROUTE-001-14]：
+  - `packages/shared`（types/utils/constants/theme）通过 pnpm workspace 引用，两端共享同一份源码
+  - 独立打包时 shared 包随社区模块一起构建，无需单独发布 npm
+
 **图片优化策略**：
 - 商品图片懒加载（`loading="lazy"`），加载失败显示默认占位图 [H5-ROUTE-001-04]
 - 首页 Banner 预加载（`preload`），首屏可见图片提前请求 [H5-ROUTE-001-05]
@@ -160,7 +179,7 @@ subpackages/cashier/
   - `orderStore`：当前订单数据 [H5-STORE-001-03]
   - `paymentStore`：支付流程状态机（`idle → paying → polling → success/failed`），管理支付方式选择、支付参数、轮询状态 [H5-STORE-001-03B]
   - `memberStore`：会员等级、积分、余额、成长值 [H5-STORE-001-04]
-  - `themeStore`：主题配置、系统主题检测 [H5-STORE-001-05]
+  - `themeStore`：主题配置、系统主题检测 [🔵 二期] [H5-STORE-001-05]
   - `configStore`：全局配置（会员配置、桌号配置等）[H5-STORE-001-06]
 - **Store 初始化依赖图**：configStore → memberStore → orderStore → paymentStore → cartStore（按依赖顺序初始化）[H5-STORE-001-07]
 - **authReady 状态**：应用启动时等待 Token 校验完成后再导航路由，避免未授权页面闪烁 [H5-STORE-001-08]
@@ -197,7 +216,7 @@ subpackages/cashier/
 ### 0.8 全局组件 [H5-COMPONENT-001]
 - **Vant UI 按需引入**：仅引入使用到的组件（Button/Cell/Tab/Switch/Dialog/Toast/Popup/Field/Stepper/Checkbox/Tag/SwipeCell/List/PullRefresh/CountDown/ActionSheet），全量引入约 60KB gzip → 按需引入约 20KB gzip [H5-COMPONENT-001-00]
 - `NavBar`：顶部导航栏（标题 + 返回 + 会员码入口）[H5-COMPONENT-001-01]
-- `TabBar`：底部导航（首页/订单/会员/俱乐部）[H5-COMPONENT-001-02]
+- `TabBar`：底部导航（首页/订单/购物车/个人中心）[H5-COMPONENT-001-02]
 - `LoadingOverlay`：全屏 loading 遮罩 [H5-COMPONENT-001-03]
 - `EmptyState`：空状态插图 + 文字 [H5-COMPONENT-001-04]
 - `SkeletonCard`：骨架屏卡片 [H5-COMPONENT-001-05]
@@ -281,6 +300,9 @@ subpackages/cashier/
 - 输入时实时搜索（防抖 300ms），展开搜索结果列表 [H5-HOME-003-02]
 - 无结果时显示"未找到相关商品" [H5-HOME-003-03]
 - 清空按钮：输入框右侧，点击清空输入内容 [H5-HOME-003-04]
+- **搜索历史**：本地存储最近 10 条搜索关键词，搜索栏聚焦时展示历史列表，支持单条删除和清空 [H5-HOME-003-05]
+- **热门搜索**：搜索栏聚焦时展示热门搜索词（服务端配置，最多 10 个），点击直接搜索 [H5-HOME-003-06]
+- **搜索结果排序**：默认按相关度排序，支持切换"价格升序/价格降序/销量排序" [H5-HOME-003-07]
 
 ### 1.4 商品标签筛选 [H5-HOME-004]
 - 标签按钮组：全部/新品/热销/推荐 [H5-HOME-004-01]
@@ -289,16 +311,16 @@ subpackages/cashier/
 ### 1.5 Banner 轮播 [H5-HOME-005]
 - 横向滑动 Banner，自动轮播，指示器圆点 [H5-HOME-005-01]
 - 图片懒加载 [H5-HOME-005-02]
+- **数据来源**：后台管理 Banner 配置（见 ADM-BANNER-001），按排序字段升序展示，仅展示启用状态的 Banner [H5-HOME-005-03]
 
-### 1.6 购物车悬浮按钮 [H5-HOME-006]
-- 右下角悬浮购物车图标，显示商品数量角标（红色圆形 + 白色数字）[H5-HOME-006-01]
-- 点击跳转购物车页面 [H5-HOME-006-02]
-- 添加商品时角标数字 +1，缩放动画（scale 1.0→1.3→1.0, 300ms）[H5-HOME-006-03]
+### 1.6 购物车入口 [H5-HOME-006]
+- 购物车为 TabBar 固定入口，TabBar 图标显示商品数量角标（红色圆形 + 白色数字）[H5-HOME-006-01]
+- 添加商品时角标数字 +1，缩放动画（scale 1.0→1.3→1.0, 300ms）[H5-HOME-006-02]
 
 ### 1.7 页面骨架 [H5-HOME-007]
 - Header（品牌 Logo + 会员图标）+ 内容区 + TabBar [H5-HOME-007-01]
-- TabBar 底部导航：首页/订单/会员/俱乐部（4 项），俱乐部一期点击 toast"即将上线" [H5-HOME-007-02]
-- 说明：首页即为商品浏览页（含分类/搜索/商品列表），无需独立的"商品"Tab [H5-HOME-007-03]
+- TabBar 底部导航：首页/订单/购物车/个人中心（4 项）[H5-HOME-007-02]
+- 说明：首页即为商品浏览页（含分类/搜索/商品列表），无需独立的"商品"Tab；个人中心即会员中心 [H5-HOME-007-03]
 - NavBar 顶部导航：标题 + 返回 + 会员码入口 [H5-HOME-007-04]
 
 ### 1.8 新用户引导 [H5-HOME-008] [🟢 一期]
@@ -339,12 +361,26 @@ subpackages/cashier/
   - 服务端独有商品：下载至本地 [H5-CART-005-07]
   - 不同 SKU 视为不同商品，分别保留 [H5-CART-005-08]
 - **冲突处理**：本地商品已下架/库存不足时，toast 提示并移除该商品 [H5-CART-005-09]
+- **商品下架处理**：购物车中商品被下架后，该商品项置灰 + 显示"已下架"标签 + 禁止勾选，3 秒后自动移除 [H5-CART-005-09B]
+- **SKU 停售处理**：购物车中 SKU 被停售后，该商品项显示"规格不可用"标签 + 禁止勾选，3 秒后自动移除 [H5-CART-005-09C]
 - **失效处理**：提交订单时服务端校验商品状态（下架/库存不足/价格变动），失败则 toast 提示并返回购物车刷新 [H5-CART-005-10]
 - **数据清理**：订单支付成功后，自动清空已购买商品的购物车数据（本地 + 服务端）[H5-CART-005-11]
 
 ---
 
 ## 3. 订单确认 [🟢 一期]
+
+> **订单状态统一定义**（H5 端 + 后台管理端共用）：
+> | 状态值 | 中文名 | 含义 | 可流转至 |
+> |:---|:---|:---|:---|
+> | `pending` | 待付款 | 订单已创建，等待支付 | `paid`/`cancelled` |
+> | `paid` | 待取餐 | 支付成功，等待商家制作 | `making`/`cancelled`/`refunded` |
+> | `making` | 制作中 | 商家开始制作 | `completed`/`refunded` |
+> | `completed` | 已完成 | 制作完成，用户已取餐 | 终态 |
+> | `cancelled` | 已取消 | 超时未支付或手动取消 | 终态 |
+> | `refunded` | 已退款 | 退款完成 | 终态 |
+>
+> **状态流转规则**：非法流转拒绝，所有状态变更记录至 `order_status_logs`。
 
 ### 3.1 桌号输入 [H5-ORDER-CONFIRM-001]
 - 输入框：placeholder="请输入桌号（如 A01）"，最大长度 10 字符 [H5-ORDER-CONFIRM-001-01]
@@ -376,7 +412,8 @@ subpackages/cashier/
 ### 3.6 实付金额 [H5-ORDER-CONFIRM-006]
 - 明细：商品总价 / 会员折扣 / 积分抵扣 / 实付金额（24px bold #FF4D4F）[H5-ORDER-CONFIRM-006-01]
 - 公式：实付 = 商品总价 - 分品类折扣合计 - 积分抵扣 [H5-ORDER-CONFIRM-006-02]
-- **服务端校验**：提交订单时服务端重新计算所有金额（折扣/积分/实付），与前端传入金额对比，差异 > 1 分则拒绝 [H5-ORDER-CONFIRM-006-03]
+- **服务端校验**：提交订单时服务端独立重算所有金额（折扣/积分/实付），前端传入金额仅作参考，以服务端计算结果为准，差异 > 1 分则拒绝 [H5-ORDER-CONFIRM-006-03]
+- **前后端金额职责约定**：前端折扣计算仅为展示预估，不作为最终结算依据；`order-preview` 接口返回服务端计算的预览金额，`order-create` 接口返回最终确认金额 [H5-ORDER-CONFIRM-006-04]
 
 ### 3.7 提交订单 [H5-ORDER-CONFIRM-007]
 - 底部固定"提交订单"按钮：未选禁用（灰色 #CCC），已选可用（主题色）[H5-ORDER-CONFIRM-007-01]
@@ -485,13 +522,16 @@ subpackages/cashier/
 ### 5.6 取餐通知 [H5-ORDER-LIST-006] [🟢 一期]
 - 订单状态变为"已完成"时，页面内展示"您的饮品已制作完成，请取餐"（绿色横幅）[H5-ORDER-LIST-006-01]
 - 订单列表页：已完成订单卡片顶部浅绿背景高亮提示 [H5-ORDER-LIST-006-02]
-- 🔵 公众号模板消息通知 → 二期 [H5-ORDER-LIST-006-03]
+- **微信订阅消息**：订单状态变更（待取餐→制作中→已完成）时，通过微信订阅消息推送通知 [H5-ORDER-LIST-006-03]
+- **订阅消息授权**：用户首次下单时弹窗请求订阅消息授权，授权后持续推送；未授权不推送但不影响下单 [H5-ORDER-LIST-006-04]
 
-### 5.7 申请退款 [H5-ORDER-LIST-007] [🔵 二期]
+### 5.7 申请退款 [H5-ORDER-LIST-007] [� 一期]
 - "待取餐"和"制作中"状态订单，详情页显示"申请退款"按钮（红色文字）[H5-ORDER-LIST-007-01]
 - 点击弹出确认弹窗："确定申请退款？退款后积分和成长值将回退" [H5-ORDER-LIST-007-02]
-- 确认后调用 refund-request 接口，toast"退款申请已提交" [H5-ORDER-LIST-007-03]
+- 确认后调用 `POST /api/v1/order/refund/request` 接口，toast"退款申请已提交" [H5-ORDER-LIST-007-03]
 - 退款完成后订单状态变为"已取消"，订单卡片显示"已退款"标签 [H5-ORDER-LIST-007-04]
+- **退款规则**：微信/支付宝支付原路退回（收钱吧退款 API），余额支付退回余额账户 [H5-ORDER-LIST-007-05]
+- **积分/成长值回退**：退款成功后自动扣减该订单获得的积分和成长值，扣减后积分/成长值不低于 0 [H5-ORDER-LIST-007-06]
 
 ---
 
@@ -537,10 +577,12 @@ subpackages/cashier/
 - ⚠️ 收银端扫码解析 → 依赖二期收银模块 [H5-MEMBER-007-07] [⚠️ 跨阶段依赖]
 
 ### 6.8 用户资料 [H5-MEMBER-008]
-- 头像：点击调起微信选择图片更换 [H5-MEMBER-008-01]
-- 昵称：点击编辑，弹出输入框，最大 20 字符 [H5-MEMBER-008-02]
+- 头像：点击调起微信选择图片更换（微信内）或系统文件选择（外部浏览器），图片压缩至 200KB 内上传 [H5-MEMBER-008-01]
+- 昵称：点击编辑，弹出输入框，最大 20 字符，校验非空 [H5-MEMBER-008-02]
 - 手机号：显示绑定状态，未绑定显示"去绑定"按钮 [H5-MEMBER-008-03]
 - 绑定手机号弹窗：手机号 + 验证码 + 60 秒倒计时，验证码发送限流 1 次/分钟/手机号，同一手机号每日最多 5 次，验证码 5 分钟有效 [H5-MEMBER-008-04]
+- 换绑手机号：已绑定手机号显示脱敏号码（138****8000）+ "换绑"按钮，换绑流程同绑定流程 [H5-MEMBER-008-05]
+- 资料保存：修改后即时调用 `POST /api/v1/member/profile/update` 保存，成功 toast"保存成功" [H5-MEMBER-008-06]
 
 ---
 
@@ -862,6 +904,12 @@ subpackages/cashier/
 
 ## 22. 系统管理 [🟢 一期]
 
+### 22.0 Banner 管理 [ADM-BANNER-001] [🟢 一期]
+- Banner 列表：图片缩略图/标题/链接/排序/状态 Switch/操作 [ADM-BANNER-001-01]
+- 新建/编辑 Banner：图片上传（≤ 2MB，建议 750×300px）+ 标题 + 跳转链接 + 排序值 + 启用状态 [ADM-BANNER-001-02]
+- 排序规则：按排序值升序展示，相同排序值按创建时间倒序 [ADM-BANNER-001-03]
+- 操作权限码：`banner:manage`（新建/编辑/删除/启用停用）[ADM-BANNER-001-04]
+
 ### 22.1 账号列表 [ADM-SYS-001]
 - 表格：用户名/昵称/角色/状态/创建时间/操作 [ADM-SYS-001-01]
 - 角色说明：系统内置"超级管理员"和"普通管理员"两个角色，权限由权限码清单决定（见 §28）；超级管理员默认拥有全部权限码，普通管理员默认仅拥有各模块 `*:view` 权限码 [ADM-SYS-001-02]
@@ -1026,6 +1074,7 @@ subpackages/cashier/
 | `table:qrcode` | 桌号管理 | 生成/下载桌台码 | 超级管理员 |
 | `config:view` | 会员配置 | 查看会员配置 | 所有角色 |
 | `config:edit` | 会员配置 | 编辑/重置会员配置 | 超级管理员 |
+| `banner:manage` | Banner 管理 | 新建/编辑/删除/启用停用 Banner | 超级管理员 |
 | `permission:manage` | 权限管理 | 为角色分配/修改权限码 | 超级管理员 |
 
 ### 28.2 权限码使用约定（代码层面） [ADM-PERM-002]
@@ -1108,6 +1157,26 @@ subpackages/cashier/
 - **慢查询监控**：服务端记录 > 1s 的查询到 `slow_queries` 集合（timestamp/endpoint/duration/query/user_id），每日告警汇总 [API-OBS-001-02]
 - **分页优化**：分页接口增加 `has_more` 字段（基于最后一条 `_id` 游标分页），非必要场景不返回 `total`，避免 `countDocuments` 性能问题 [API-OBS-001-03]
 
+### 错误监控与告警体系 [API-MONITOR-001]
+- **前端错误监控** [API-MONITOR-001-01]：
+  - 全局 `window.onerror` + `unhandledrejection` 捕获，上报至 uniCloud `frontend_errors` 集合
+  - 上报内容：timestamp / error_message / stack / page_url / user_agent / user_id / request_id
+  - 采样率：生产环境 10%（高频错误自动提升至 100%），开发/测试环境 100%
+  - 预留 Sentry 接入能力（DSN 配置项），二期可切换至 Sentry
+- **服务端错误监控** [API-MONITOR-001-02]：
+  - 云函数未捕获异常自动记录 `error_logs` 集合（同 ERROR-HOOK-002）
+  - 关键链路（支付/退款/充值）错误实时告警：写入 `alert_queue` 集合，定时任务每分钟扫描并推送钉钉/企微
+  - 告警规则：同一 `request_id` 5 分钟内出现 ≥ 3 次错误触发告警；支付/退款接口任何错误立即告警
+- **业务指标监控** [API-MONITOR-001-03]：
+  - 支付成功率：`pay_success / pay_total`，低于 95% 告警
+  - 订单超时取消率：`timeout_cancel / order_total`，高于 10% 告警
+  - 接口 P99 延迟：基于 `request_id` 计算响应时间，P99 > 3s 告警
+- **监控数据保留策略** [API-MONITOR-001-04]：
+  - `frontend_errors`：保留 30 天，超期自动清理
+  - `error_logs`：保留 90 天，超期归档至 OSS
+  - `slow_queries`：保留 7 天
+  - `alert_queue`：已处理告警保留 180 天
+
 ### 并发安全 [API-CONCURRENCY-001]
 - **乐观锁**：订单操作采用乐观锁（`version` 字段），冲突时提示"订单已被他人操作，请刷新" [API-CONCURRENCY-001-01]
 - **原子操作**：余额扣减使用 `findOneAndUpdate` 带 `balance >= amount` 条件，防止超扣 [API-CONCURRENCY-001-02]
@@ -1126,6 +1195,10 @@ subpackages/cashier/
 - **购物车集合**：db-schema 需补充 `carts` 集合定义（`_id/member_id/items[{goodsId/skuId/name/price/quantity/image/selected}]/updated_at`），支持登录后购物车同步 [API-DATA-001-01]
 - **SKU 规格组**：db-schema 的 `goods` 集合需补充 `spec_groups` 字段（`[{name:"温度",values:["热","冰"]}]`），`sku_list` 中每项增加 `spec_values`（`{"温度":"热","大小":"大"}`），支持笛卡尔积模型 [API-DATA-001-02]
 - **商品分类层级**：db-schema 的 `goods` 集合 `category` 字段改为 `category_id`（关联 `categories` 集合），支持 2 级分类（`parent_id` 自关联）[API-DATA-001-03]
+- **Banner 集合**：db-schema 需补充 `banners` 集合定义（`_id/title/image/link/sort_order/status/create_time/update_time`），支持首页 Banner 运营配置 [API-DATA-001-04]
+- **操作日志集合**：db-schema 需补充 `admin_operation_logs` 集合定义（`_id/admin_id/admin_name/action/target_type/target_id/before_snapshot/after_snapshot/create_time`），支持后台敏感操作审计 [API-DATA-001-05]
+- **等级变更记录集合**：db-schema 需补充 `member_level_changes` 集合定义（`_id/member_id/old_level/new_level/trigger_type(trigger/recharge/consume)/trigger_id/create_time`），支持等级变更追溯 [API-DATA-001-06]
+- **订单状态日志集合**：db-schema 需补充 `order_status_logs` 集合定义（`_id/order_id/from_status/to_status/operator_type(system/admin/member)/operator_id/create_time`），支持订单状态变更审计 [API-DATA-001-07]
 
 ---
 
@@ -1199,7 +1272,7 @@ subpackages/cashier/
 | H5-ORDER-CONFIRM-001 ~ 007 | H5 订单确认（含 order-preview） | p1-h5-trade | 一期 |
 | H5-PAY-001 ~ 009 | H5 订单支付（含长轮询+中断恢复） | p1-h5-trade | 一期 |
 | H5-ORDER-LIST-001 ~ 006 | H5 订单管理 | p1-h5-trade | 一期 |
-| H5-ORDER-LIST-007 | H5 申请退款 | — | 二期 |
+| H5-ORDER-LIST-007 | H5 申请退款 | p1-h5-trade | 一期 |
 | H5-MEMBER-000 | H5 会员数据缓存策略 | p1-h5-member | 一期 |
 | H5-MEMBER-001 ~ 008 | H5 会员中心 | p1-h5-member | 一期 |
 | H5-BENEFIT-001 ~ 004 | H5 会员权益 | p1-h5-member | 一期 |
@@ -1224,6 +1297,7 @@ subpackages/cashier/
 | ADM-LOG-001 ~ 002 | 后台操作日志 | p2-admin | 一期 |
 | ADM-TABLE-001 ~ 002 | 后台桌号管理 | p2-admin | 一期 |
 | ADM-CONFIG-001 | 后台会员配置 | p2-admin | 一期 |
+| ADM-BANNER-001 | 后台 Banner 管理 | p2-admin | 一期 |
 | ADM-PERM-001 ~ 003 | 后管权限码规划 | p2-admin | 一期 |
 | ADM-COMM-001 ~ 003 | 后台社区管理 | — | 二期 |
 | ERROR-HOOK-001 ~ 003 | 全局异常日志 | — | 一期 |
@@ -1235,6 +1309,7 @@ subpackages/cashier/
 | API-SECURITY-001 | 数据传输安全 | — | 一期 |
 | API-SLA-001 | 性能 SLA | — | 一期 |
 | API-OBS-001 | 可观测性（request_id/慢查询/分页优化） | — | 一期 |
+| API-MONITOR-001 | 错误监控与告警体系 | — | 一期 |
 | API-CONCURRENCY-001 | 并发安全（乐观锁/原子操作） | — | 一期 |
 | API-CLOUD-001 | 云函数架构（合并策略） | — | 一期 |
 | API-DATA-001 | 数据模型补充说明（购物车/SKU/分类） | — | 一期 |
@@ -1248,7 +1323,7 @@ subpackages/cashier/
 | H5-PAY-004 余额支付 | P0 缺陷：余额充值后缺少消费出口 |
 | H5-PAY 支付方式扩展 | 新增支付宝支付（收钱吧），在线支付统一走收钱吧 |
 | H5-ORDER-LIST-006 取餐通知 | P0 缺陷：用户无法得知何时取餐 |
-| H5-ORDER-LIST-007 申请退款 | 🔵 二期：一期仅饮品在线点单，无退款场景 |
+| H5-ORDER-LIST-007 申请退款 | P0 缺陷：一期退款场景存在（饮品点错/商家取消），需提供用户端退款入口 |
 | H5-BALANCE-001~003 余额明细 | P1 缺陷：余额变动无流水记录 |
 | H5-TABLE-001~002 桌台码扫码 | P2 缺陷：桌号管理体系不完整 |
 | H5-HOME-008 新用户引导 | P2 缺陷：首次使用体验缺失 |
@@ -1256,12 +1331,41 @@ subpackages/cashier/
 | ADM-REPORT-001~004 数据报表 | P2 缺陷：运营看板过于简单 |
 | ADM-LOG-001~002 操作日志 | P2 缺陷：敏感操作无审计 |
 | ADM-TABLE-001~002 桌号管理 | P2 缺陷：桌号无法管理 |
+| ADM-BANNER-001 Banner 管理 | P1 缺陷：首页 Banner 无后台配置入口 |
 
 ---
 
-> **版本**：v3.8 | **基于**：member-system-design.md v6.0 | **更新日期**：2026-05-28
-> **变更摘要**：
-> - P0 修复：Token 改为 withCredentials 模式（服务端 Set-Cookie + 前端自动携带）；新增外部浏览器手机号+验证码登录；支付结果轮询改为长轮询（减少 70% 请求量）；收钱吧 API 调用方式对齐（precreate 返回 pay_params）；退款增加异步状态查询；订单状态命名统一为 pending/paid/making/completed/cancelled/refunded
-> - P1 优化：Token 刷新竞态队列；JS-SDK 签名 2 小时缓存；Vant UI 按需引入（60KB→20KB）；orderStore 拆分为 orderStore+paymentStore；购物车合并锁定；WeixinJSBridge 就绪检测封装；支付中断恢复 UI；订单确认页调用 order-preview 接口；手机号验证码防刷
-> - P1 后台：Vben Tabs 多标签页 + 搜索重置规范；后台登录密码强度统一为 ≥8 位；重置密码后强制重新登录（Token 黑名单）
-> - P1 服务端：性能 SLA 定义；慢查询监控；request_id 关联；乐观锁；熔断器参数优化（失败率>50%→熔断10s）；收钱吧 API 超时+回调 URL；云函数合并策略（51→15）；购物车/SKU/分类数据模型补充说明
+# 附录 C：待补充文档清单
+
+> 以下文档尚未编写，但属于项目交付必需。在此记录以避免后续执行时遗漏，每份文档标注**应产出阶段**和**依赖前提**。
+
+| # | 文档名称 | 应产出阶段 | 依赖前提 | 产出标准 | 状态 |
+|:---|:---|:---|:---|:---|:---|
+| 1 | **测试策略与用例文档** | Phase 1 开发完成后、联调前 | full-feature-list.md v4.0 定稿 + API 契约文档定稿 | 覆盖所有一期核心流程（登录→浏览→加购→下单→支付→取餐→退款），含正向/反向用例 | ❌ 待编写 |
+| 2 | **部署与运维手册** | Phase 1 联调通过后、上线前 | 云函数架构定稿 + 域名/SSL 证书就绪 | 含环境变量清单、Nginx 配置、PM2/云函数部署命令、监控告警配置、回滚方案 | ❌ 待编写 |
+| 3 | **运营配置手册** | Phase 1 上线前 | 后台管理端功能开发完成 | 含 Banner 配置、会员等级/积分规则配置、商品上下架操作、桌号管理操作 | ❌ 待编写 |
+| 4 | **数据迁移方案** | Phase 2 社区模块启动前 | 社区模块数据模型定稿 | 含现有用户数据迁移脚本、数据校验方案、回滚策略 | ❌ 待编写 |
+
+**文档产出流程约定**：
+1. 每份文档产出前，需先在 `.trae/specs` 下创建对应 spec 文件（如 `test-strategy.md`、`deployment-guide.md`）
+2. 文档编写遵循 sdd-riper 协议：先出方案 → 确认 → 编写 → 验证
+3. 文档产出后，本清单对应行的"状态"列更新为 ✅
+
+---
+
+> **版本**：v4.0 | **基于**：member-system-design.md v6.0 | **更新日期**：2026-06-01
+> **变更摘要（v3.8 → v4.0）**：
+> - **TabBar 重构**：底部导航从"首页/订单/会员/俱乐部"改为"首页/订单/购物车/个人中心"，购物车升级为 TabBar 页面，移除悬浮购物车按钮
+> - **深色模式降为二期**：一期仅实现浅色模式，深色模式相关功能（themeStore/主题切换/主题持久化/系统跟随）标记为 🔵 二期
+> - **退款功能升级为一期**：H5 端申请退款（H5-ORDER-LIST-007）从二期调整为一期，补充退款规则和积分/成长值回退逻辑
+> - **订单状态统一定义**：在 §3 新增订单状态统一定义表（pending/paid/making/completed/cancelled/refunded），消除 H5 端与后台状态命名歧义
+> - **搜索功能细化**：补充搜索历史（本地 10 条）、热门搜索词（服务端配置）、搜索结果排序策略
+> - **用户资料编辑细化**：补充换绑手机号、图片压缩上传、资料保存 API 调用
+> - **Banner 运营配置**：新增 ADM-BANNER-001 后台 Banner 管理功能，首页 Banner 数据来源明确
+> - **DB 集合补充**：新增 banners、admin_operation_logs、member_level_changes、order_status_logs 集合声明
+> - **业务规则强化**：购物车商品下架/SKU 停售处理、前后端金额计算职责约定、服务端独立重算
+> - **取餐通知增强**：微信订阅消息推送从二期提前至一期，补充订阅消息授权机制
+> - **权限码补充**：新增 `banner:manage` 权限码
+> - **错误监控与告警体系**：新增 API-MONITOR-001（前端错误上报/服务端告警/业务指标监控/数据保留策略）
+> - **分开打包实现路径**：补充 pages.json 配置策略、独立部署路由、跨域认证方案、共享包版本管理
+> - **待补充文档清单**：新增附录 C，记录测试策略、部署运维、运营配置、数据迁移 4 份待编写文档及产出阶段
