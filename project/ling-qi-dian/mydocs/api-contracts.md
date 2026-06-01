@@ -1,9 +1,9 @@
 # API 接口契约文档
 
 > 本文档定义机车俱乐部系统的全部云函数接口契约
-> 版本: v2.1 | 日期: 2026-05-24
+> 版本: v3.0 | 日期: 2026-05-31
 >
-> **产品基准**：`full-feature-list.md` v3.0 | 接口覆盖：全部 51 个云函数
+> **产品基准**：`full-feature-list.md` v3.8 | 接口覆盖：全部 51 个云函数（合并后约 15 个入口）
 
 ---
 
@@ -17,6 +17,7 @@
 6. [收银模块](#收银模块)
 7. [社区模块](#社区模块)
 8. [后台管理模块](#后台管理模块)
+9. [微信模块](#微信模块)
 
 ---
 
@@ -32,12 +33,12 @@
 
 ### 2. 认证方式
 
-**客户端认证**: HTTP Header 携带 Token
-```
-Authorization: Bearer <token>
-```
+**H5 端认证**: Cookie-based withCredentials 模式
+- 服务端通过 Set-Cookie 下发 httpOnly Cookie（含 access_token + refresh_token）
+- 前端请求配置 withCredentials: true，浏览器自动携带 Cookie
+- 服务端从 Cookie 解析 Token
 
-**后台管理认证**: JWT Token
+**后台管理认证**: JWT Token（Header 方式）
 ```
 Authorization: Bearer <jwt_token>
 ```
@@ -49,6 +50,7 @@ Authorization: Bearer <jwt_token>
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": { }
 }
 ```
@@ -58,6 +60,7 @@ Authorization: Bearer <jwt_token>
 {
   "code": 10001,
   "message": "错误描述",
+  "request_id": "uuid-v4",
   "data": null
 }
 ```
@@ -68,11 +71,13 @@ Authorization: Bearer <jwt_token>
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "list": [],
     "total": 100,
     "page": 1,
-    "pageSize": 20
+    "pageSize": 20,
+    "has_more": true
   }
 }
 ```
@@ -88,12 +93,19 @@ Authorization: Bearer <jwt_token>
 | `10004` | 资源不存在 |
 | `10005` | 服务器内部错误 |
 | `10006` | 请求过于频繁 |
+| `10007` | 验证码错误 |
+| `10008` | 验证码已过期 |
+| `10009` | 验证码发送频率超限 |
+| `10010` | Token 刷新失败 |
+| `10011` | 账号已锁定 |
 | `20001` | 余额不足 |
 | `20002` | 库存不足 |
 | `20003` | 订单状态异常 |
 | `20004` | 支付失败 |
 | `20005` | 活动已结束 |
 | `20006` | 不在活动期 |
+| `20007` | 订单版本冲突（乐观锁） |
+| `20008` | 重复请求（requestId 去重） |
 
 ---
 
@@ -101,11 +113,11 @@ Authorization: Bearer <jwt_token>
 
 ### 1. 微信网页授权登录
 
-**云函数**: `wx-auth`
+**云函数**: `auth`（路由分发）
 
 **请求**
 ```http
-POST /wx-auth
+POST /api/v1/auth/wx-login
 Content-Type: application/json
 
 {
@@ -118,8 +130,8 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
-    "token": "eyJhbGciOiJIUzI1NiIs...",
     "expire": 7200,
     "userInfo": {
       "uid": "用户ID",
@@ -135,15 +147,21 @@ Content-Type: application/json
 > **字段说明**：
 > - `level`: 等级值（0-6，0=普通用户）
 > - `level_name`: 普通用户/青铜/白银/黄金/铂金/钻石/至尊
+> - Token 通过 Set-Cookie 下发（httpOnly Cookie 含 access_token + refresh_token）
 
-### 2. Token 校验
+### 2. 手机号+验证码登录
 
-**云函数**: `check-token`
+**云函数**: `auth`（路由分发）
 
 **请求**
 ```http
-POST /check-token
-Authorization: Bearer <token>
+POST /api/v1/auth/phone-login
+Content-Type: application/json
+
+{
+  "phone": "13800138000",
+  "sms_code": "123456"
+}
 ```
 
 **响应**
@@ -151,6 +169,67 @@ Authorization: Bearer <token>
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
+  "data": {
+    "expire": 7200,
+    "userInfo": {
+      "uid": "用户ID",
+      "nickname": "微信昵称",
+      "avatar": "头像URL",
+      "level": 1,
+      "level_name": "青铜"
+    }
+  }
+}
+```
+
+> **字段说明**：
+> - 服务端根据手机号查询/创建用户，下发 Token（Set-Cookie）
+
+### 3. 发送验证码
+
+**云函数**: `auth`（路由分发）
+
+**请求**
+```http
+POST /api/v1/auth/sms-code
+Content-Type: application/json
+
+{
+  "phone": "13800138000"
+}
+```
+
+**响应**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "request_id": "uuid-v4",
+  "data": {
+    "expire_in": 300
+  }
+}
+```
+
+> **限流**：1次/分钟/手机号，5次/天/手机号
+
+### 4. Token 校验
+
+**云函数**: `auth`（路由分发）
+
+**请求**
+```http
+POST /api/v1/auth/check-token
+Cookie: 自动携带（withCredentials: true）
+```
+
+**响应**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "valid": true,
     "userInfo": {
@@ -168,13 +247,61 @@ Authorization: Bearer <token>
 > - `level`: 等级值（0-6，0=普通用户）
 > - `level_name`: 普通用户/青铜/白银/黄金/铂金/钻石/至尊
 
-### 3. 后台登录
+### 5. Token 刷新
 
-**云函数**: `admin-login`
+**云函数**: `auth`（路由分发）
 
 **请求**
 ```http
-POST /admin-login
+POST /api/v1/auth/token-refresh
+Cookie: 自动携带（withCredentials: true）
+```
+
+**响应**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "request_id": "uuid-v4",
+  "data": {
+    "expire": 7200
+  }
+}
+```
+
+> **字段说明**：
+> - Set-Cookie 下发新 access_token + refresh_token，refresh_token 轮换
+
+### 6. 退出登录
+
+**云函数**: `auth`（路由分发）
+
+**请求**
+```http
+POST /api/v1/auth/logout
+Cookie: 自动携带（withCredentials: true）
+```
+
+**响应**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "request_id": "uuid-v4",
+  "data": {}
+}
+```
+
+> **字段说明**：
+> - 清除 Cookie
+
+### 7. 后台登录
+
+**云函数**: `admin`（路由分发）
+
+**请求**
+```http
+POST /api/v1/admin/login
 Content-Type: application/json
 
 {
@@ -188,6 +315,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "token": "eyJhbGciOiJIUzI1NiIs...",
     "expire": 86400,
@@ -205,14 +333,14 @@ Content-Type: application/json
 
 ## 商品模块
 
-### 4. 获取商品列表
+### 8. 获取商品列表
 
-**云函数**: `goods-list`
+**云函数**: `admin`（路由分发）
 
 **请求**
 ```http
-POST /goods-list
-Authorization: Bearer <token>
+POST /api/v1/goods/list
+Cookie: 自动携带（withCredentials: true）
 Content-Type: application/json
 
 {
@@ -227,6 +355,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "list": [
       {
@@ -252,19 +381,20 @@ Content-Type: application/json
     ],
     "total": 50,
     "page": 1,
-    "pageSize": 20
+    "pageSize": 20,
+    "has_more": true
   }
 }
 ```
 
-### 5. 获取商品详情
+### 9. 获取商品详情
 
-**云函数**: `goods-detail`
+**云函数**: `admin`（路由分发）
 
 **请求**
 ```http
-POST /goods-detail
-Authorization: Bearer <token>
+POST /api/v1/goods/detail
+Cookie: 自动携带（withCredentials: true）
 Content-Type: application/json
 
 {
@@ -277,6 +407,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "id": "商品ID",
     "name": "美式咖啡",
@@ -304,17 +435,18 @@ Content-Type: application/json
 
 ## 订单模块
 
-### 6. 创建订单
+### 10. 创建订单
 
-**云函数**: `order-create`
+**云函数**: `order`（路由分发）
 
 **请求**
 ```http
-POST /order-create
-Authorization: Bearer <token>
+POST /api/v1/order/create
+Cookie: 自动携带（withCredentials: true）
 Content-Type: application/json
 
 {
+  "request_id": "uuid-v4",
   "table_no": "A01",
   "goods": [
     {
@@ -331,12 +463,14 @@ Content-Type: application/json
 
 > **参数说明**：
 > - `goods[].category`: 商品品类，用于分品类折扣计算（如：咖啡、饮品、工时费、配件）
+> - `request_id`: 用于防重复提交，服务端 10s 内相同 request_id 去重
 
 **响应**
 ```json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "order_no": "202605211430001",
     "pay_amount": 5000,
@@ -358,13 +492,136 @@ Content-Type: application/json
 }
 ```
 
-### 7. 支付回调
+### 11. 订单预览
 
-**云函数**: `order-pay-callback`
+**云函数**: `order`（路由分发）
+
+> **对应功能**：H5-ORDER-CONFIRM-003
 
 **请求**
 ```http
-POST /order-pay-callback
+POST /api/v1/order/preview
+Cookie: 自动携带（withCredentials: true）
+Content-Type: application/json
+
+{
+  "goods": [
+    {
+      "goods_id": "商品ID",
+      "sku_id": "sku_001",
+      "quantity": 2
+    }
+  ],
+  "use_points": 0
+}
+```
+
+**响应**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "request_id": "uuid-v4",
+  "data": {
+    "original_amount": 5000,
+    "discount_detail": {
+      "drink_discount_amount": 100,
+      "labor_discount_amount": 0,
+      "parts_discount_amount": 0,
+      "total_discount_amount": 100
+    },
+    "point_deduct": 0,
+    "pay_amount": 4900,
+    "goods_valid": true
+  }
+}
+```
+
+> **字段说明**：
+> - 服务端计算最新价格/折扣/库存，前端仅展示
+
+### 12. 发起支付
+
+**云函数**: `order`（路由分发）
+
+> **对应功能**：H5-PAY-004/005/006
+
+**请求**
+```http
+POST /api/v1/order/pay
+Cookie: 自动携带（withCredentials: true）
+Content-Type: application/json
+
+{
+  "order_no": "202605211430001",
+  "pay_method": "wechat",
+  "env": "wechat"
+}
+```
+
+> **参数说明**：
+> - `pay_method` 可选：`wechat` / `alipay` / `balance`
+> - `env` 可选：`wechat` / `browser`
+
+**响应（微信内）**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "request_id": "uuid-v4",
+  "data": {
+    "order_no": "202605211430001",
+    "pay_method": "wechat",
+    "pay_params": {
+      "appId": "wx...",
+      "timeStamp": "1234567890",
+      "nonceStr": "随机字符串",
+      "package": "prepay_id=...",
+      "signType": "RSA",
+      "paySign": "签名"
+    }
+  }
+}
+```
+
+**响应（外部浏览器）**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "request_id": "uuid-v4",
+  "data": {
+    "order_no": "202605211430001",
+    "pay_method": "wechat",
+    "h5_url": "https://wx.tenpay.com/cgi-bin/mmpayweb-bin/checkmweb?..."
+  }
+}
+```
+
+**响应（余额支付）**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "request_id": "uuid-v4",
+  "data": {
+    "order_no": "202605211430001",
+    "pay_method": "balance",
+    "pay_amount": 5000,
+    "balance_before": 11000,
+    "balance_after": 6000,
+    "pay_time": "2026-05-21T14:35:00Z"
+  }
+}
+```
+
+### 13. 支付回调
+
+**云函数**: `order`（路由分发）
+
+**请求**
+```http
+POST /api/v1/order/pay-callback
 Content-Type: application/json
 
 {
@@ -382,6 +639,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "order_no": "202605211430001",
     "order_status": "paid",
@@ -390,14 +648,50 @@ Content-Type: application/json
 }
 ```
 
-### 8. 查询订单列表
+### 14. 支付状态长轮询
 
-**云函数**: `order-list`
+**云函数**: `order`（路由分发）
+
+> **对应功能**：H5-PAY-007
 
 **请求**
 ```http
-POST /order-list
-Authorization: Bearer <token>
+POST /api/v1/order/pay-status
+Cookie: 自动携带（withCredentials: true）
+Content-Type: application/json
+
+{
+  "order_no": "202605211430001"
+}
+```
+
+**响应**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "request_id": "uuid-v4",
+  "data": {
+    "order_no": "202605211430001",
+    "order_status": "paid",
+    "pay_status": 1
+  }
+}
+```
+
+> **字段说明**：
+> - 服务端 hold 5 秒后返回（有结果立即返回），减少 70% 请求量
+> - `order_status`: pending/paid/making/completed/cancelled/refunded
+> - `pay_status`: 0=待支付，1=已支付，2=已取消
+
+### 15. 查询订单列表
+
+**云函数**: `order`（路由分发）
+
+**请求**
+```http
+POST /api/v1/order/list
+Cookie: 自动携带（withCredentials: true）
 Content-Type: application/json
 
 {
@@ -412,6 +706,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "list": [
       {
@@ -431,19 +726,20 @@ Content-Type: application/json
     ],
     "total": 10,
     "page": 1,
-    "pageSize": 20
+    "pageSize": 20,
+    "has_more": false
   }
 }
 ```
 
-### 9. 查询订单详情
+### 16. 查询订单详情
 
-**云函数**: `order-detail`
+**云函数**: `order`（路由分发）
 
 **请求**
 ```http
-POST /order-detail
-Authorization: Bearer <token>
+POST /api/v1/order/detail
+Cookie: 自动携带（withCredentials: true）
 Content-Type: application/json
 
 {
@@ -456,6 +752,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "order_no": "202605211430001",
     "table_no": "A01",
@@ -486,18 +783,67 @@ Content-Type: application/json
 }
 ```
 
----
+### 17. 申请退款（H5 端）
 
-## 会员模块
+**云函数**: `order`（路由分发）
 
-### 10. 获取会员信息
-
-**云函数**: `member-info`
+> **对应功能**：H5-ORDER-LIST-007
 
 **请求**
 ```http
-POST /member-info
-Authorization: Bearer <token>
+POST /api/v1/order/refund-request
+Cookie: 自动携带（withCredentials: true）
+Content-Type: application/json
+
+{
+  "order_no": "202605211430001"
+}
+```
+
+**响应**
+```json
+{
+  "code": 0,
+  "message": "退款申请已提交",
+  "request_id": "uuid-v4",
+  "data": {
+    "order_no": "202605211430001",
+    "refund_status": "pending",
+    "create_time": "2026-05-21T15:00:00Z"
+  }
+}
+```
+
+**错误响应**
+```json
+{
+  "code": 20003,
+  "message": "当前订单状态不支持退款",
+  "request_id": "uuid-v4",
+  "data": null
+}
+```
+
+> **字段说明**：
+> - 仅 pending（待取餐）和 making（制作中）状态的订单可申请退款
+> - `refund_status`: pending（待处理）/ approved（已退款）/ rejected（已驳回）
+> - 退款完成后订单状态变为 cancelled，积分和成长值自动回退
+
+### 18. 退款状态查询
+
+**云函数**: `order`（路由分发）
+
+> **对应功能**：ADM-ORDER-003
+
+**请求**
+```http
+POST /api/v1/order/refund-status
+Cookie: 自动携带（withCredentials: true）
+Content-Type: application/json
+
+{
+  "order_no": "202605211430001"
+}
 ```
 
 **响应**
@@ -505,6 +851,89 @@ Authorization: Bearer <token>
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
+  "data": {
+    "order_no": "202605211430001",
+    "refund_status": "approved",
+    "refund_amount": 5000,
+    "refund_time": "2026-05-21T15:10:00Z"
+  }
+}
+```
+
+### 19. 购物车同步
+
+**云函数**: `order`（路由分发）
+
+> **对应功能**：H5-CART-005
+
+**请求**
+```http
+POST /api/v1/cart/sync
+Cookie: 自动携带（withCredentials: true）
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "goodsId": "商品ID",
+      "skuId": "sku_001",
+      "name": "美式咖啡",
+      "price": 2500,
+      "quantity": 2,
+      "image": "url",
+      "selected": true
+    }
+  ]
+}
+```
+
+**响应**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "request_id": "uuid-v4",
+  "data": {
+    "items": [
+      {
+        "goodsId": "商品ID",
+        "skuId": "sku_001",
+        "name": "美式咖啡",
+        "price": 2500,
+        "quantity": 3,
+        "image": "url",
+        "selected": true
+      }
+    ],
+    "merged": true
+  }
+}
+```
+
+> **字段说明**：
+> - 服务端异或合并后返回，相同商品+相同SKU数量相加
+
+---
+
+## 会员模块
+
+### 20. 获取会员信息
+
+**云函数**: `member`（路由分发）
+
+**请求**
+```http
+POST /api/v1/members/info
+Cookie: 自动携带（withCredentials: true）
+```
+
+**响应**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "uid": "用户ID",
     "nickname": "微信昵称",
@@ -528,14 +957,14 @@ Authorization: Bearer <token>
 }
 ```
 
-### 11. 获取会员权益
+### 21. 获取会员权益
 
-**云函数**: `member-benefits`
+**云函数**: `member`（路由分发）
 
 **请求**
 ```http
-POST /member-benefits
-Authorization: Bearer <token>
+POST /api/v1/members/benefits
+Cookie: 自动携带（withCredentials: true）
 ```
 
 **响应**
@@ -543,6 +972,7 @@ Authorization: Bearer <token>
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "current": {
       "level": 1,
@@ -669,14 +1099,14 @@ Authorization: Bearer <token>
 }
 ```
 
-### 12. 获取积分流水
+### 22. 获取积分流水
 
-**云函数**: `member-point-logs`
+**云函数**: `member`（路由分发）
 
 **请求**
 ```http
-POST /member-point-logs
-Authorization: Bearer <token>
+POST /api/v1/members/point-logs
+Cookie: 自动携带（withCredentials: true）
 Content-Type: application/json
 
 {
@@ -691,6 +1121,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "list": [
       {
@@ -705,19 +1136,20 @@ Content-Type: application/json
     ],
     "total": 50,
     "page": 1,
-    "pageSize": 20
+    "pageSize": 20,
+    "has_more": true
   }
 }
 ```
 
-### 13. 获取充值档位
+### 23. 获取充值档位
 
-**云函数**: `member-recharge-tiers`
+**云函数**: `member`（路由分发）
 
 **请求**
 ```http
-POST /member-recharge-tiers
-Authorization: Bearer <token>
+POST /api/v1/members/recharge-tiers
+Cookie: 自动携带（withCredentials: true）
 Content-Type: application/json
 
 {}
@@ -730,6 +1162,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "tiers": [
       {
@@ -773,14 +1206,14 @@ Content-Type: application/json
 >
 > **二期扩展**：开业活动时将增加 `extra_bonus_points`、`extra_growth_value`、`remark` 字段
 
-### 14. 发起充值
+### 24. 发起充值
 
-**云函数**: `member-recharge`
+**云函数**: `member`（路由分发）
 
 **请求**
 ```http
-POST /member-recharge
-Authorization: Bearer <token>
+POST /api/v1/members/recharge
+Cookie: 自动携带（withCredentials: true）
 Content-Type: application/json
 
 {
@@ -796,6 +1229,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "order_no": "R202605210001",
     "amount": 100000,
@@ -815,16 +1249,16 @@ Content-Type: application/json
 > **字段说明**：
 > - `activity_code`: 关联活动编码，非活动期为空字符串
 
-### 15. H5 端余额支付
+### 25. H5 端余额支付
 
-**云函数**: `member-balance-pay`
+**云函数**: `member`（路由分发）
 
 > **对应功能**：H5-PAY-004
 
 **请求**
 ```http
-POST /member-balance-pay
-Authorization: Bearer <token>
+POST /api/v1/members/balance/pay
+Cookie: 自动携带（withCredentials: true）
 Content-Type: application/json
 
 {
@@ -837,6 +1271,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "order_no": "202605211430001",
     "pay_amount": 5000,
@@ -852,6 +1287,7 @@ Content-Type: application/json
 {
   "code": 20001,
   "message": "余额不足",
+  "request_id": "uuid-v4",
   "data": null
 }
 ```
@@ -861,14 +1297,14 @@ Content-Type: application/json
 > - `balance_after`: 支付后余额（单位：分）
 > - 扣款为原子操作，使用 `findOneAndUpdate` 带余额条件保证不超扣
 
-### 16. 获取充值记录
+### 26. 获取充值记录
 
-**云函数**: `member-recharge-logs`
+**云函数**: `member`（路由分发）
 
 **请求**
 ```http
-POST /member-recharge-logs
-Authorization: Bearer <token>
+POST /api/v1/members/recharge-logs
+Cookie: 自动携带（withCredentials: true）
 Content-Type: application/json
 
 {
@@ -882,6 +1318,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "list": [
       {
@@ -896,67 +1333,22 @@ Content-Type: application/json
     ],
     "total": 5,
     "page": 1,
-    "pageSize": 20
+    "pageSize": 20,
+    "has_more": false
   }
 }
 ```
 
----
+### 27. 余额流水查询
 
-### 17. 申请退款（H5 端）
-
-**云函数**: `refund-request`
-
-> **对应功能**：H5-ORDER-LIST-007
-
-**请求**
-```http
-POST /refund-request
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "order_no": "202605211430001"
-}
-```
-
-**响应**
-```json
-{
-  "code": 0,
-  "message": "退款申请已提交",
-  "data": {
-    "order_no": "202605211430001",
-    "refund_status": "pending",
-    "create_time": "2026-05-21T15:00:00Z"
-  }
-}
-```
-
-**错误响应**
-```json
-{
-  "code": 20003,
-  "message": "当前订单状态不支持退款",
-  "data": null
-}
-```
-
-> **字段说明**：
-> - 仅"待取餐"和"制作中"状态的订单可申请退款
-> - `refund_status`: pending（待处理）/ approved（已退款）/ rejected（已驳回）
-> - 退款完成后订单状态变为"已取消"，积分和成长值自动回退
-
-### 18. 余额流水查询
-
-**云函数**: `member-balance-logs`
+**云函数**: `member`（路由分发）
 
 > **对应功能**：H5-BALANCE-002~003
 
 **请求**
 ```http
-POST /member-balance-logs
-Authorization: Bearer <token>
+POST /api/v1/members/balance-logs
+Cookie: 自动携带（withCredentials: true）
 Content-Type: application/json
 
 {
@@ -974,6 +1366,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "list": [
       {
@@ -988,7 +1381,8 @@ Content-Type: application/json
     ],
     "total": 20,
     "page": 1,
-    "pageSize": 20
+    "pageSize": 20,
+    "has_more": false
   }
 }
 ```
@@ -998,52 +1392,18 @@ Content-Type: application/json
 > - `after_balance`: 变动后余额（单位：分）
 > - `type`: 变动类型（recharge/consume/refund/adjust）
 
-### 19. 查询支付状态
-
-**云函数**: `member-reconnect`
-
-> **对应功能**：H5-PAY-005
-
-**请求**
-```http
-POST /member-reconnect
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "order_no": "202605211430001"
-}
-```
-
-**响应**
-```json
-{
-  "code": 0,
-  "message": "success",
-  "data": {
-    "order_no": "202605211430001",
-    "pay_status": 1,
-    "pay_time": "2026-05-21T14:35:00Z"
-  }
-}
-```
-
-> **字段说明**：
-> - `pay_status`: 0=待支付，1=已支付，2=已取消
-> - H5 端支付后每 2 秒轮询此接口，最多 30 秒
-
 ---
 
 ## 收银模块
 
-### 20. 店员创建订单
+### 28. 店员创建订单
 
-**云函数**: `cashier-order-create`
+**云函数**: `cashier`（路由分发）
 
 **请求**
 ```http
-POST /cashier-order-create
-Authorization: Bearer <token>
+POST /api/v1/cashier/order-create
+Cookie: 自动携带（withCredentials: true）
 Content-Type: application/json
 
 {
@@ -1066,6 +1426,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "order_no": "202605211430001",
     "pay_amount": 5000,
@@ -1088,14 +1449,14 @@ Content-Type: application/json
 }
 ```
 
-### 21. 余额支付
+### 29. 余额支付
 
-**云函数**: `cashier-balance-pay`
+**云函数**: `cashier`（路由分发）
 
 **请求**
 ```http
-POST /cashier-balance-pay
-Authorization: Bearer <token>
+POST /api/v1/cashier/balance-pay
+Cookie: 自动携带（withCredentials: true）
 Content-Type: application/json
 
 {
@@ -1109,6 +1470,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "order_no": "202605211430001",
     "pay_status": 1,
@@ -1118,14 +1480,14 @@ Content-Type: application/json
 }
 ```
 
-### 22. 解析会员码
+### 30. 解析会员码
 
-**云函数**: `member-code-decode`
+**云函数**: `cashier`（路由分发）
 
 **请求**
 ```http
-POST /member-code-decode
-Authorization: Bearer <token>
+POST /api/v1/cashier/member-code-decode
+Cookie: 自动携带（withCredentials: true）
 Content-Type: application/json
 
 {
@@ -1138,6 +1500,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "member_id": "用户ID",
     "nickname": "微信昵称",
@@ -1153,14 +1516,14 @@ Content-Type: application/json
 
 ## 社区模块
 
-### 23. 创建帖子
+### 31. 创建帖子
 
-**云函数**: `community-post-create`
+**云函数**: `community-post`（路由分发）
 
 **请求**
 ```http
-POST /community-post-create
-Authorization: Bearer <token>
+POST /api/v1/community/post-create
+Cookie: 自动携带（withCredentials: true）
 Content-Type: application/json
 
 {
@@ -1180,6 +1543,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "post_id": "帖子ID",
     "create_time": "2026-05-21T10:00:00Z"
@@ -1187,14 +1551,14 @@ Content-Type: application/json
 }
 ```
 
-### 24. 获取帖子列表
+### 32. 获取帖子列表
 
-**云函数**: `community-post-list`
+**云函数**: `community-post`（路由分发）
 
 **请求**
 ```http
-POST /community-post-list
-Authorization: Bearer <token>
+POST /api/v1/community/post-list
+Cookie: 自动携带（withCredentials: true）
 Content-Type: application/json
 
 {
@@ -1209,6 +1573,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "list": [
       {
@@ -1233,19 +1598,20 @@ Content-Type: application/json
     ],
     "total": 100,
     "page": 1,
-    "pageSize": 20
+    "pageSize": 20,
+    "has_more": true
   }
 }
 ```
 
-### 25. 获取帖子详情
+### 33. 获取帖子详情
 
-**云函数**: `community-post-detail`
+**云函数**: `community-post`（路由分发）
 
 **请求**
 ```http
-POST /community-post-detail
-Authorization: Bearer <token>
+POST /api/v1/community/post-detail
+Cookie: 自动携带（withCredentials: true）
 Content-Type: application/json
 
 {
@@ -1258,6 +1624,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "post_id": "帖子ID",
     "author": {
@@ -1282,14 +1649,14 @@ Content-Type: application/json
 }
 ```
 
-### 26. 点赞/取消点赞
+### 34. 点赞/取消点赞
 
-**云函数**: `community-post-like`
+**云函数**: `community-post`（路由分发）
 
 **请求**
 ```http
-POST /community-post-like
-Authorization: Bearer <token>
+POST /api/v1/community/post-like
+Cookie: 自动携带（withCredentials: true）
 Content-Type: application/json
 
 {
@@ -1303,6 +1670,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "post_id": "帖子ID",
     "is_liked": true,
@@ -1311,14 +1679,14 @@ Content-Type: application/json
 }
 ```
 
-### 27. 发表评论
+### 35. 发表评论
 
-**云函数**: `community-comment-create`
+**云函数**: `community-comment`（路由分发）
 
 **请求**
 ```http
-POST /community-comment-create
-Authorization: Bearer <token>
+POST /api/v1/community/comment-create
+Cookie: 自动携带（withCredentials: true）
 Content-Type: application/json
 
 {
@@ -1333,6 +1701,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "comment_id": "评论ID",
     "create_time": "2026-05-21T11:00:00Z"
@@ -1340,14 +1709,14 @@ Content-Type: application/json
 }
 ```
 
-### 28. 获取评论列表
+### 36. 获取评论列表
 
-**云函数**: `community-comment-list`
+**云函数**: `community-comment`（路由分发）
 
 **请求**
 ```http
-POST /community-comment-list
-Authorization: Bearer <token>
+POST /api/v1/community/comment-list
+Cookie: 自动携带（withCredentials: true）
 Content-Type: application/json
 
 {
@@ -1362,6 +1731,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "list": [
       {
@@ -1378,19 +1748,20 @@ Content-Type: application/json
     ],
     "total": 8,
     "page": 1,
-    "pageSize": 20
+    "pageSize": 20,
+    "has_more": false
   }
 }
 ```
 
-### 29. 删除帖子
+### 37. 删除帖子
 
-**云函数**: `community-post-delete`
+**云函数**: `community-post`（路由分发）
 
 **请求**
 ```http
-POST /community-post-delete
-Authorization: Bearer <token>
+POST /api/v1/community/post-delete
+Cookie: 自动携带（withCredentials: true）
 Content-Type: application/json
 
 {
@@ -1403,6 +1774,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "post_id": "帖子ID"
   }
@@ -1413,13 +1785,13 @@ Content-Type: application/json
 
 ## 后台管理模块
 
-### 30. 获取商品列表（后台）
+### 38. 获取商品列表（后台）
 
-**云函数**: `admin-goods-list`
+**云函数**: `admin`（路由分发）
 
 **请求**
 ```http
-POST /admin-goods-list
+POST /api/v1/admin/goods/list
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
@@ -1437,6 +1809,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "list": [
       {
@@ -1451,18 +1824,19 @@ Content-Type: application/json
     ],
     "total": 50,
     "page": 1,
-    "pageSize": 20
+    "pageSize": 20,
+    "has_more": true
   }
 }
 ```
 
-### 31. 保存商品
+### 39. 保存商品
 
-**云函数**: `admin-goods-save`
+**云函数**: `admin`（路由分发）
 
 **请求**
 ```http
-POST /admin-goods-save
+POST /api/v1/admin/goods/save
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
@@ -1493,19 +1867,20 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "id": "商品ID"
   }
 }
 ```
 
-### 32. 获取订单列表（后台）
+### 40. 获取订单列表（后台）
 
-**云函数**: `admin-orders-list`
+**云函数**: `admin`（路由分发）
 
 **请求**
 ```http
-POST /admin-orders-list
+POST /api/v1/admin/orders/list
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
@@ -1524,6 +1899,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "list": [
       {
@@ -1538,18 +1914,59 @@ Content-Type: application/json
     ],
     "total": 100,
     "page": 1,
-    "pageSize": 20
+    "pageSize": 20,
+    "has_more": true
   }
 }
 ```
 
-### 33. 获取会员列表
+### 41. 更新订单状态
 
-**云函数**: `admin-members-list`
+**云函数**: `admin`（路由分发）
+
+> **对应功能**：ADM-ORDER-002
 
 **请求**
 ```http
-POST /admin-members-list
+POST /api/v1/admin/orders/update
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+
+{
+  "order_no": "202605211430001",
+  "order_status": "making"
+}
+```
+
+> **order_status 可选值**：`making`（开始制作）/ `completed`（完成订单）/ `cancelled`（取消订单）
+
+**响应**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "request_id": "uuid-v4",
+  "data": {
+    "order_no": "202605211430001",
+    "order_status": "making",
+    "update_time": "2026-05-21T14:40:00Z"
+  }
+}
+```
+
+> **状态流转规则**：
+> - pending（待取餐）→ making（制作中）或 cancelled（已取消）
+> - making（制作中）→ completed（已完成）
+> - completed/cancelled 状态不可再变更
+> - 退款状态下通过 `admin/refund/process` 单独处理
+
+### 42. 获取会员列表
+
+**云函数**: `admin`（路由分发）
+
+**请求**
+```http
+POST /api/v1/admin/members/list
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
@@ -1566,6 +1983,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "list": [
       {
@@ -1582,18 +2000,19 @@ Content-Type: application/json
     ],
     "total": 1000,
     "page": 1,
-    "pageSize": 20
+    "pageSize": 20,
+    "has_more": true
   }
 }
 ```
 
-### 34. 获取会员详情
+### 43. 获取会员详情
 
-**云函数**: `admin-members-detail`
+**云函数**: `admin`（路由分发）
 
 **请求**
 ```http
-POST /admin-members-detail
+POST /api/v1/admin/members/detail
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
@@ -1607,6 +2026,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "uid": "用户ID",
     "nickname": "微信昵称",
@@ -1634,13 +2054,13 @@ Content-Type: application/json
 }
 ```
 
-### 35. 调整会员积分
+### 44. 调整会员积分
 
-**云函数**: `admin-point-adjust`
+**云函数**: `admin`（路由分发）
 
 **请求**
 ```http
-POST /admin-point-adjust
+POST /api/v1/admin/members/point-adjust
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
@@ -1656,6 +2076,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "uid": "用户ID",
     "points_before": 1150,
@@ -1665,19 +2086,54 @@ Content-Type: application/json
 }
 ```
 
-### 36. 获取社区帖子列表（后台）
+### 45. 余额调整（后台）
 
-**云函数**: `admin-community-posts`
+**云函数**: `admin`（路由分发）
 
 **请求**
 ```http
-POST /admin-community-posts
+POST /api/v1/admin/members/balance-adjust
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
 {
-  "keyword": "",
-  "status": 1,
+  "member_id": "用户ID",
+  "adjust_amount": 5000,
+  "reason": "线下退款"
+}
+```
+
+> **参数说明**：
+> - `adjust_amount`: 调整金额（单位：分），正数增加余额，负数扣减余额
+> - `reason`: 调整原因
+
+**响应**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "request_id": "uuid-v4",
+  "data": {
+    "member_id": "用户ID",
+    "balance_before": 10000,
+    "balance_after": 15000,
+    "adjust_amount": 5000
+  }
+}
+```
+
+### 46. 会员充值记录查询（后台）
+
+**云函数**: `admin`（路由分发）
+
+**请求**
+```http
+POST /api/v1/admin/members/recharge-logs
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+
+{
+  "member_id": "用户ID",
   "page": 1,
   "pageSize": 20
 }
@@ -1688,101 +2144,36 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "list": [
       {
-        "post_id": "帖子ID",
-        "author_nickname": "微信昵称",
-        "content_preview": "今天骑行了铁山坪...",
-        "likes": 15,
-        "comments_count": 8,
-        "status": 1,
-        "create_time": "2026-05-21T10:00:00Z"
+        "order_no": "R202605210001",
+        "recharge_amount": 298000,
+        "bonus_points": 2980,
+        "growth_value": 2980,
+        "pay_status": 1,
+        "pay_time": "2026-05-21T10:00:00Z",
+        "create_time": "2026-05-21T09:50:00Z"
       }
     ],
-    "total": 100,
+    "total": 5,
     "page": 1,
-    "pageSize": 20
+    "pageSize": 20,
+    "has_more": false
   }
 }
 ```
 
-### 37. 删除社区帖子（后台）
+### 47. 退款处理
 
-**云函数**: `admin-post-delete`
-
-**请求**
-```http
-POST /admin-post-delete
-Authorization: Bearer <admin_token>
-Content-Type: application/json
-
-{
-  "post_id": "帖子ID"
-}
-```
-
-**响应**
-```json
-{
-  "code": 0,
-  "message": "success",
-  "data": {
-    "post_id": "帖子ID"
-  }
-}
-```
-
-### 38. 更新订单状态
-
-**云函数**: `admin-order-update`
-
-> **对应功能**：ADM-ORDER-002
-
-**请求**
-```http
-POST /admin-order-update
-Authorization: Bearer <admin_token>
-Content-Type: application/json
-
-{
-  "order_no": "202605211430001",
-  "order_status": "making"
-}
-```
-
-> **order_status 可选值**：`making`（开始制作）/ `completed`（完成订单）/ `cancelled`（取消订单）
-
-**响应**
-```json
-{
-  "code": 0,
-  "message": "success",
-  "data": {
-    "order_no": "202605211430001",
-    "order_status": "making",
-    "update_time": "2026-05-21T14:40:00Z"
-  }
-}
-```
-
-> **状态流转规则**：
-> - 待取餐 → 制作中（making）或 已取消（cancelled）
-> - 制作中（making）→ 已完成（completed）
-> - 已完成/已取消状态不可再变更
-> - 退款状态下通过 `admin-refund-process` 单独处理
-
----
-
-### 39. 退款处理
-
-**云函数**: `admin-refund-process`
+**云函数**: `admin`（路由分发）
 
 > **对应功能**：ADM-ORDER-003
 
 **请求**
 ```http
-POST /admin-refund-process
+POST /api/v1/admin/refund/process
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
@@ -1803,6 +2194,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "order_no": "202605211430001",
     "order_status": "cancelled",
@@ -1818,102 +2210,25 @@ Content-Type: application/json
 {
   "code": 20003,
   "message": "订单已完成，无法退款",
+  "request_id": "uuid-v4",
   "data": null
 }
 ```
 
 > **处理逻辑**：
-> - 仅"待取餐"和"制作中"状态可退款
+> - 仅 pending（待取餐）和 making（制作中）状态可退款
 > - 微信支付：调用收钱吧退款 API 原路退回
 > - 余额支付：退回余额账户
 > - 退款后自动回退积分和成长值，恢复库存
 > - 订单状态变为 `cancelled`
 
----
+### 48. 等级权益配置查询（后台）
 
-### 40. 会员充值记录查询（后台）
-
-**云函数**: `admin-recharge-logs`
+**云函数**: `admin`（路由分发）
 
 **请求**
 ```http
-POST /admin-recharge-logs
-Authorization: Bearer <admin_token>
-Content-Type: application/json
-
-{
-  "member_id": "用户ID",
-  "page": 1,
-  "pageSize": 20
-}
-```
-
-**响应**
-```json
-{
-  "code": 0,
-  "message": "success",
-  "data": {
-    "list": [
-      {
-        "order_no": "R202605210001",
-        "recharge_amount": 298000,
-        "bonus_points": 2980,
-        "growth_value": 2980,
-        "pay_status": 1,
-        "pay_time": "2026-05-21T10:00:00Z",
-        "create_time": "2026-05-21T09:50:00Z"
-      }
-    ],
-    "total": 5,
-    "page": 1,
-    "pageSize": 20
-  }
-}
-```
-
-### 41. 余额调整（后台）
-
-**云函数**: `admin-balance-adjust`
-
-**请求**
-```http
-POST /admin-balance-adjust
-Authorization: Bearer <admin_token>
-Content-Type: application/json
-
-{
-  "member_id": "用户ID",
-  "adjust_amount": 5000,
-  "reason": "线下退款"
-}
-```
-
-> **参数说明**：
-> - `adjust_amount`: 调整金额（单位：分），正数增加余额，负数扣减余额
-> - `reason`: 调整原因
-
-**响应**
-```json
-{
-  "code": 0,
-  "message": "success",
-  "data": {
-    "member_id": "用户ID",
-    "balance_before": 10000,
-    "balance_after": 15000,
-    "adjust_amount": 5000
-  }
-}
-```
-
-### 42. 等级权益配置查询（后台）
-
-**云函数**: `admin-member-levels`
-
-**请求**
-```http
-POST /admin-member-levels
+POST /api/v1/admin/member-levels/list
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
@@ -1925,6 +2240,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "levels": [
       {
@@ -1947,13 +2263,13 @@ Content-Type: application/json
 }
 ```
 
-### 43. 等级权益配置保存（后台）
+### 49. 等级权益配置保存（后台）
 
-**云函数**: `admin-member-levels-save`
+**云函数**: `admin`（路由分发）
 
 **请求**
 ```http
-POST /admin-member-levels-save
+POST /api/v1/admin/member-levels/save
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
@@ -1977,6 +2293,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "level": 1,
     "update_time": "2026-05-21T10:00:00Z"
@@ -1984,13 +2301,13 @@ Content-Type: application/json
 }
 ```
 
-### 44. 充值档位配置查询（后台）
+### 50. 充值档位配置查询（后台）
 
-**云函数**: `admin-recharge-tiers`
+**云函数**: `admin`（路由分发）
 
 **请求**
 ```http
-POST /admin-recharge-tiers
+POST /api/v1/admin/recharge-tiers/list
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
@@ -2002,6 +2319,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "tiers": [
       {
@@ -2017,13 +2335,13 @@ Content-Type: application/json
 }
 ```
 
-### 45. 充值档位配置保存（后台）
+### 51. 充值档位配置保存（后台）
 
-**云函数**: `admin-recharge-tiers-save`
+**云函数**: `admin`（路由分发）
 
 **请求**
 ```http
-POST /admin-recharge-tiers-save
+POST /api/v1/admin/recharge-tiers/save
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
@@ -2041,6 +2359,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "tier_id": 1,
     "update_time": "2026-05-21T10:00:00Z"
@@ -2048,17 +2367,15 @@ Content-Type: application/json
 }
 ```
 
----
+### 52. 营业报表
 
-### 46. 营业报表
-
-**云函数**: `admin-report-dashboard`
+**云函数**: `admin`（路由分发）
 
 > **对应功能**：ADM-REPORT-001
 
 **请求**
 ```http
-POST /admin-report-dashboard
+POST /api/v1/admin/report/dashboard
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
@@ -2077,6 +2394,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "summary": {
       "total_amount": 150000,
@@ -2092,15 +2410,15 @@ Content-Type: application/json
 }
 ```
 
-### 47. 商品销售排行
+### 53. 商品销售排行
 
-**云函数**: `admin-report-goods-ranking`
+**云函数**: `admin`（路由分发）
 
 > **对应功能**：ADM-REPORT-002
 
 **请求**
 ```http
-POST /admin-report-goods-ranking
+POST /api/v1/admin/report/goods-ranking
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
@@ -2120,6 +2438,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "list": [
       {
@@ -2135,15 +2454,15 @@ Content-Type: application/json
 }
 ```
 
-### 48. 会员统计报表
+### 54. 会员统计报表
 
-**云函数**: `admin-report-member-stats`
+**云函数**: `admin`（路由分发）
 
 > **对应功能**：ADM-REPORT-003
 
 **请求**
 ```http
-POST /admin-report-member-stats
+POST /api/v1/admin/report/member-stats
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
@@ -2158,6 +2477,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "member_growth": [
       { "date": "2026-05-01", "new_count": 5 }
@@ -2175,15 +2495,15 @@ Content-Type: application/json
 }
 ```
 
-### 49. 操作日志查询
+### 55. 操作日志查询
 
-**云函数**: `admin-operation-logs`
+**云函数**: `admin`（路由分发）
 
 > **对应功能**：ADM-LOG-001~002
 
 **请求**
 ```http
-POST /admin-operation-logs
+POST /api/v1/admin/operation-logs
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
@@ -2206,6 +2526,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "list": [
       {
@@ -2224,20 +2545,21 @@ Content-Type: application/json
     ],
     "total": 50,
     "page": 1,
-    "pageSize": 20
+    "pageSize": 20,
+    "has_more": true
   }
 }
 ```
 
-### 50. 桌号列表查询
+### 56. 桌号列表查询
 
-**云函数**: `admin-table-list`
+**云函数**: `admin`（路由分发）
 
 > **对应功能**：ADM-TABLE-001
 
 **请求**
 ```http
-POST /admin-table-list
+POST /api/v1/admin/table/list
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
@@ -2253,6 +2575,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "list": [
       {
@@ -2265,20 +2588,21 @@ Content-Type: application/json
     ],
     "total": 20,
     "page": 1,
-    "pageSize": 50
+    "pageSize": 50,
+    "has_more": false
   }
 }
 ```
 
-### 51. 桌号保存 & 生成桌台码
+### 57. 桌号保存 & 生成桌台码
 
-**云函数**: `admin-table-save`
+**云函数**: `admin`（路由分发）
 
 > **对应功能**：ADM-TABLE-001~002
 
 **请求**
 ```http
-POST /admin-table-save
+POST /api/v1/admin/table/save
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
@@ -2299,6 +2623,7 @@ Content-Type: application/json
 {
   "code": 0,
   "message": "success",
+  "request_id": "uuid-v4",
   "data": {
     "id": "桌号ID",
     "table_no": "A01",
@@ -2309,63 +2634,179 @@ Content-Type: application/json
 }
 ```
 
+### 58. 帖子管理（后台）
+
+**云函数**: `admin`（路由分发）
+
+**请求**
+```http
+POST /api/v1/admin/community/posts
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+
+{
+  "keyword": "",
+  "status": 1,
+  "page": 1,
+  "pageSize": 20
+}
+```
+
+**响应**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "request_id": "uuid-v4",
+  "data": {
+    "list": [
+      {
+        "post_id": "帖子ID",
+        "author_nickname": "微信昵称",
+        "content_preview": "今天骑行了铁山坪...",
+        "likes": 15,
+        "comments_count": 8,
+        "status": 1,
+        "create_time": "2026-05-21T10:00:00Z"
+      }
+    ],
+    "total": 100,
+    "page": 1,
+    "pageSize": 20,
+    "has_more": true
+  }
+}
+```
+
+### 59. 删除社区帖子（后台）
+
+**云函数**: `admin`（路由分发）
+
+**请求**
+```http
+POST /api/v1/admin/community/post-delete
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+
+{
+  "post_id": "帖子ID"
+}
+```
+
+**响应**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "request_id": "uuid-v4",
+  "data": {
+    "post_id": "帖子ID"
+  }
+}
+```
+
+---
+
+## 微信模块
+
+### 60. 微信 JSAPI 签名
+
+**云函数**: `wx-jsapi-signature`（独立）
+
+> **对应功能**：H5-WX-SDK-001
+
+**请求**
+```http
+POST /api/v1/wx/jsapi-signature
+Cookie: 自动携带（withCredentials: true）
+Content-Type: application/json
+
+{
+  "url": "https://m.bikeclub.cn/pages/index/index"
+}
+```
+
+**响应**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "request_id": "uuid-v4",
+  "data": {
+    "appId": "wx1234567890",
+    "timestamp": "1234567890",
+    "nonceStr": "随机字符串",
+    "signature": "sha1签名"
+  }
+}
+```
+
 ---
 
 ## 接口汇总表
 
-| 序号 | 云函数 | 模块 | 说明 |
-|:---:|:---|:---|:---|
-| 1 | `wx-auth` | 认证 | 微信登录 |
-| 2 | `check-token` | 认证 | Token校验 |
-| 3 | `admin-login` | 认证 | 后台登录 |
-| 4 | `goods-list` | 商品 | 商品列表 |
-| 5 | `goods-detail` | 商品 | 商品详情 |
-| 6 | `order-create` | 订单 | 创建订单 |
-| 7 | `order-pay-callback` | 订单 | 支付回调 |
-| 8 | `order-list` | 订单 | 订单列表 |
-| 9 | `order-detail` | 订单 | 订单详情 |
-| 10 | `member-info` | 会员 | 会员信息 |
-| 11 | `member-benefits` | 会员 | 会员权益 |
-| 12 | `member-point-logs` | 会员 | 积分流水 |
-| 13 | `member-recharge-tiers` | 会员 | 充值档位 |
-| 14 | `member-recharge` | 会员 | 发起充值 |
-| 15 | `member-balance-pay` | 会员 | H5端余额支付 |
-| 16 | `member-recharge-logs` | 会员 | 充值记录 |
-| 17 | `refund-request` | 订单 | H5端申请退款 |
-| 18 | `member-balance-logs` | 会员 | 余额流水查询 |
-| 19 | `member-reconnect` | 订单 | 支付状态轮询 |
-| 20 | `cashier-order-create` | 收银 | 店员下单 |
-| 21 | `cashier-balance-pay` | 收银 | 收银端余额支付 |
-| 22 | `member-code-decode` | 收银 | 解析会员码 |
-| 23 | `community-post-create` | 社区 | 创建帖子 |
-| 24 | `community-post-list` | 社区 | 帖子列表 |
-| 25 | `community-post-detail` | 社区 | 帖子详情 |
-| 26 | `community-post-like` | 社区 | 点赞/取消 |
-| 27 | `community-comment-create` | 社区 | 发表评论 |
-| 28 | `community-comment-list` | 社区 | 评论列表 |
-| 29 | `community-post-delete` | 社区 | 删除帖子 |
-| 30 | `admin-goods-list` | 后台 | 商品列表 |
-| 31 | `admin-goods-save` | 后台 | 保存商品 |
-| 32 | `admin-orders-list` | 后台 | 订单列表 |
-| 33 | `admin-members-list` | 后台 | 会员列表 |
-| 34 | `admin-members-detail` | 后台 | 会员详情 |
-| 35 | `admin-point-adjust` | 后台 | 积分调整 |
-| 36 | `admin-community-posts` | 后台 | 帖子管理 |
-| 37 | `admin-post-delete` | 后台 | 删除帖子 |
-| 38 | `admin-order-update` | 后台 | 更新订单状态 |
-| 39 | `admin-refund-process` | 后台 | 退款处理 |
-| 40 | `admin-recharge-logs` | 后台 | 会员充值记录 |
-| 41 | `admin-balance-adjust` | 后台 | 余额调整 |
-| 42 | `admin-member-levels` | 后台 | 等级权益配置查询 |
-| 43 | `admin-member-levels-save` | 后台 | 等级权益配置保存 |
-| 44 | `admin-recharge-tiers` | 后台 | 充值档位配置查询 |
-| 45 | `admin-recharge-tiers-save` | 后台 | 充值档位配置保存 |
-| 46 | `admin-report-dashboard` | 后台 | 营业报表 |
-| 47 | `admin-report-goods-ranking` | 后台 | 商品销售排行 |
-| 48 | `admin-report-member-stats` | 后台 | 会员统计报表 |
-| 49 | `admin-operation-logs` | 后台 | 操作日志查询 |
-| 50 | `admin-table-list` | 后台 | 桌号列表查询 |
-| 51 | `admin-table-save` | 后台 | 桌号保存&桌台码 |
+| 序号 | 接口路径 | 合并云函数 | 模块 | 说明 |
+|:---:|:---|:---|:---|:---|
+| 1 | POST /api/v1/auth/wx-login | auth | 认证 | 微信登录 |
+| 2 | POST /api/v1/auth/phone-login | auth | 认证 | 手机号验证码登录 |
+| 3 | POST /api/v1/auth/sms-code | auth | 认证 | 发送验证码 |
+| 4 | POST /api/v1/auth/check-token | auth | 认证 | Token校验 |
+| 5 | POST /api/v1/auth/token-refresh | auth | 认证 | Token刷新 |
+| 6 | POST /api/v1/auth/logout | auth | 认证 | 退出登录 |
+| 7 | POST /api/v1/admin/login | admin | 认证 | 后台登录 |
+| 8 | POST /api/v1/goods/list | admin | 商品 | 商品列表 |
+| 9 | POST /api/v1/goods/detail | admin | 商品 | 商品详情 |
+| 10 | POST /api/v1/order/create | order | 订单 | 创建订单 |
+| 11 | POST /api/v1/order/preview | order | 订单 | 订单预览 |
+| 12 | POST /api/v1/order/pay | order | 订单 | 发起支付 |
+| 13 | POST /api/v1/order/pay-callback | order | 订单 | 支付回调 |
+| 14 | POST /api/v1/order/pay-status | order | 订单 | 支付状态长轮询 |
+| 15 | POST /api/v1/order/list | order | 订单 | 订单列表 |
+| 16 | POST /api/v1/order/detail | order | 订单 | 订单详情 |
+| 17 | POST /api/v1/order/refund-request | order | 订单 | H5端申请退款 |
+| 18 | POST /api/v1/order/refund-status | order | 订单 | 退款状态查询 |
+| 19 | POST /api/v1/cart/sync | order | 订单 | 购物车同步 |
+| 20 | POST /api/v1/members/info | member | 会员 | 会员信息 |
+| 21 | POST /api/v1/members/benefits | member | 会员 | 会员权益 |
+| 22 | POST /api/v1/members/point-logs | member | 会员 | 积分流水 |
+| 23 | POST /api/v1/members/recharge-tiers | member | 会员 | 充值档位 |
+| 24 | POST /api/v1/members/recharge | member | 会员 | 发起充值 |
+| 25 | POST /api/v1/members/balance/pay | member | 会员 | H5端余额支付 |
+| 26 | POST /api/v1/members/recharge-logs | member | 会员 | 充值记录 |
+| 27 | POST /api/v1/members/balance-logs | member | 会员 | 余额流水查询 |
+| 28 | POST /api/v1/cashier/order-create | cashier | 收银 | 店员下单 |
+| 29 | POST /api/v1/cashier/balance-pay | cashier | 收银 | 收银端余额支付 |
+| 30 | POST /api/v1/cashier/member-code-decode | cashier | 收银 | 解析会员码 |
+| 31 | POST /api/v1/community/post-create | community-post | 社区 | 创建帖子 |
+| 32 | POST /api/v1/community/post-list | community-post | 社区 | 帖子列表 |
+| 33 | POST /api/v1/community/post-detail | community-post | 社区 | 帖子详情 |
+| 34 | POST /api/v1/community/post-like | community-post | 社区 | 点赞/取消 |
+| 35 | POST /api/v1/community/comment-create | community-comment | 社区 | 发表评论 |
+| 36 | POST /api/v1/community/comment-list | community-comment | 社区 | 评论列表 |
+| 37 | POST /api/v1/community/post-delete | community-post | 社区 | 删除帖子 |
+| 38 | POST /api/v1/admin/goods/list | admin | 后台 | 商品列表 |
+| 39 | POST /api/v1/admin/goods/save | admin | 后台 | 保存商品 |
+| 40 | POST /api/v1/admin/orders/list | admin | 后台 | 订单列表 |
+| 41 | POST /api/v1/admin/orders/update | admin | 后台 | 更新订单状态 |
+| 42 | POST /api/v1/admin/members/list | admin | 后台 | 会员列表 |
+| 43 | POST /api/v1/admin/members/detail | admin | 后台 | 会员详情 |
+| 44 | POST /api/v1/admin/members/point-adjust | admin | 后台 | 积分调整 |
+| 45 | POST /api/v1/admin/members/balance-adjust | admin | 后台 | 余额调整 |
+| 46 | POST /api/v1/admin/members/recharge-logs | admin | 后台 | 会员充值记录 |
+| 47 | POST /api/v1/admin/refund/process | admin | 后台 | 退款处理 |
+| 48 | POST /api/v1/admin/member-levels/list | admin | 后台 | 等级权益配置查询 |
+| 49 | POST /api/v1/admin/member-levels/save | admin | 后台 | 等级权益配置保存 |
+| 50 | POST /api/v1/admin/recharge-tiers/list | admin | 后台 | 充值档位配置查询 |
+| 51 | POST /api/v1/admin/recharge-tiers/save | admin | 后台 | 充值档位配置保存 |
+| 52 | POST /api/v1/admin/report/dashboard | admin | 后台 | 营业报表 |
+| 53 | POST /api/v1/admin/report/goods-ranking | admin | 后台 | 商品销售排行 |
+| 54 | POST /api/v1/admin/report/member-stats | admin | 后台 | 会员统计报表 |
+| 55 | POST /api/v1/admin/operation-logs | admin | 后台 | 操作日志查询 |
+| 56 | POST /api/v1/admin/table/list | admin | 后台 | 桌号列表查询 |
+| 57 | POST /api/v1/admin/table/save | admin | 后台 | 桌号保存&桌台码 |
+| 58 | POST /api/v1/admin/community/posts | admin | 后台 | 帖子管理 |
+| 59 | POST /api/v1/admin/community/post-delete | admin | 后台 | 删除帖子 |
+| 60 | POST /api/v1/wx/jsapi-signature | wx-jsapi-signature | 微信 | JSAPI签名 |
 
 ---
 

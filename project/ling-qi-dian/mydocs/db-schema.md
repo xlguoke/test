@@ -1,9 +1,9 @@
 # 数据库 Schema 设计文档
 
 > 本文档定义机车俱乐部饮品与社区系统的全部 MongoDB 集合结构
-> 版本: v2.1 | 日期: 2026-05-24
+> 版本: v3.0 | 日期: 2026-05-31
 >
-> **产品基准**：`full-feature-list.md` v3.0 | 集合覆盖：14 个 MongoDB 集合
+> **产品基准**：`full-feature-list.md` v3.8 | 集合覆盖：17 个 MongoDB 集合
 
 ---
 
@@ -28,6 +28,8 @@
 | `balance_logs` | 余额变动流水 | 5万+ | 插入、查询 |
 | `recharge_logs` | 充值记录 | 5万+ | 插入、查询 |
 | `activities` | 开业活动配置 | 1~5 | CRUD |
+| `carts` | 购物车 | 1万+ | 查询、更新 |
+| `categories` | 商品分类 | 20+ | CRUD |
 | `goods` | 商品信息 | 100+ | CRUD |
 | `orders` | 订单主表 | 10万+ | CRUD |
 | `community_posts` | 社区帖子 | 1万+ | CRUD |
@@ -36,6 +38,7 @@
 | `admin_users` | 后台账号 | 10+ | CRUD |
 | `admin_operation_logs` | 后台操作日志 | 1万+ | 插入、查询 |
 | `tables` | 桌号管理 | 50+ | CRUD |
+| `slow_queries` | 慢查询记录 | 1万+ | 插入、查询 |
 
 ---
 
@@ -120,20 +123,20 @@ db.member_levels.createIndex({ level: 1 })
   "nickname": "微信昵称",
   "avatar": "头像URL",
   "mobile": "13800138000",
-  
+
   "level": 1,
   "level_name": "青铜",
   "total_recharge": 100000,
   "growth_value": 100000,
-  
+
   "points": 1250,
   "total_points_earned": 5000,
   "total_points_used": 2250,
   "total_points_expired": 0,
-  
+
   "balance": 11000,
   "total_consume": 80000,
-  
+
   "create_time": "2026-01-01T00:00:00Z",
   "update_time": "2026-05-21T10:00:00Z"
 }
@@ -335,7 +338,99 @@ db.recharge_logs.createIndex({ pay_status: 1 })
 
 ## 商品订单相关集合
 
-### 4. goods（商品表）
+### 4. carts（购物车表）
+
+存储登录用户的购物车数据，支持多设备同步。
+
+> **对应功能**：H5-CART-005
+
+```json
+{
+  "_id": "ObjectId",
+  "member_id": "用户ID",
+  "items": [
+    {
+      "goods_id": "商品ID",
+      "sku_id": "sku_001",
+      "name": "美式咖啡",
+      "price": 2500,
+      "quantity": 2,
+      "image": "url",
+      "selected": true
+    }
+  ],
+  "updated_at": "2026-05-21T10:00:00Z"
+}
+```
+
+**字段说明**
+
+| 字段 | 类型 | 必填 | 默认值 | 说明 |
+|:---|:---|:---:|:---|:---|
+| `_id` | ObjectId | ✅ | auto | 主键 |
+| `member_id` | String | ✅ | - | 会员ID（唯一） |
+| `items` | Array\<Object\> | ✅ | [] | 购物车商品列表 |
+| `updated_at` | Date | ✅ | now | 最后更新时间 |
+
+**items 结构**
+
+| 字段 | 类型 | 说明 |
+|:---|:---|:---|
+| `goods_id` | String | 商品ID |
+| `sku_id` | String | SKU ID |
+| `name` | String | 商品名称 |
+| `price` | Number | 单价（单位：分） |
+| `quantity` | Number | 数量 |
+| `image` | String | 商品图片URL |
+| `selected` | Boolean | 是否选中 |
+
+**索引**
+
+```javascript
+db.carts.createIndex({ member_id: 1 }, { unique: true })
+```
+
+---
+
+### 5. categories（商品分类表）
+
+存储商品分类，支持 2 级分类（parent_id 自关联）。
+
+```json
+{
+  "_id": "ObjectId",
+  "name": "咖啡",
+  "parent_id": null,
+  "sort_order": 1,
+  "status": 1,
+  "create_time": "2026-01-01T00:00:00Z",
+  "update_time": "2026-05-21T00:00:00Z"
+}
+```
+
+**字段说明**
+
+| 字段 | 类型 | 必填 | 默认值 | 说明 |
+|:---|:---|:---:|:---|:---|
+| `_id` | ObjectId | ✅ | auto | 主键 |
+| `name` | String | ✅ | - | 分类名称 |
+| `parent_id` | ObjectId | ❌ | null | 父分类ID（null=顶级分类，支持2级分类） |
+| `sort_order` | Number | ✅ | 0 | 排序权重 |
+| `status` | Number | ✅ | 1 | 状态：1启用/0停用 |
+| `create_time` | Date | ✅ | now | 创建时间 |
+| `update_time` | Date | ✅ | now | 更新时间 |
+
+**索引**
+
+```javascript
+db.categories.createIndex({ parent_id: 1 })
+db.categories.createIndex({ sort_order: 1 })
+db.categories.createIndex({ status: 1 })
+```
+
+---
+
+### 6. goods（商品表）
 
 存储商品信息，支持多规格（SKU）。
 
@@ -343,20 +438,30 @@ db.recharge_logs.createIndex({ pay_status: 1 })
 {
   "_id": "ObjectId",
   "name": "美式咖啡",
-  "category": "咖啡",
+  "category_id": "ObjectId",
   "description": "精选阿拉比卡咖啡豆",
   "images": ["url1", "url2"],
   "status": 1,
   "sort_order": 1,
+  "spec_groups": [
+    {
+      "name": "温度",
+      "values": ["热", "去冰", "冰"]
+    },
+    {
+      "name": "大小",
+      "values": ["大", "中", "小"]
+    }
+  ],
   "sku_list": [
     {
       "sku_id": "sku_001",
       "name": "大杯/去冰",
       "price": 2500,
       "stock": 50,
-      "specs": {
-        "size": "大杯",
-        "temperature": "去冰"
+      "spec_values": {
+        "温度": "去冰",
+        "大小": "大"
       }
     }
   ],
@@ -371,14 +476,22 @@ db.recharge_logs.createIndex({ pay_status: 1 })
 |:---|:---|:---:|:---|:---|
 | `_id` | ObjectId | ✅ | auto | 主键 |
 | `name` | String | ✅ | - | 商品名称 |
-| `category` | String | ✅ | - | 分类 |
+| `category_id` | ObjectId | ✅ | - | 分类ID（关联 categories 集合） |
 | `description` | String | ❌ | "" | 商品描述 |
 | `images` | Array<String> | ❌ | [] | 商品图片URL列表 |
 | `status` | Number | ✅ | 1 | 状态：1上架/0下架/-1删除 |
 | `sort_order` | Number | ✅ | 0 | 排序权重 |
+| `spec_groups` | Array\<Object\> | ❌ | [] | 规格组定义 |
 | `sku_list` | Array<Object> | ✅ | [] | SKU列表 |
 | `create_time` | Date | ✅ | now | 创建时间 |
 | `update_time` | Date | ✅ | now | 更新时间 |
+
+**spec_groups 结构**
+
+| 字段 | 类型 | 说明 |
+|:---|:---|:---|
+| `name` | String | 规格组名称（如"温度"） |
+| `values` | Array\<String\> | 规格值列表（如["热","冰"]） |
 
 **SKU 结构**
 
@@ -388,13 +501,13 @@ db.recharge_logs.createIndex({ pay_status: 1 })
 | `name` | String | SKU名称（如"大杯/去冰"） |
 | `price` | Number | 价格（单位：分） |
 | `stock` | Number | 库存（-1表示无限） |
-| `specs` | Object | 规格键值对 |
+| `spec_values` | Object | 规格键值对（如{"温度":"热","大小":"大"}） |
 
 **索引**
 
 ```javascript
 // 分类+状态查询
-db.goods.createIndex({ category: 1, status: 1 })
+db.goods.createIndex({ category_id: 1, status: 1 })
 
 // 排序
 db.goods.createIndex({ sort_order: -1 })
@@ -405,7 +518,7 @@ db.goods.createIndex({ status: 1 })
 
 ---
 
-### 5. orders（订单表）
+### 7. orders（订单表）
 
 存储订单完整信息。
 
@@ -417,7 +530,7 @@ db.goods.createIndex({ status: 1 })
   "table_no": "A01",
   "source": "customer",
   "cashier_id": "",
-  
+
   "goods": [
     {
       "goods_id": "商品ID",
@@ -429,7 +542,7 @@ db.goods.createIndex({ status: 1 })
       "subtotal": 5000
     }
   ],
-  
+
   "original_amount": 5000,
   "discount_amount": 0,
   "discount_detail": {
@@ -440,20 +553,23 @@ db.goods.createIndex({ status: 1 })
   },
   "point_deduct": 0,
   "pay_amount": 5000,
-  
+
   "pay_way": "wechat",
   "pay_status": 1,
   "pay_time": "2026-05-21T14:35:00Z",
-  
+
   "order_status": "completed",
   "remark": "少糖",
+
+  "version": 1,
+  "request_id": "uuid-v4",
 
   "refund_amount": 0,
   "refund_status": "",
   "refund_reason": "",
   "refund_remark": "",
   "refund_time": null,
-  
+
   "create_time": "2026-05-21T14:30:00Z",
   "update_time": "2026-05-21T14:35:00Z"
 }
@@ -480,6 +596,8 @@ db.goods.createIndex({ status: 1 })
 | `pay_time` | Date | ❌ | null | 支付时间 |
 | `order_status` | String | ✅ | "pending" | 订单状态 |
 | `remark` | String | ❌ | "" | 备注 |
+| `version` | Number | ✅ | 1 | 乐观锁版本号，每次更新 +1 |
+| `request_id` | String | ❌ | "" | 创建订单时的防重复提交 ID（10s 内去重） |
 | `refund_amount` | Number | ✅ | 0 | 退款金额（分），0=未退款 |
 | `refund_status` | String | ✅ | "" | 退款状态：pending（待处理）/ approved（已退款）/ rejected（已驳回），空=未申请 |
 | `refund_reason` | String | ✅ | "" | 退款原因：customer_cancel（顾客取消）/ goods_issue（商品问题）/ other（其他） |
@@ -522,13 +640,16 @@ db.orders.createIndex({ order_status: 1 })
 
 // 支付状态查询
 db.orders.createIndex({ pay_status: 1 })
+
+// 防重复提交（10s TTL）
+db.orders.createIndex({ request_id: 1 }, { unique: true, expireAfterSeconds: 10 })
 ```
 
 ---
 
 ## 社区相关集合
 
-### 6. community_posts（社区帖子）
+### 8. community_posts（社区帖子）
 
 存储用户发布的帖子内容。
 
@@ -538,7 +659,7 @@ db.orders.createIndex({ pay_status: 1 })
   "author_id": "用户ID",
   "content": "今天骑行了铁山坪，风景真不错！",
   "images": ["url1", "url2", "url3"],
-  
+
   "route_info": {
     "start": "铁山坪",
     "end": "南山",
@@ -546,13 +667,13 @@ db.orders.createIndex({ pay_status: 1 })
     "duration": 120,
     "path": [[106.5, 29.6], [106.6, 29.7]]
   },
-  
+
   "likes": 15,
   "comments_count": 8,
-  
+
   "status": 1,
   "is_top": false,
-  
+
   "create_time": "2026-05-21T10:00:00Z",
   "update_time": "2026-05-21T10:00:00Z"
 }
@@ -602,7 +723,7 @@ db.community_posts.createIndex({ status: 1 })
 
 ---
 
-### 7. community_comments（评论表）
+### 9. community_comments（评论表）
 
 存储帖子评论。
 
@@ -642,7 +763,7 @@ db.community_comments.createIndex({ author_id: 1, create_time: -1 })
 
 ---
 
-### 8. community_likes（点赞表）
+### 10. community_likes（点赞表）
 
 存储点赞记录，用于点赞/取消点赞。
 
@@ -681,7 +802,7 @@ db.community_likes.createIndex({ post_id: 1, user_id: 1 }, { unique: true })
 
 ## 后台管理相关集合
 
-### 9. activities（开业活动配置表）
+### 11. activities（开业活动配置表）
 
 存储限时开业活动配置，支持多档位活动规则。
 
@@ -748,7 +869,7 @@ db.activities.createIndex({ status: 1 })
 
 ---
 
-### 10. admin_users（后台账号表）
+### 12. admin_users（后台账号表）
 
 存储后台管理员账号。
 
@@ -759,7 +880,10 @@ db.activities.createIndex({ status: 1 })
   "password_hash": "$2b$10$...",
   "nickname": "管理员",
   "role": "super",
+  "permissions": ["dashboard:view", "goods:view", "goods:edit"],
   "status": 1,
+  "login_fail_count": 0,
+  "lock_until": null,
   "last_login_time": "2026-05-21T10:00:00Z",
   "create_time": "2026-01-01T00:00:00Z"
 }
@@ -774,7 +898,10 @@ db.activities.createIndex({ status: 1 })
 | `password_hash` | String | ✅ | - | bcrypt 密码哈希 |
 | `nickname` | String | ✅ | - | 昵称 |
 | `role` | String | ✅ | "admin" | 角色：super/admin/staff |
+| `permissions` | Array\<String\> | ✅ | [] | 权限码列表 |
 | `status` | Number | ✅ | 1 | 状态：1启用/0禁用 |
+| `login_fail_count` | Number | ✅ | 0 | 连续登录失败次数 |
+| `lock_until` | Date | ❌ | null | 账号锁定截止时间（连续5次失败锁定15分钟） |
 | `last_login_time` | Date | ❌ | null | 最后登录时间 |
 | `create_time` | Date | ✅ | now | 创建时间 |
 
@@ -787,7 +914,7 @@ db.admin_users.createIndex({ username: 1 }, { unique: true })
 
 ---
 
-### 11. admin_operation_logs（后台操作日志）
+### 13. admin_operation_logs（后台操作日志）
 
 记录后台管理员敏感操作，不可修改，只追加。
 
@@ -857,7 +984,7 @@ db.admin_operation_logs.createIndex({ target_id: 1 })
 
 ---
 
-### 12. tables（桌号管理）
+### 14. tables（桌号管理）
 
 存储门店桌号配置及对应的桌台码。
 
@@ -897,6 +1024,44 @@ db.tables.createIndex({ status: 1 })
 
 ---
 
+### 15. slow_queries（慢查询记录）
+
+记录服务端执行时长超过 1 秒的查询，用于性能监控。
+
+> **对应功能**：API-OBS-001-02
+
+```json
+{
+  "_id": "ObjectId",
+  "endpoint": "/api/v1/order/list",
+  "duration": 1500,
+  "query": {},
+  "user_id": "用户ID",
+  "timestamp": "2026-05-21T10:00:00Z"
+}
+```
+
+**字段说明**
+
+| 字段 | 类型 | 必填 | 默认值 | 说明 |
+|:---|:---|:---:|:---|:---|
+| `_id` | ObjectId | ✅ | auto | 主键 |
+| `endpoint` | String | ✅ | - | 接口路径 |
+| `duration` | Number | ✅ | - | 执行时长（毫秒） |
+| `query` | Object | ❌ | {} | 查询参数 |
+| `user_id` | String | ❌ | "" | 操作用户ID |
+| `timestamp` | Date | ✅ | now | 记录时间 |
+
+**索引**
+
+```javascript
+db.slow_queries.createIndex({ timestamp: -1 })
+db.slow_queries.createIndex({ duration: -1 })
+db.slow_queries.createIndex({ endpoint: 1 })
+```
+
+---
+
 ## 集合关系图
 
 ```
@@ -922,8 +1087,33 @@ db.tables.createIndex({ status: 1 })
                         │ pay_status      │     │ discount_detail │
                         └─────────────────┘     │ pay_amount      │
                                                 │ order_status    │
+                                                │ version         │
+                                                │ request_id (UQ) │
                                                 │ refund_status   │
                                                 └─────────────────┘
+
+┌─────────────────┐     ┌─────────────────┐
+│      carts      │     │   categories    │
+├─────────────────┤     ├─────────────────┤
+│ _id (PK)        │     │ _id (PK)        │
+│ member_id (FK)  │     │ parent_id (FK)  │──┐
+│ items           │     │ name            │  │
+│ updated_at      │     │ sort_order      │  │
+└─────────────────┘     │ status          │◄─┘ (自关联)
+                        └─────────────────┘
+                                │
+                                │ 1:N
+                                ▼
+                        ┌─────────────────┐
+                        │      goods      │
+                        ├─────────────────┤
+                        │ _id (PK)        │
+                        │ category_id(FK) │
+                        │ name            │
+                        │ spec_groups     │
+                        │ sku_list        │
+                        │ status          │
+                        └─────────────────┘
 
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │ community_posts │◄────┤community_comments│    │ community_likes │
@@ -942,8 +1132,21 @@ db.tables.createIndex({ status: 1 })
 │ activity_code   │     │ username (UQ)   │     │ operator_id (FK) │     │ table_no (UQ)   │
 │ tier_configs    │     │ password_hash   │     │ operation_type   │     │ status          │
 │ status          │     │ role            │     │ detail           │     │ qrcode_url      │
-└─────────────────┘     └─────────────────┘     │ data_snapshot    │     └─────────────────┘
-                                                └──────────────────┘
+└─────────────────┘     │ permissions     │     │ data_snapshot    │     └─────────────────┘
+                        │ login_fail_count│     └──────────────────┘
+                        │ lock_until      │
+                        └─────────────────┘
+
+┌─────────────────┐
+│   slow_queries  │
+├─────────────────┤
+│ _id (PK)        │
+│ endpoint        │
+│ duration        │
+│ query           │
+│ user_id         │
+│ timestamp       │
+└─────────────────┘
 ```
 
 ---
@@ -979,6 +1182,18 @@ db.members.findOneAndUpdate(
 ### 6. 退款数据一致性
 - 退款时须同时：更新订单退款字段 + 回退积分 + 回退成长值 + 恢复库存
 - 以上操作使用 MongoDB 事务保证原子性
+
+### 7. 乐观锁一致性
+- 订单更新使用 `version` 字段乐观锁
+- 更新时 `findOneAndUpdate` 带 `version` 条件：
+```javascript
+db.orders.findOneAndUpdate(
+  { _id: orderId, version: currentVersion },
+  { $set: { order_status: newStatus }, $inc: { version: 1 } },
+  { returnDocument: 'after' }
+)
+```
+- 版本冲突时返回错误码 `20007`，前端提示"订单已被他人操作，请刷新"
 
 ---
 

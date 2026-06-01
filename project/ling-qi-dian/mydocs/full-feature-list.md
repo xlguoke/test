@@ -1,4 +1,4 @@
-# 机车俱乐部饮品与社区系统 — 产品功能清单 v3.3
+# 机车俱乐部饮品与社区系统 — 产品功能清单 v3.8
 
 > **本文档定位**：产品功能清单，是系统的**唯一产品真相源**（Single Source of Truth）。
 >
@@ -11,7 +11,7 @@
 >   └── .trae/specs/*/（技术 Spec，声明基于本清单的 § 范围）
 > ```
 >
-> **下层文档约定**：每个 Spec / 契约文档头部需声明"产品基准：full-feature-list.md v3.3 §X~§Y"。
+> **下层文档约定**：每个 Spec / 契约文档头部需声明"产品基准：full-feature-list.md v3.8 §X~§Y"。
 >
 > **功能编号规则**：
 > - `H5-{模块}-{序号}`：H5 端功能
@@ -30,33 +30,229 @@
 
 ---
 
+# H5 端基础架构设计
+
+> **技术栈**：uni-app + Vue3 (Composition API) + Vant UI + Pinia + TypeScript
+> **运行环境**：微信公众号 H5（微信内置浏览器）+ 外部浏览器双场景支持
+
+---
+
+## 0. 基础配置 [🟢 一期]
+
+### 0.1 主题系统 [H5-THEME-001]
+- **设计 Token 管理**：基于 CSS Variables + SCSS 变量 + JS Theme 对象三层架构 [H5-THEME-001-01]
+- **主色统一**：青绿色 `#4ECDC4`，全局主题色变量 `--color-primary` [H5-THEME-001-02]
+- **预设主题**：
+  - 浅色模式（默认）：白底 + 深色文字 + 主题色点缀 [H5-THEME-001-03]
+  - 深色模式：深灰底 `#1A1A1A` + 浅色文字 + 主题色点缀 [H5-THEME-001-04]
+- **主题切换**：会员中心→设置→主题切换开关，切换后全局即时生效 [H5-THEME-001-05]
+- **主题持久化**：localStorage 存储用户选择，下次打开自动应用 [H5-THEME-001-06]
+- **系统主题跟随**：首次打开时检测 `prefers-color-scheme`，自动匹配系统主题 [H5-THEME-001-07]
+
+### 0.2 设计 Token 清单 [H5-THEME-002]
+
+#### 色彩变量
+| 变量名 | 浅色模式 | 深色模式 | 用途 |
+|:---|:---|:---|:---|
+| `--color-primary` | `#4ECDC4` | `#4ECDC4` | 主题色（按钮/链接/高亮） |
+| `--color-bg` | `#FFFFFF` | `#1A1A1A` | 页面背景 |
+| `--color-bg-secondary` | `#F5F5F5` | `#2A2A2A` | 卡片/组件背景 |
+| `--color-text` | `#333333` | `#E0E0E0` | 主要文字 |
+| `--color-text-secondary` | `#999999` | `#888888` | 次要文字/提示 |
+| `--color-border` | `#E5E5E5` | `#3A3A3A` | 边框/分割线 |
+| `--color-success` | `#52C41A` | `#52C41A` | 成功状态 |
+| `--color-warning` | `#FAAD14` | `#FAAD14` | 警告状态 |
+| `--color-danger` | `#FF4D4F` | `#FF4D4F` | 危险/错误状态 |
+| `--color-price` | `#FF4D4F` | `#FF4D4F` | 价格文字（固定红色） |
+
+#### 圆角变量
+| 变量名 | 值 | 用途 |
+|:---|:---|:---|
+| `--radius-sm` | `4px` | 小按钮/标签 |
+| `--radius-md` | `8px` | 卡片/输入框 |
+| `--radius-lg` | `12px` | 弹窗/大卡片 |
+| `--radius-xl` | `16px` | 商品图片/大圆角组件 |
+| `--radius-full` | `999px` | 胶囊按钮/角标 |
+
+#### 字体变量
+| 变量名 | 值 | 用途 |
+|:---|:---|:---|
+| `--font-size-xs` | `10px` | 角标/辅助文字 |
+| `--font-size-sm` | `12px` | 标签/提示 |
+| `--font-size-md` | `14px` | 正文 |
+| `--font-size-lg` | `16px` | 标题/金额 |
+| `--font-size-xl` | `18px` | 大标题 |
+| `--font-size-2xl` | `24px` | 页面标题 |
+| `--font-size-3xl` | `36px` | 支付金额/取餐码 |
+
+#### 间距变量
+| 变量名 | 值 | 用途 |
+|:---|:---|:---|
+| `--spacing-xs` | `4px` | 紧凑间距 |
+| `--spacing-sm` | `8px` | 小组件间距 |
+| `--spacing-md` | `12px` | 常规间距 |
+| `--spacing-lg` | `16px` | 卡片内边距 |
+| `--spacing-xl` | `24px` | 页面边距 |
+
+### 0.3 路由结构与分包策略 [H5-ROUTE-001]
+**主包（≤ 2MB）**：首页/登录/购物车/订单确认/支付
+```
+pages/
+├── index/index              # 首页（商品浏览/分类/搜索）
+├── cart/cart                # 购物车
+├── order/confirm            # 订单确认
+├── order/pay                # 订单支付
+└── order/success            # 支付成功
+```
+
+**子包 order（按需加载）**：订单管理
+```
+subpackages/order/
+├── order/list               # 订单列表
+└── order/detail             # 订单详情
+```
+
+**子包 member（按需加载）**：会员中心
+```
+subpackages/member/
+├── member/index             # 会员中心
+├── member/benefits          # 会员权益
+├── member/recharge          # 会员充值
+├── member/profile           # 用户资料
+├── member/point-logs        # 积分明细
+├── member/balance-logs      # 余额明细
+└── member/recharge-logs     # 充值记录
+```
+
+**子包 community（二期按需加载）**：社区
+```
+subpackages/community/
+├── community/index          # 社区动态广场 [二期]
+├── community/post           # 发帖 [二期]
+└── community/detail          # 帖子详情 [二期]
+```
+
+**子包 cashier（二期按需加载）**：收银端
+```
+subpackages/cashier/
+└── cashier/index            # 店员收银端 [二期]
+```
+
+**分包加载策略**：
+- 主包首屏加载，子包按需懒加载 [H5-ROUTE-001-01]
+- 用户进入会员中心/订单列表时预加载对应子包 [H5-ROUTE-001-02]
+- 主包体积控制在 2MB 以内，首屏加载时间 < 2s [H5-ROUTE-001-03]
+
+**图片优化策略**：
+- 商品图片懒加载（`loading="lazy"`），加载失败显示默认占位图 [H5-ROUTE-001-04]
+- 首页 Banner 预加载（`preload`），首屏可见图片提前请求 [H5-ROUTE-001-05]
+- CDN 缓存策略：`Cache-Control: max-age=86400`（24 小时）[H5-ROUTE-001-06]
+
+**Service Worker 策略**：
+- 注册 Service Worker 缓存静态资源（CSS/JS/字体/图片）[H5-ROUTE-001-07]
+- 网络断开时展示离线提示页 [H5-ROUTE-001-08]
+- 二次访问时静态资源秒级加载 [H5-ROUTE-001-09]
+
+### 0.4 状态管理 [H5-STORE-001]
+- **Pinia Store 模块划分**：
+  - `userStore`：用户信息、Token、登录态、authReady 状态 [H5-STORE-001-01]
+  - `cartStore`：购物车数据（未登录存本地，登录后同步服务端，支持多设备合并）[H5-STORE-001-02]
+  - `orderStore`：当前订单数据 [H5-STORE-001-03]
+  - `paymentStore`：支付流程状态机（`idle → paying → polling → success/failed`），管理支付方式选择、支付参数、轮询状态 [H5-STORE-001-03B]
+  - `memberStore`：会员等级、积分、余额、成长值 [H5-STORE-001-04]
+  - `themeStore`：主题配置、系统主题检测 [H5-STORE-001-05]
+  - `configStore`：全局配置（会员配置、桌号配置等）[H5-STORE-001-06]
+- **Store 初始化依赖图**：configStore → memberStore → orderStore → paymentStore → cartStore（按依赖顺序初始化）[H5-STORE-001-07]
+- **authReady 状态**：应用启动时等待 Token 校验完成后再导航路由，避免未授权页面闪烁 [H5-STORE-001-08]
+- **数据版本迁移**：localStorage 增加 `storeVersion` 字段，应用启动时检查版本并执行迁移脚本 [H5-STORE-001-09]
+
+### 0.5 网络请求封装 [H5-HTTP-001]
+- **请求配置**：`withCredentials: true`，浏览器自动携带 httpOnly Cookie 中的 Token [H5-HTTP-001-01]
+- **响应拦截器**：
+  - 200：正常返回 data [H5-HTTP-001-02]
+  - 401：Token 过期 → 自动 refresh_token → 失败则跳转登录 [H5-HTTP-001-03]
+  - 403：Toast "无权访问" + 回退上一页 [H5-HTTP-001-04]
+  - 429：Toast "操作过于频繁，请稍后重试"（5s 内屏蔽重复点击）[H5-HTTP-001-05]
+  - 500：Toast "服务器繁忙，请稍后重试" [H5-HTTP-001-06]
+- **超时设置**：10 秒，超时 Toast "网络请求超时，请重试" [H5-HTTP-001-07]
+- **重试机制**：失败后 3 秒内显示"重试"按钮 [H5-HTTP-001-08]
+
+### 0.6 环境配置 [H5-ENV-001]
+- **环境变量**：
+  - `VITE_API_BASE_URL`：后端 API 地址 [H5-ENV-001-01]
+  - `VITE_WX_APPID`：微信公众号 AppID [H5-ENV-001-02]
+  - `VITE_ENV`：开发/测试/生产环境标识 [H5-ENV-001-03]
+- **多环境配置**：`.env.development` / `.env.test` / `.env.production` [H5-ENV-001-04]
+
+### 0.7 微信 JS-SDK 配置 [H5-WX-SDK-001]
+- **初始化**：应用启动时调用 `wx.config` 注入权限 [H5-WX-SDK-001-01]
+- **必要接口**：
+  - `wx.chooseImage`：用户资料修改头像 [H5-WX-SDK-001-02]
+  - `wx.updateAppMessageShareData`：分享配置 [H5-WX-SDK-001-03]
+  - `WeixinJSBridge.invoke`：JSAPI 支付调起 [H5-WX-SDK-001-04]
+- **签名获取**：服务端提供 `/api/v1/wx/jsapi-signature` 接口，传入当前 URL 返回签名 [H5-WX-SDK-001-05]
+- **签名缓存**：微信签名有效期 7200 秒，前端缓存至 localStorage（2 小时），过期前 5 分钟自动刷新 [H5-WX-SDK-001-06]
+- **WeixinJSBridge 就绪检测**：封装 `invokeWxPay()` 方法，检测 `WeixinJSBridge` 对象就绪后调用支付，超时 5 秒降级提示"支付调起失败，请重试" [H5-WX-SDK-001-07]
+
+### 0.8 全局组件 [H5-COMPONENT-001]
+- **Vant UI 按需引入**：仅引入使用到的组件（Button/Cell/Tab/Switch/Dialog/Toast/Popup/Field/Stepper/Checkbox/Tag/SwipeCell/List/PullRefresh/CountDown/ActionSheet），全量引入约 60KB gzip → 按需引入约 20KB gzip [H5-COMPONENT-001-00]
+- `NavBar`：顶部导航栏（标题 + 返回 + 会员码入口）[H5-COMPONENT-001-01]
+- `TabBar`：底部导航（首页/订单/会员/俱乐部）[H5-COMPONENT-001-02]
+- `LoadingOverlay`：全屏 loading 遮罩 [H5-COMPONENT-001-03]
+- `EmptyState`：空状态插图 + 文字 [H5-COMPONENT-001-04]
+- `SkeletonCard`：骨架屏卡片 [H5-COMPONENT-001-05]
+- `PayCountdown`：支付倒计时组件 [H5-COMPONENT-001-06]
+- `QrCodeDialog`：二维码弹窗（会员码/支付宝支付）[H5-COMPONENT-001-07]
+- `LoginGuideDialog`：登录引导弹窗 [H5-COMPONENT-001-08]
+- `NewUserGuide`：新用户引导组件 [H5-COMPONENT-001-09]
+
+---
+
 # H5 端功能清单
 
 ---
 
 ## 0. 用户登录与认证 [🟢 一期] [新增]
 
-### 0.1 微信授权登录 [H5-AUTH-001]
-- H5 端通过微信 OAuth 2.0 静默授权获取 openid [H5-AUTH-001-01]
-- 首次授权流程：用户进入 H5 → 微信 redirect → 同意授权 → 回调获取 code → 服务端换取 openid → 创建/查询用户 → 下发 JWT Token [H5-AUTH-001-02]
-- 非首次授权：Token 有效则直接进入首页，Token 过期则自动续期（refresh token）[H5-AUTH-001-03]
-- 授权失败降级：弹窗提示"授权失败，请重试"，提供"重新授权"按钮 [H5-AUTH-001-04]
+> **运行场景**：微信公众号 H5（微信内置浏览器）+ 外部浏览器双场景支持。
+> **登录方式**：微信静默授权（snsapi_base），用户无感知获取 openid，是微信支付（JSAPI）的必需前提。
+
+### 0.1 微信静默授权登录 [H5-AUTH-001]
+- 入口：公众号菜单/链接打开 H5 时自动触发 [H5-AUTH-001-01]
+- 授权方式：静默授权（`snsapi_base`），用户无感知，自动获取 code [H5-AUTH-001-02]
+- 首次授权流程：进入 H5 → 检测 URL 是否有 code → 无 code 则跳转微信授权页 → 微信回调带 code → 服务端用 code 换取 openid → 创建/查询用户 → 下发 JWT Token [H5-AUTH-001-03]
+- 非首次授权：Token 有效则直接进入首页，Token 过期则自动使用 refresh_token 续期 [H5-AUTH-001-04]
+- 授权失败降级：弹窗提示"授权失败，请重试"，提供"重新授权"按钮 [H5-AUTH-001-05]
+
+### 0.2 外部浏览器登录 [H5-AUTH-001B] [🟢 一期]
+- **运行环境检测**：前端检测 `navigator.userAgent` 是否包含 `MicroMessenger`，区分微信内/外部浏览器 [H5-AUTH-001B-01]
+- **微信内环境**：使用静默授权（§0.1），获取 openid 用于 JSAPI 支付 [H5-AUTH-001B-02]
+- **外部浏览器环境**：采用手机号 + 验证码登录 [H5-AUTH-001B-03]
+  - 登录页：手机号输入框 + 验证码输入框 + 60 秒倒计时按钮 + "登录"按钮 [H5-AUTH-001B-04]
+  - 验证码发送：1 次/分钟/手机号，同一手机号每日最多 5 次，验证码 5 分钟有效 [H5-AUTH-001B-05]
+  - 登录成功：服务端根据手机号查询/创建用户 → 下发 JWT Token [H5-AUTH-001B-06]
+- **支付差异**：外部浏览器无 openid，微信支付走 H5 支付（收钱吧 `h5_url`），支付宝走 H5 跳转 [H5-AUTH-001B-07]
 
 ### 0.2 微信用户信息获取 [H5-AUTH-002]
-- 登录后通过 `wx.getUserInfo` 获取微信昵称和头像（需用户主动触发）[H5-AUTH-002-01]
-- 未授权用户信息时使用默认头像 + "微信用户"作为默认昵称 [H5-AUTH-002-02]
+- 静默授权仅获取 openid，不获取昵称头像 [H5-AUTH-002-01]
+- 未完善用户信息时使用默认头像 + "微信用户"作为默认昵称 [H5-AUTH-002-02]
 - 头像昵称可在会员中心→用户资料中修改（见 §6.8）[H5-AUTH-002-03]
 
 ### 0.3 Token 管理 [H5-AUTH-003]
-- JWT Token 存储于 localStorage，每次请求通过 Header `Authorization: Bearer <token>` 携带 [H5-AUTH-003-01]
-- Token 过期时间 7 天，过期前自动使用 refresh_token 续期 [H5-AUTH-003-02]
-- 退出登录：清除本地 Token + localStorage 数据 → 回到首页（访客模式，可浏览商品但不可下单）[H5-AUTH-003-03]
+- **Token 存储**：服务端通过 `Set-Cookie` 下发 httpOnly Cookie（含 access_token + refresh_token），前端无需手动读取 [H5-AUTH-003-01]
+- **Token 携带**：前端请求配置 `withCredentials: true`，浏览器自动携带 Cookie，服务端从 Cookie 解析 Token [H5-AUTH-003-02]
+- **Token 有效期**：access_token 7 天，refresh_token 30 天 [H5-AUTH-003-03]
+- **refresh_token 轮换**：每次续期后轮换 refresh_token（旧 token 失效），防重放攻击 [H5-AUTH-003-04]
+- **Token 刷新竞态处理**：多个请求同时 401 时，仅第一个触发 refresh_token，其余请求排队等待刷新结果，刷新成功后统一重发 [H5-AUTH-003-05]
+- **code 单次使用**：微信 code 仅能使用一次，服务端校验后前端 URL 清除 code 参数（`history.replaceState`）[H5-AUTH-003-06]
+- **设备指纹**：登录时生成 deviceId（基于 UA + 时间戳 hash），服务端记录最后登录设备 [H5-AUTH-003-07]
+- **退出登录**：调用服务端退出接口（清除 Cookie）+ 清除 localStorage 数据 → 回到首页（访客模式，可浏览商品但不可下单）[H5-AUTH-003-08]
 
 ### 0.4 登录态校验 [H5-AUTH-004]
 - 以下操作需校验登录态，未登录时弹出登录引导弹窗 [H5-AUTH-004-01]：
   - 提交订单 / 支付 / 查看会员中心 / 查看订单 / 充值 / 积分抵扣
 - 以下操作无需登录 [H5-AUTH-004-02]：
-  - 浏览首页 / 搜索商品 / 查看商品详情 / 添加购物车（购物车存 localStorage）
+  - 浏览首页 / 搜索商品 / 查看商品详情 / 添加购物车（未登录存本地，登录后同步服务端）
 - 登录引导弹窗："登录后即可下单享会员折扣" + "微信登录"按钮（绿色主题色）[H5-AUTH-004-03]
 
 ### 0.5 登录加载与过渡 [H5-AUTH-005]
@@ -131,8 +327,20 @@
 ### 2.4 清空购物车 [H5-CART-004]
 - 顶部"清空"按钮，点击弹出确认弹窗："确定清空购物车？"[H5-CART-004-01]
 
-### 2.5 数据持久化 [H5-CART-005]
-- 购物车数据 Pinia store + localStorage 持久化 [H5-CART-005-01]
+### 2.5 数据持久化与同步 [H5-CART-005]
+- **未登录状态**：购物车数据维护在 Pinia store + localStorage 持久化 [H5-CART-005-01]
+- **存储结构**：`localStorage` 中 key 为 `cart_data`，值为 JSON 数组，每项包含 `{ goodsId, skuId, name, price, quantity, image, selected }` [H5-CART-005-02]
+- **登录后同步策略**：用户登录成功后，自动将本地购物车同步至服务端数据库 [H5-CART-005-03]
+- **同步锁定**：合并期间锁定购物车操作（显示 loading），合并完成后解锁，防止覆盖同步结果 [H5-CART-005-03B]
+- **多设备同步**：同一用户在不同设备登录时，拉取服务端购物车数据，与本地购物车合并 [H5-CART-005-04]
+- **合并规则**（异或策略）：
+  - 相同商品 + 相同 SKU：数量相加 [H5-CART-005-05]
+  - 本地独有商品：上传至服务端 [H5-CART-005-06]
+  - 服务端独有商品：下载至本地 [H5-CART-005-07]
+  - 不同 SKU 视为不同商品，分别保留 [H5-CART-005-08]
+- **冲突处理**：本地商品已下架/库存不足时，toast 提示并移除该商品 [H5-CART-005-09]
+- **失效处理**：提交订单时服务端校验商品状态（下架/库存不足/价格变动），失败则 toast 提示并返回购物车刷新 [H5-CART-005-10]
+- **数据清理**：订单支付成功后，自动清空已购买商品的购物车数据（本地 + 服务端）[H5-CART-005-11]
 
 ---
 
@@ -149,6 +357,7 @@
 - 字数统计："0/200" [H5-ORDER-CONFIRM-002-02]
 
 ### 3.3 商品清单 [H5-ORDER-CONFIRM-003]
+- **数据来源**：进入订单确认页时调用 `POST /api/v1/order/preview` 接口，获取最新价格、折扣和库存，而非纯前端计算 [H5-ORDER-CONFIRM-003-00]
 - 商品项：图片（60x60px）+ 名称 + 规格 + 数量 × 单价 [H5-ORDER-CONFIRM-003-01]
 - 分类标签区分颜色：饮品/工时费/配件 [H5-ORDER-CONFIRM-003-02]
 
@@ -162,21 +371,28 @@
 - 开启后显示：可用积分、抵扣上限（订单金额 30%）、步进器调整 [H5-ORDER-CONFIRM-005-02]
 - 提示："100 积分 = 1 元，最低 100 积分起用" [H5-ORDER-CONFIRM-005-03]
 - 非会员（level=0）显示"充值成为会员即可使用积分抵扣" [H5-ORDER-CONFIRM-005-04]
+- **积分抵扣计算**：前端仅展示预估抵扣金额，服务端重新计算并返回最终实付金额，前端二次确认 [H5-ORDER-CONFIRM-005-05]
 
 ### 3.6 实付金额 [H5-ORDER-CONFIRM-006]
 - 明细：商品总价 / 会员折扣 / 积分抵扣 / 实付金额（24px bold #FF4D4F）[H5-ORDER-CONFIRM-006-01]
 - 公式：实付 = 商品总价 - 分品类折扣合计 - 积分抵扣 [H5-ORDER-CONFIRM-006-02]
+- **服务端校验**：提交订单时服务端重新计算所有金额（折扣/积分/实付），与前端传入金额对比，差异 > 1 分则拒绝 [H5-ORDER-CONFIRM-006-03]
 
 ### 3.7 提交订单 [H5-ORDER-CONFIRM-007]
 - 底部固定"提交订单"按钮：未选禁用（灰色 #CCC），已选可用（主题色）[H5-ORDER-CONFIRM-007-01]
 - 点击后"提交中..."loading，禁用二次点击 [H5-ORDER-CONFIRM-007-02]
-- 提交时服务端原子扣减库存，库存不足返回错误 [H5-ORDER-CONFIRM-007-03]
-- 提交成功生成待付款订单 → 跳转支付页，失败 toast 提示（如"库存不足"）[H5-ORDER-CONFIRM-007-04]
-- ⚠️ 订单超时自动取消：提交后 15 分钟内未支付，服务端定时任务自动将订单状态改为"已取消"，释放库存 [H5-ORDER-CONFIRM-007-05]
+- **防重复提交**：前端生成 `requestId`（UUID v4），随请求携带，服务端幂等校验（相同 requestId 10s 内去重）[H5-ORDER-CONFIRM-007-03]
+- 提交时服务端原子扣减库存，库存不足返回错误 [H5-ORDER-CONFIRM-007-04]
+- 提交成功生成待付款订单 → 跳转支付页，失败 toast 提示（如"库存不足"）[H5-ORDER-CONFIRM-007-05]
+- **库存不足处理**：保留购物车中其他商品，仅移除售罄商品，toast 提示具体商品名称 [H5-ORDER-CONFIRM-007-06]
+- ⚠️ 订单超时自动取消：提交后 15 分钟内未支付，服务端定时任务自动将订单状态改为"已取消"，释放库存 [H5-ORDER-CONFIRM-007-07]
 
 ---
 
 ## 4. 订单支付 [🟢 一期]
+
+> **支付架构**：前端统一调用服务端 → 服务端统一调用收钱吧 API → 收钱吧对接微信/支付宝。
+> **双通道适配**：微信内使用 JSAPI 支付（需 openid），外部浏览器使用 H5 支付（不需 openid）。
 
 ### 4.1 支付金额展示 [H5-PAY-001]
 - 大字体金额："¥XX.XX"（36px bold #FF4D4F）[H5-PAY-001-01]
@@ -189,29 +405,52 @@
 - 余额支付：显示当前余额，"余额支付"文字，余额不足时置灰禁用 [H5-PAY-002-03]
 - 支付方式卡片：选中态（主题色边框），未选中态（灰色边框）[H5-PAY-002-04]
 
-### 4.3 在线支付（收钱吧） [H5-PAY-003]
-- 微信支付：点击"确认支付"，调起收钱吧微信 JSAPI 支付 [H5-PAY-003-01]
-- 支付宝支付：点击"确认支付"，调起收钱吧支付宝 JSAPI 支付 [H5-PAY-003-02]
-- 支付中按钮显示"支付中..."，禁用状态 [H5-PAY-003-03]
+### 4.3 运行环境检测 [H5-PAY-003]
+- 前端自动检测运行环境（`navigator.userAgent` 是否包含 `MicroMessenger`）[H5-PAY-003-01]
+- 微信内环境：使用 JSAPI 支付（需 openid，`WeixinJSBridge.invoke` 调起）[H5-PAY-003-02]
+- 外部浏览器环境：使用 H5 支付（不需 openid，`window.location.href` 跳转）[H5-PAY-003-03]
+- 前端请求支付接口时传入 `env` 参数（`wechat` 或 `browser`）[H5-PAY-003-04]
 
-### 4.4 余额支付 [H5-PAY-004] [🟢 一期]
-- 选中"余额支付"，"确认支付"按钮显示"确认扣款 ¥XXX" [H5-PAY-004-01]
-- 点击后调用 member-balance-pay 云函数扣减余额 [H5-PAY-004-02]
-- 扣款成功：跳转支付成功页 [H5-PAY-004-03]
-- 扣款失败（余额不足）：toast 提示 + 自动切换回微信支付 [H5-PAY-004-04]
+### 4.4 微信支付 [H5-PAY-004]
+- 前端调用 `POST /api/v1/order/pay`，传入 `{ orderId, payMethod: 'wechat', env }` [H5-PAY-004-01]
+- 服务端根据 `env` 参数决定是否传 `payer_uid`（微信内必填 openid，外部浏览器不传）[H5-PAY-004-02]
+- 微信内：服务端调用收钱吧 `precreate` 接口，返回 `pay_params`（含 appId/timeStamp/nonceStr/package/signType/paySign），前端通过 `invokeWxPay()` 封装方法调起 `WeixinJSBridge.invoke` 原生支付弹窗 [H5-PAY-004-03]
+- 外部浏览器：收钱吧返回 `h5_url`，前端 `window.location.href` 跳转微信中间页完成支付 [H5-PAY-004-04]
+- 支付中按钮显示"支付中..."，禁用状态 [H5-PAY-004-05]
 
-### 4.5 支付结果轮询 [H5-PAY-005]
-- 每 2 秒轮询订单支付状态，最多 30 秒 [H5-PAY-005-01]
-- 超时显示"支付结果确认中，请稍后查看订单" [H5-PAY-005-02]
-- 轮询期间若订单被超时自动取消，提示"订单已超时取消，请重新下单"并自动返回首页 [H5-PAY-005-03]
+### 4.5 支付宝支付 [H5-PAY-005]
+- 前端调用 `POST /api/v1/order/pay`，传入 `{ orderId, payMethod: 'alipay', env }` [H5-PAY-005-01]
+- 服务端调用收钱吧 `precreate`（`payway: "2"`），支付宝在任何环境下都不需要 `payer_uid` [H5-PAY-005-02]
+- 微信内环境：收钱吧返回支付宝支付链接/二维码，前端展示二维码弹窗，用户长按识别跳转支付宝 [H5-PAY-005-03]
+- 外部浏览器环境：收钱吧返回 `h5_url`，前端直接跳转支付宝 [H5-PAY-005-04]
+- 微信内展示二维码时启动长轮询（见 §4.7）[H5-PAY-005-05]
+- 二维码弹窗：标题"请使用支付宝扫码支付" + 二维码图片 + "长按识别图中二维码"提示 + "已支付，查询"按钮 [H5-PAY-005-06]
 
-### 4.6 支付成功 [H5-PAY-006]
-- 绿色对勾 + "支付成功" + 订单信息（订单号、金额、支付方式、时间）[H5-PAY-006-01]
-- "查看订单"按钮 → 订单详情 / "返回首页"按钮 → 首页 [H5-PAY-006-02]
+### 4.6 余额支付 [H5-PAY-006] [🟢 一期]
+- 选中"余额支付"，"确认支付"按钮显示"确认扣款 ¥XXX" [H5-PAY-006-01]
+- 点击调用 `POST /api/v1/members/balance/pay` 接口扣减余额 [H5-PAY-006-02]
+- 扣款成功：跳转支付成功页 [H5-PAY-006-03]
+- 扣款失败（余额不足）：toast 提示 + 自动切换回微信支付 [H5-PAY-006-04]
 
-### 4.7 支付失败 [H5-PAY-007]
-- 红色感叹号 + "支付失败" + 失败原因 [H5-PAY-007-01]
-- "重新支付"按钮 → 返回支付页 / "取消订单"按钮 → 确认弹窗 [H5-PAY-007-02]
+### 4.7 支付结果确认 [H5-PAY-007]
+- **长轮询机制**：前端发起长轮询请求，服务端 hold 5 秒后返回（有结果立即返回），减少 70% 请求量 [H5-PAY-007-01]
+- 微信支付：长轮询最多 30 秒（6 次请求），支付宝二维码场景最多 60 秒（12 次请求）[H5-PAY-007-02]
+- 超时显示"支付结果确认中，请稍后查看订单" [H5-PAY-007-03]
+- 轮询期间若订单被超时自动取消，提示"订单已超时取消，请重新下单"并自动返回首页 [H5-PAY-007-04]
+
+### 4.8 支付中断恢复 [H5-PAY-007B]
+- 从支付页退出后再进入支付页 → 先展示"正在确认支付结果..."loading（最多 3 秒）→ 查询订单状态 [H5-PAY-007B-01]
+- 已支付：跳转支付成功页 [H5-PAY-007B-02]
+- 未支付：展示支付界面，继续支付流程 [H5-PAY-007B-03]
+- 避免用户重复支付 [H5-PAY-007B-04]
+
+### 4.8 支付成功 [H5-PAY-008]
+- 绿色对勾 + "支付成功" + 订单信息（订单号、金额、支付方式、时间）[H5-PAY-008-01]
+- "查看订单"按钮 → 订单详情 / "返回首页"按钮 → 首页 [H5-PAY-008-02]
+
+### 4.9 支付失败 [H5-PAY-009]
+- 红色感叹号 + "支付失败" + 失败原因 [H5-PAY-009-01]
+- "重新支付"按钮 → 返回支付页 / "取消订单"按钮 → 确认弹窗 [H5-PAY-009-02]
 
 ---
 
@@ -258,6 +497,11 @@
 
 ## 6. 会员中心 [🟢 一期]
 
+### 6.0 数据缓存策略 [H5-MEMBER-000]
+- **会员数据缓存**：会员等级/积分/余额/成长值缓存 5 分钟，关键操作（支付/充值）后强制刷新 [H5-MEMBER-000-01]
+- **预加载策略**：应用启动后后台静默预加载会员数据，进入会员中心时直接展示 [H5-MEMBER-000-02]
+- **缓存失效**：服务端返回的会员数据携带 `cache_time` 字段，前端检查缓存时间 > 5 分钟自动刷新 [H5-MEMBER-000-03]
+
 ### 6.1 用户信息 [H5-MEMBER-001]
 - 微信头像（80px 圆形）+ 昵称（18px bold）+ 等级徽章 [H5-MEMBER-001-01]
 - 等级徽章颜色：普通(灰 #999)/青铜(棕 #CD7F32)/白银(银 #C0C0C0)/黄金(金 #FFD700)/铂金(白 #E5E4E2)/钻石(蓝 #B9F2FF)/至尊(紫 #9400D3) [H5-MEMBER-001-02]
@@ -289,14 +533,14 @@
 - 5 分钟有效期，每 5 分钟自动刷新 [H5-MEMBER-007-03]
 - 关闭：点击遮罩 / 关闭按钮 / 下滑 >80px [H5-MEMBER-007-04]
 - 网络异常："网络异常，无法生成会员码" [H5-MEMBER-007-05]
-- 离线缓存：显示上次缓存的码 + "离线码，可能已过期"标注 [H5-MEMBER-007-06]
+- 离线缓存：显示上次缓存的码 + "离线码，可能已过期"标注 + 时间戳水印（收银端校验时拒绝 >10 分钟的码）[H5-MEMBER-007-06]
 - ⚠️ 收银端扫码解析 → 依赖二期收银模块 [H5-MEMBER-007-07] [⚠️ 跨阶段依赖]
 
 ### 6.8 用户资料 [H5-MEMBER-008]
 - 头像：点击调起微信选择图片更换 [H5-MEMBER-008-01]
 - 昵称：点击编辑，弹出输入框，最大 20 字符 [H5-MEMBER-008-02]
 - 手机号：显示绑定状态，未绑定显示"去绑定"按钮 [H5-MEMBER-008-03]
-- 绑定手机号弹窗：手机号 + 验证码 + 60 秒倒计时 [H5-MEMBER-008-04]
+- 绑定手机号弹窗：手机号 + 验证码 + 60 秒倒计时，验证码发送限流 1 次/分钟/手机号，同一手机号每日最多 5 次，验证码 5 分钟有效 [H5-MEMBER-008-04]
 
 ---
 
@@ -453,6 +697,21 @@
 
 # 后台管理端功能清单
 
+> **技术栈**：Vue3 + Vben Admin + TypeScript + Ant Design Vue + ECharts
+> **运行环境**：PC 浏览器（Chrome/Edge/Safari）
+
+---
+
+## 16. 后台基础架构 [🟢 一期]
+
+### 16.1 Vben 框架集成 [ADM-VBEN-001]
+- **动态路由模式**：结合 Vben 的 `accessMode`（后端路由模式），服务端返回用户可访问的路由列表，动态生成菜单 [ADM-VBEN-001-01]
+- **useTable/useForm 规范**：各列表页使用统一的 useTable 配置模板（分页/排序/搜索/操作列标准化）[ADM-VBEN-001-02]
+- **全局配置**：利用 Vben 的 `useAppConfig` 统一配置主题色 `#4ECDC4`、水印（操作人+时间）、全局 loading [ADM-VBEN-001-03]
+- **权限指令**：按钮级 `v-permission="'goods:edit'"` 指令控制元素是否渲染；路由守卫校验 `meta.permission` [ADM-VBEN-001-04]
+- **Tabs 多标签页**：启用 Vben 的 `useTabs` 多标签页功能，已打开页面缓存不销毁，频繁切换无需重新加载 [ADM-VBEN-001-05]
+- **搜索重置规范**：搜索区域"重置"按钮统一行为：清空所有条件 + 恢复默认分页 + 重新查询 [ADM-VBEN-001-06]
+
 ---
 
 ## 17. 登录页 [🟢 一期]
@@ -466,7 +725,7 @@
 - 登录成功：存储 JWT Token → 跳转 Dashboard [ADM-LOGIN-001-06]
 - 登录失败：输入框下方红色提示"账号或密码错误" [ADM-LOGIN-001-07]
 - Token 过期自动跳转登录页 [ADM-LOGIN-001-08]
-- 表单校验：账号非空、密码非空、密码 ≥6 位 [ADM-LOGIN-001-09]
+- 表单校验：账号非空、密码非空、密码 ≥8 位（含大小写字母 + 数字 + 特殊字符）[ADM-LOGIN-001-09]
 
 ---
 
@@ -518,9 +777,10 @@
 ### 19.2 商品编辑 [ADM-GOODS-002]
 - 左侧表单（2/3）+ 右侧预览（1/3）[ADM-GOODS-002-01]
 - 表单：名称/分类/描述/图片上传（最多 5 张）/标签多选/状态 Switch [ADM-GOODS-002-02]
-- SKU 规格管理：动态表格，添加/删除规格行（名称/价格/库存/操作）[ADM-GOODS-002-03]
-- 表单校验：名称非空、至少 1 个 SKU、价格 >0 [ADM-GOODS-002-04]
-- 预览卡片：实时预览商品卡片效果 [ADM-GOODS-002-05]
+- **SKU 笛卡尔积模型**：规格组（如温度：热/冰）× 规格值（如大小：大/中/小），自动生成 SKU 组合 [ADM-GOODS-002-03]
+- SKU 规格管理：动态表格，添加/删除规格行（名称/价格/库存/操作）[ADM-GOODS-002-04]
+- 表单校验：名称非空、至少 1 个 SKU、价格 >0 [ADM-GOODS-002-05]
+- 预览卡片：实时预览商品卡片效果 [ADM-GOODS-002-06]
 
 ---
 
@@ -551,8 +811,9 @@
 
 ### 20.2 订单详情 [ADM-ORDER-002]
 - 订单信息卡片 + 状态时间轴 + 商品清单 + 金额明细 + 会员信息 + 操作区 [ADM-ORDER-002-01]
-- 状态时间轴：待付款 → 待取餐 → 制作中 → 已完成，当前高亮 [ADM-ORDER-002-02]
-- 操作区按钮（按状态显隐，与列表页操作列一致）：[ADM-ORDER-002-03]
+- **订单状态机**：`pending（待付款）→ paid（待取餐）→ making（制作中）→ completed（已完成）`，终态：`cancelled（已取消）/refunded（已退款）`，非法流转拒绝 [ADM-ORDER-002-02]
+- 状态时间轴：待付款 → 待取餐 → 制作中 → 已完成，当前高亮 [ADM-ORDER-002-03]
+- 操作区按钮（按状态显隐，与列表页操作列一致）：[ADM-ORDER-002-04]
   - 待取餐：开始制作 / 取消订单 / 退款
   - 制作中：完成订单 / 退款
   - 已完成/已取消/已退款：无操作按钮（仅查看）
@@ -560,11 +821,12 @@
 ### 20.3 退款处理 [ADM-ORDER-003] [🟢 一期] [新增]
 - 订单详情页"退款"按钮（红色），仅"待取餐"和"制作中"状态可用 [ADM-ORDER-003-01]
 - 点击弹出退款确认弹窗：退款金额（自动填入实付金额，支持修改）+ 退款原因（下拉选择：顾客取消/商品问题/其他）+ 备注 [ADM-ORDER-003-02]
-- 确认退款后调用 refund-process 接口 [ADM-ORDER-003-03]
-- 退款成功：订单状态变为"已取消"+"已退款"标签；自动回退积分和成长值；恢复库存 [ADM-ORDER-003-04]
-- 微信支付退款：调用收钱吧退款 API 原路退回 [ADM-ORDER-003-05]
-- 余额支付退款：退回余额账户 [ADM-ORDER-003-06]
-- 退款失败：弹出错误提示 [ADM-ORDER-003-07]
+- 确认退款后调用 `POST /api/v1/admin/refund/process` 接口 [ADM-ORDER-003-03]
+- **退款状态查询**：退款是异步操作，提交退款后每 5 秒查询退款状态（最多 6 次，30 秒），退款成功才更新订单状态 [ADM-ORDER-003-04]
+- 退款成功：订单状态变为"已取消"+"已退款"标签；自动回退积分和成长值；恢复库存 [ADM-ORDER-003-05]
+- 微信/支付宝退款：调用收钱吧退款 API 原路退回 [ADM-ORDER-003-06]
+- 余额支付退款：退回余额账户 [ADM-ORDER-003-07]
+- 退款失败：弹出错误提示，回滚本地退款状态 [ADM-ORDER-003-08]
 
 ---
 
@@ -610,7 +872,7 @@
 | 按钮 | 图标 | 权限码 | 数据约束 | 说明 |
 |:---|:---|:---|:---|:---|
 | 编辑 | 笔图标 | `account:manage` | — | 编辑昵称/角色 |
-| 重置密码 | 钥匙图标 | `account:manage` | — | 确认弹窗→重置为随机密码 |
+| 重置密码 | 钥匙图标 | `account:manage` | — | 确认弹窗→重置为随机密码→强制该账号重新登录（Token 黑名单） |
 | 禁用/启用 | Switch | `account:manage` | 不可禁用自己 | 点击切换账号状态 |
 | 删除 | 垃圾桶图标 | `account:manage` | 不可删除自己；不可删除最后一个超级管理员 | 确认弹窗→删除 |
 
@@ -624,6 +886,11 @@
 
 ### 22.3 个人设置 [ADM-SYS-003]
 - 修改密码/修改昵称/退出登录 [ADM-SYS-003-01]
+- **修改密码流程**：输入旧密码 → 验证通过 → 输入新密码（2次）→ 确认修改 [ADM-SYS-003-02]
+- **密码强度策略**：≥8 位，包含大小写字母 + 数字 + 特殊字符，禁止常见弱密码（Top 1000）[ADM-SYS-003-03]
+- **密码加密存储**：服务端使用 `bcrypt`（cost=12）或 `argon2id` 加密存储，禁止 MD5/SHA1 [ADM-SYS-003-04]
+- **密码修改通知**：修改成功后发送站内通知，展示修改时间/IP [ADM-SYS-003-05]
+- **登录失败锁定**：连续 5 次密码错误锁定账号 15 分钟，记录 `admin_operation_logs` [ADM-SYS-003-06]
 
 ---
 
@@ -789,6 +1056,79 @@
 
 ---
 
+## 服务端 API 安全与稳定性约定（全系统通用）
+
+> 以下约定覆盖服务端与第三方 API 集成的安全、限流、熔断、编解码等通用策略。
+
+### 收钱吧 API 集成安全 [API-SHQ-001]
+- **密钥安全存储**：收钱吧 `client_id`/`client_secret` 存储于环境变量或密钥管理服务（如阿里云 KMS），禁止硬编码 [API-SHQ-001-01]
+- **回调签名校验**：服务端校验收钱吧回调签名（RSA/MD5），签名失败拒绝处理 [API-SHQ-001-02]
+- **API 版本控制**：请求中指定 `api_version` 参数，服务端配置可切换版本，灰度升级 [API-SHQ-001-03]
+- **Unicode 编码处理**：服务端统一 UTF-8 编码，MongoDB 存储使用 `utf8mb4` 兼容字符集，前端展示使用 `String.prototype.normalize('NFC')` [API-SHQ-001-04]
+
+### 熔断与重试策略 [API-CIRCUIT-001]
+- **收钱吧熔断器**：失败率 > 50%（10 秒窗口内）→ 熔断 10s → 半开探测 3 次 → 恢复/继续熔断 [API-CIRCUIT-001-01]
+- **降级策略**：收钱吧完全不可用时，展示"支付系统维护中，请稍后重试" + 引导余额支付（如余额充足）[API-CIRCUIT-001-02]
+- **充值降级**：充值接口复用支付熔断器，降级策略为提示"充值系统维护中，请稍后重试"（无余额支付替代方案）[API-CIRCUIT-001-02B]
+- **重试策略**：幂等接口（查询订单）自动重试 2 次（指数退避：1s/2s），非幂等接口（支付）不重试 [API-CIRCUIT-001-03]
+- **支付回调幂等**：支付回调处理前检查订单状态，已处理直接返回成功，不重复处理 [API-CIRCUIT-001-04]
+- **收钱吧 API 超时**：调用收钱吧 API 超时 10 秒，超时后触发熔断器 [API-CIRCUIT-001-05]
+- **收钱吧回调 URL**：`https://api.bikeclub.cn/api/v1/pay/callback`，回调验证：签名校验 + 订单号校验 + 金额校验 [API-CIRCUIT-001-06]
+
+### 接口限流策略 [API-RATE-001]
+- **登录接口**：5 次/分钟/IP [API-RATE-001-01]
+- **支付接口**：10 次/分钟/user [API-RATE-001-02]
+- **通用接口**：100 次/分钟/IP [API-RATE-001-03]
+- **限流响应**：429 Too Many Requests，返回 `Retry-After` 头 [API-RATE-001-04]
+
+### 接口版本控制 [API-VERSION-001]
+- **版本前缀**：所有接口路径增加版本前缀 `/api/v1/`，大版本升级时保留旧版本 6 个月 [API-VERSION-001-01]
+- **RESTful 规范**：资源名词 + HTTP 方法语义（如 `POST /api/v1/members/{id}/balance/pay`）[API-VERSION-001-02]
+
+### 数据传输安全 [API-SECURITY-001]
+- **请求体大小限制**：Nginx 配置 `client_max_body_size 10m`，服务端校验请求体大小，超限返回 413 [API-SECURITY-001-01]
+- **XSS 防护**：服务端对所有字符串输入执行 XSS 过滤（移除 `<script>`、`javascript:` 等），输出时 HTML 转义 [API-SECURITY-001-02]
+- **NoSQL 注入防护**：使用 Joi/zod 校验所有输入，禁止直接使用用户输入构建 MongoDB 查询条件 [API-SECURITY-001-03]
+- **安全响应头**：`Content-Security-Policy`、`X-Frame-Options: DENY`、`X-Content-Type-Options: nosniff` [API-SECURITY-001-04]
+
+---
+
+## 服务端架构优化约定（全系统通用）
+
+> 以下约定覆盖服务端性能、可观测性、架构扩展性等通用策略。
+
+### 性能 SLA [API-SLA-001]
+- **列表页查询**：< 1s（10 万条数据）[API-SLA-001-01]
+- **详情页查询**：< 500ms [API-SLA-001-02]
+- **报表查询**：< 3s [API-SLA-001-03]
+- **支付接口**：< 2s（含收钱吧调用）[API-SLA-001-04]
+
+### 可观测性 [API-OBS-001]
+- **request_id**：所有接口响应增加 `request_id` 字段（UUID），服务端日志通过 `request_id` 关联 [API-OBS-001-01]
+- **慢查询监控**：服务端记录 > 1s 的查询到 `slow_queries` 集合（timestamp/endpoint/duration/query/user_id），每日告警汇总 [API-OBS-001-02]
+- **分页优化**：分页接口增加 `has_more` 字段（基于最后一条 `_id` 游标分页），非必要场景不返回 `total`，避免 `countDocuments` 性能问题 [API-OBS-001-03]
+
+### 并发安全 [API-CONCURRENCY-001]
+- **乐观锁**：订单操作采用乐观锁（`version` 字段），冲突时提示"订单已被他人操作，请刷新" [API-CONCURRENCY-001-01]
+- **原子操作**：余额扣减使用 `findOneAndUpdate` 带 `balance >= amount` 条件，防止超扣 [API-CONCURRENCY-001-02]
+- **分布式锁**：退款/库存扣减等关键操作使用 MongoDB `findOneAndUpdate` 原子操作替代分布式锁 [API-CONCURRENCY-001-03]
+
+### 云函数架构 [API-CLOUD-001]
+- **云函数合并**：按业务域合并云函数，减少冷启动延迟 [API-CLOUD-001-01]
+  - `order`（路由分发）：order-create / order-pay / order-pay-callback / order-preview / refund-request
+  - `member`（路由分发）：member-info / member-benefits / member-point-logs / member-recharge / member-balance-pay / member-code-decode
+  - `admin`（路由分发）：admin-goods-* / admin-orders-* / admin-members-* / admin-config-* / admin-report-* / admin-system-*
+  - `auth`（路由分发）：wx-login / phone-login / token-refresh / logout
+  - 其他独立云函数：wx-jsapi-signature / community-* / cashier-*
+- **预期效果**：51 个云函数 → 约 15 个，冷启动减少 70% [API-CLOUD-001-02]
+
+### 数据模型补充说明 [API-DATA-001]
+- **购物车集合**：db-schema 需补充 `carts` 集合定义（`_id/member_id/items[{goodsId/skuId/name/price/quantity/image/selected}]/updated_at`），支持登录后购物车同步 [API-DATA-001-01]
+- **SKU 规格组**：db-schema 的 `goods` 集合需补充 `spec_groups` 字段（`[{name:"温度",values:["热","冰"]}]`），`sku_list` 中每项增加 `spec_values`（`{"温度":"热","大小":"大"}`），支持笛卡尔积模型 [API-DATA-001-02]
+- **商品分类层级**：db-schema 的 `goods` 集合 `category` 字段改为 `category_id`（关联 `categories` 集合），支持 2 级分类（`parent_id` 自关联）[API-DATA-001-03]
+
+---
+
 ## 异常与边界处理约定（全系统通用）
 
 > 各模块描述正常流程时省略重复的异常处理，以下约定覆盖全系统通用异常场景。
@@ -816,7 +1156,7 @@
 | 库存不足 | 提交订单失败 → Toast "XX 商品库存不足" → 返回购物车刷新 |
 | 余额不足 | 支付失败 → 自动切换支付方式 |
 | 订单状态冲突 | 操作失败 → Toast "订单状态已变更，请刷新" → 自动刷新列表 |
-| 重复提交 | 前端防抖 300ms + 服务端幂等校验（相同订单号 10s 内去重） |
+| 重复提交 | 前端生成 requestId（UUID v4）+ 服务端幂等校验（相同 requestId 10s 内去重） |
 
 ### 数据边界处理
 | 场景 | 处理方式 |
@@ -831,6 +1171,7 @@
 |:---|:---|
 | 支付中断恢复 | 从支付页退出后再进入 → 自动查询订单状态 → 已支付跳转成功页 / 未支付继续支付 |
 | 页面崩溃 | H5 端 localStorage 缓存表单草稿（3 分钟），重新进入提示"是否恢复未完成的订单？" |
+| 订单草稿恢复 | 提交订单失败后，缓存订单草稿至 localStorage（key: `order_draft`），3 分钟内重新进入订单确认页弹窗提示"是否恢复未完成的订单？"，用户可选择"继续下单"/"放弃" [ERROR-RECOVER-001] |
 | 定时任务失败 | 超时取消订单定时任务失败 → 记录 `admin_operation_logs` + 钉钉/企微告警 |
 
 ### 全局异常日志
@@ -844,13 +1185,22 @@
 
 | 功能 ID 范围 | 功能模块 | 对应 Spec | 实现阶段 |
 |:---|:---|:---|:---|
+| H5-THEME-001 ~ 002 | H5 主题系统 | p1-h5-home | 一期 |
+| H5-ROUTE-001 | H5 路由结构与分包策略 | p1-h5-home | 一期 |
+| H5-STORE-001 | H5 状态管理 | p1-h5-home | 一期 |
+| H5-HTTP-001 | H5 网络请求封装 | p1-h5-home | 一期 |
+| H5-ENV-001 | H5 环境配置 | p1-h5-home | 一期 |
+| H5-WX-SDK-001 | H5 微信 JS-SDK | p1-h5-home | 一期 |
+| H5-COMPONENT-001 | H5 全局组件 | p1-h5-home | 一期 |
 | H5-AUTH-001 ~ 005 | H5 登录认证 | p1-h5-home | 一期 |
+| H5-AUTH-001B | H5 外部浏览器登录 | p1-h5-home | 一期 |
 | H5-HOME-001 ~ 008 | H5 首页 | p1-h5-home | 一期 |
-| H5-CART-001 ~ 005 | H5 购物车 | p1-h5-trade | 一期 |
-| H5-ORDER-CONFIRM-001 ~ 007 | H5 订单确认 | p1-h5-trade | 一期 |
-| H5-PAY-001 ~ 007 | H5 订单支付 | p1-h5-trade | 一期 |
+| H5-CART-001 ~ 005 | H5 购物车（含同步策略） | p1-h5-trade | 一期 |
+| H5-ORDER-CONFIRM-001 ~ 007 | H5 订单确认（含 order-preview） | p1-h5-trade | 一期 |
+| H5-PAY-001 ~ 009 | H5 订单支付（含长轮询+中断恢复） | p1-h5-trade | 一期 |
 | H5-ORDER-LIST-001 ~ 006 | H5 订单管理 | p1-h5-trade | 一期 |
 | H5-ORDER-LIST-007 | H5 申请退款 | — | 二期 |
+| H5-MEMBER-000 | H5 会员数据缓存策略 | p1-h5-member | 一期 |
 | H5-MEMBER-001 ~ 008 | H5 会员中心 | p1-h5-member | 一期 |
 | H5-BENEFIT-001 ~ 004 | H5 会员权益 | p1-h5-member | 一期 |
 | H5-RECHARGE-001 ~ 004 | H5 会员充值 | p1-h5-member | 一期 |
@@ -863,6 +1213,7 @@
 | H5-COMM-POST-001 | H5 社区发帖 | — | 二期 |
 | H5-COMM-DETAIL-001 | H5 社区帖子详情 | — | 二期 |
 | H5-CASHIER-001 ~ 005 | H5 店员收银端 | — | 二期 |
+| ADM-VBEN-001 | 后台 Vben 框架集成 | p2-admin | 一期 |
 | ADM-LOGIN-001 | 后台登录 | p2-admin | 一期 |
 | ADM-DASH-001 ~ 004 | 后台 Dashboard | p2-admin | 一期 |
 | ADM-GOODS-001 ~ 002 | 后台商品管理 | p2-admin | 一期 |
@@ -876,6 +1227,17 @@
 | ADM-PERM-001 ~ 003 | 后管权限码规划 | p2-admin | 一期 |
 | ADM-COMM-001 ~ 003 | 后台社区管理 | — | 二期 |
 | ERROR-HOOK-001 ~ 003 | 全局异常日志 | — | 一期 |
+| ERROR-RECOVER-001 | 订单草稿恢复 | — | 一期 |
+| API-SHQ-001 | 收钱吧 API 集成安全 | — | 一期 |
+| API-CIRCUIT-001 | 熔断与重试策略 | — | 一期 |
+| API-RATE-001 | 接口限流策略 | — | 一期 |
+| API-VERSION-001 | 接口版本控制 | — | 一期 |
+| API-SECURITY-001 | 数据传输安全 | — | 一期 |
+| API-SLA-001 | 性能 SLA | — | 一期 |
+| API-OBS-001 | 可观测性（request_id/慢查询/分页优化） | — | 一期 |
+| API-CONCURRENCY-001 | 并发安全（乐观锁/原子操作） | — | 一期 |
+| API-CLOUD-001 | 云函数架构（合并策略） | — | 一期 |
+| API-DATA-001 | 数据模型补充说明（购物车/SKU/分类） | — | 一期 |
 
 ---
 
@@ -897,5 +1259,9 @@
 
 ---
 
-> **版本**：v3.3 | **基于**：member-system-design.md v6.0 | **更新日期**：2026-05-24
-> **变更摘要**：统一订单状态模型为 5 状态（待付款/待取餐/制作中/已完成/已取消）；新增 §0「用户登录与认证」（微信 OAuth + Token + 登录态校验）；新增「异常与边界处理约定」全系统通用章节；补充未支付订单 15 分钟超时自动取消；修正悬空引用；优化 TabBar 为 4 项；二期占位章补充功能 ID 编号
+> **版本**：v3.8 | **基于**：member-system-design.md v6.0 | **更新日期**：2026-05-28
+> **变更摘要**：
+> - P0 修复：Token 改为 withCredentials 模式（服务端 Set-Cookie + 前端自动携带）；新增外部浏览器手机号+验证码登录；支付结果轮询改为长轮询（减少 70% 请求量）；收钱吧 API 调用方式对齐（precreate 返回 pay_params）；退款增加异步状态查询；订单状态命名统一为 pending/paid/making/completed/cancelled/refunded
+> - P1 优化：Token 刷新竞态队列；JS-SDK 签名 2 小时缓存；Vant UI 按需引入（60KB→20KB）；orderStore 拆分为 orderStore+paymentStore；购物车合并锁定；WeixinJSBridge 就绪检测封装；支付中断恢复 UI；订单确认页调用 order-preview 接口；手机号验证码防刷
+> - P1 后台：Vben Tabs 多标签页 + 搜索重置规范；后台登录密码强度统一为 ≥8 位；重置密码后强制重新登录（Token 黑名单）
+> - P1 服务端：性能 SLA 定义；慢查询监控；request_id 关联；乐观锁；熔断器参数优化（失败率>50%→熔断10s）；收钱吧 API 超时+回调 URL；云函数合并策略（51→15）；购物车/SKU/分类数据模型补充说明
