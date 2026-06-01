@@ -48,6 +48,15 @@
 - **主题切换**：会员中心→设置→主题切换开关，切换后全局即时生效 [🔵 二期] [H5-THEME-001-05]
 - **主题持久化**：localStorage 存储用户选择，下次打开自动应用 [🔵 二期] [H5-THEME-001-06]
 - **系统主题跟随**：首次打开时检测 `prefers-color-scheme`，自动匹配系统主题 [🔵 二期] [H5-THEME-001-07]
+- **UI 组件库**：H5 端采用 Vant 4（Vue3 版本），通过 `unplugin-vue-components` + `@vant/auto-import-resolver` 按需引入，首屏 JS 体积减少 70%（60KB → 20KB）[H5-THEME-001-08]
+- **Vant 主题定制**：通过 `ConfigProvider` 组件 + CSS Variables 覆盖 Vant 默认主题，将 Vant 设计变量映射至设计 Token（如 `--van-button-primary-background-color` → `--color-primary`）[H5-THEME-001-09]
+- **设计风格参考**：参考瑞幸咖啡/喜茶点单小程序的年轻化视觉风格——大圆角卡片（16px）、高饱和主题色（青绿色 #4ECDC4）、胶囊形按钮、流畅过渡动画（300ms ease-out）[H5-THEME-001-10]
+- **组件级主题适配清单**：[H5-THEME-001-11]
+  - `Button`：主按钮背景色 → `--color-primary`，危险按钮 → `--color-danger`
+  - `Card`：卡片背景 → `--color-bg-secondary`，圆角 → `--radius-lg`
+  - `Tag`：标签圆角 → `--radius-full`，字号 → `--font-size-sm`
+  - `Dialog/Popup`：弹窗圆角 → `--radius-lg`，背景 → `--color-bg`
+  - `Field`：输入框圆角 → `--radius-md`，边框色 → `--color-border`
 
 ### 0.2 设计 Token 清单 [H5-THEME-002]
 
@@ -430,6 +439,10 @@ subpackages/cashier/
 
 > **支付架构**：前端统一调用服务端 → 服务端统一调用收钱吧 API → 收钱吧对接微信/支付宝。
 > **双通道适配**：微信内使用 JSAPI 支付（需 openid），外部浏览器使用 H5 支付（不需 openid）。
+> **收钱吧 API 调用细节**：
+> - **终端号配置**：`terminal_no` 存储于环境变量 `SQB_TERMINAL_NO`，一期单门店场景使用固定终端号；二期多门店场景需扩展为门店级配置（`stores.terminal_no`）[H5-PAY-003-01A]
+> - **支付结果查询**：轮询阶段调用收钱吧 `query` 接口（`trade_no` = 订单号），返回 `pay_status`（0=待支付/1=支付成功/2=支付失败）[H5-PAY-003-01B]
+> - **退款接口**：调用收钱吧 `refund` 接口（支持全额/部分退款），参数：`terminal_no`/`sn`（收钱吧订单号）/`refund_amount`；退款结果通过回调或 `query` 查询 [H5-PAY-003-01C]
 
 ### 4.1 支付金额展示 [H5-PAY-001]
 - 大字体金额："¥XX.XX"（36px bold #FF4D4F）[H5-PAY-001-01]
@@ -1114,6 +1127,10 @@ subpackages/cashier/
 - **回调签名校验**：服务端校验收钱吧回调签名（RSA/MD5），签名失败拒绝处理 [API-SHQ-001-02]
 - **API 版本控制**：请求中指定 `api_version` 参数，服务端配置可切换版本，灰度升级 [API-SHQ-001-03]
 - **Unicode 编码处理**：服务端统一 UTF-8 编码，MongoDB 存储使用 `utf8mb4` 兼容字符集，前端展示使用 `String.prototype.normalize('NFC')` [API-SHQ-001-04]
+- **终端号管理**：`terminal_no` 存储于环境变量 `SQB_TERMINAL_NO`，一期固定终端号，二期扩展为门店级配置（后台管理端配置门店终端号映射表）[API-SHQ-001-05]
+- **收钱吧订单号（sn）**：precreate 成功后返回 `sn`（收钱吧内部订单号），存储至 `orders.sqb_sn` 字段，退款/查询时使用 `sn` 而非业务订单号 [API-SHQ-001-06]
+- **支付结果查询接口**：`POST /api/v1/pay/query`，调用收钱吧 `query` 接口，返回 `pay_status`/`pay_time`/`total_amount`，用于长轮询支付结果 [API-SHQ-001-07]
+- **退款接口**：`POST /api/v1/order/refund`，调用收钱吧 `refund` 接口，参数：`sn` + `refund_amount`（分），退款状态通过回调或查询确认 [API-SHQ-001-08]
 
 ### 熔断与重试策略 [API-CIRCUIT-001]
 - **收钱吧熔断器**：失败率 > 50%（10 秒窗口内）→ 熔断 10s → 半开探测 3 次 → 恢复/继续熔断 [API-CIRCUIT-001-01]
@@ -1199,6 +1216,7 @@ subpackages/cashier/
 - **操作日志集合**：db-schema 需补充 `admin_operation_logs` 集合定义（`_id/admin_id/admin_name/action/target_type/target_id/before_snapshot/after_snapshot/create_time`），支持后台敏感操作审计 [API-DATA-001-05]
 - **等级变更记录集合**：db-schema 需补充 `member_level_changes` 集合定义（`_id/member_id/old_level/new_level/trigger_type(trigger/recharge/consume)/trigger_id/create_time`），支持等级变更追溯 [API-DATA-001-06]
 - **订单状态日志集合**：db-schema 需补充 `order_status_logs` 集合定义（`_id/order_id/from_status/to_status/operator_type(system/admin/member)/operator_id/create_time`），支持订单状态变更审计 [API-DATA-001-07]
+- **orders 集合补充字段**：db-schema 的 `orders` 集合需补充 `sqb_sn` 字段（收钱吧订单号，precreate 成功后返回），用于退款/查询时关联收钱吧订单 [API-DATA-001-08]
 
 ---
 
@@ -1352,20 +1370,3 @@ subpackages/cashier/
 3. 文档产出后，本清单对应行的"状态"列更新为 ✅
 
 ---
-
-> **版本**：v4.0 | **基于**：member-system-design.md v6.0 | **更新日期**：2026-06-01
-> **变更摘要（v3.8 → v4.0）**：
-> - **TabBar 重构**：底部导航从"首页/订单/会员/俱乐部"改为"首页/订单/购物车/个人中心"，购物车升级为 TabBar 页面，移除悬浮购物车按钮
-> - **深色模式降为二期**：一期仅实现浅色模式，深色模式相关功能（themeStore/主题切换/主题持久化/系统跟随）标记为 🔵 二期
-> - **退款功能升级为一期**：H5 端申请退款（H5-ORDER-LIST-007）从二期调整为一期，补充退款规则和积分/成长值回退逻辑
-> - **订单状态统一定义**：在 §3 新增订单状态统一定义表（pending/paid/making/completed/cancelled/refunded），消除 H5 端与后台状态命名歧义
-> - **搜索功能细化**：补充搜索历史（本地 10 条）、热门搜索词（服务端配置）、搜索结果排序策略
-> - **用户资料编辑细化**：补充换绑手机号、图片压缩上传、资料保存 API 调用
-> - **Banner 运营配置**：新增 ADM-BANNER-001 后台 Banner 管理功能，首页 Banner 数据来源明确
-> - **DB 集合补充**：新增 banners、admin_operation_logs、member_level_changes、order_status_logs 集合声明
-> - **业务规则强化**：购物车商品下架/SKU 停售处理、前后端金额计算职责约定、服务端独立重算
-> - **取餐通知增强**：微信订阅消息推送从二期提前至一期，补充订阅消息授权机制
-> - **权限码补充**：新增 `banner:manage` 权限码
-> - **错误监控与告警体系**：新增 API-MONITOR-001（前端错误上报/服务端告警/业务指标监控/数据保留策略）
-> - **分开打包实现路径**：补充 pages.json 配置策略、独立部署路由、跨域认证方案、共享包版本管理
-> - **待补充文档清单**：新增附录 C，记录测试策略、部署运维、运营配置、数据迁移 4 份待编写文档及产出阶段
